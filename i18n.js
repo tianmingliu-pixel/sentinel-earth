@@ -9,7 +9,7 @@
 window.SE_I18N=(function(){
 var UI={
  zh:{title:'安全地球 · 全球安全态势',sub:'拖动旋转，滚轮缩放。点任意国家看其监管与安全级别；点城市飞入街道层，点建筑按类型看它的联网链路与安全考量。',
-  tRot:'自转',tCov:'覆盖',tNight:'夜景',tBorder:'国界',tGrid:'经纬网',tNodes:'节点',tReset:'重置',
+  tRot:'自转',tCov:'覆盖',tNight:'夜景',tBorder:'国界',tGrid:'经纬网',tNodes:'节点',tSol:'太阳系',tReset:'重置',
   loading:'正在加载卫星影像…',introEye:'使用指南',introT:'点击地球上的任意国家或城市',
   introP:'全球每个国家都标出了适用的安全级别与监管框架。点城市会飞入真实街道层——建筑按规划类型着色（住宅/商业/零售/工业/公共），点一栋楼就能看到这一类从「用户 → 网络 → React → Agent」的端到端安全链路，正是 CSE635 的全部知识点。',
   how:'操作',howList:['<b>拖动</b> 旋转，<b>滚轮/双指</b> 缩放','<b>点国家</b> 看监管与安全级别','<b>点城市</b> 飞入街道层','<b>点建筑</b> 看该类型的端到端安全链路','<b>示例教学街区</b> 讲政府/银行/医院等行业','<b>Esc</b> 返回全球'],
@@ -19,7 +19,7 @@ var UI={
   cityEye:'城市 · 街道层',bEye:'建筑类型',district:'示例教学街区',openDistrict:'打开示例教学街区',
   buildings:'建筑',roads:'道路',pop:'人口',riskHop:'风险点',course:'对应课程知识点'},
  en:{title:'Sentinel Earth · Global Security Posture',sub:'Drag to rotate, scroll to zoom. Click any country for its regulations and security level; click a city to enter the street layer and click a building for its network chain and security considerations.',
-  tRot:'Spin',tCov:'Coverage',tNight:'Night',tBorder:'Borders',tGrid:'Graticule',tNodes:'Nodes',tReset:'Reset',
+  tRot:'Spin',tCov:'Coverage',tNight:'Night',tBorder:'Borders',tGrid:'Graticule',tNodes:'Nodes',tSol:'Solar system',tReset:'Reset',
   loading:'Loading satellite imagery…',introEye:'Field guide',introT:'Click any country or city on Earth',
   introP:'Every country is marked with its applicable security level and regulatory frame. Clicking a city flies into a real street layer — buildings coloured by planning type (residential/commercial/retail/industrial/civic). Click one to see that type’s end-to-end chain from user → network → React → Agent, which is the whole of CSE635.',
   how:'Controls',howList:['<b>Drag</b> to rotate, <b>scroll/pinch</b> to zoom','<b>Click a country</b> for regulation and level','<b>Click a city</b> to enter the street layer','<b>Click a building</b> for its end-to-end chain','<b>Teaching District</b> for government/bank/hospital sectors','<b>Esc</b> returns to the globe'],

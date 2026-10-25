@@ -43,6 +43,14 @@ flowchart TB
   Z --> PED3["Walk when no car is coming · 无来车才过"]
 ```
 
+```mermaid
+flowchart LR
+  ST["Street · 街道层<br/>real 3D streets"] -- zoom out · 缩小 --> GL["Globe · 地球<br/>real Sun direction · 真实昼夜"]
+  GL -- zoom out · 缩小 --> EM["Earth–Moon · 地月<br/>Moon at true distance & phase<br/>月球真实距离与月相"]
+  EM -- zoom out · 缩小 --> SS["Solar system · 太阳系<br/>8 planets at today's positions<br/>八大行星今日位置"]
+  SS -- zoom in on Earth · 放大地球 --> GL
+```
+
 ---
 
 ## 中文
@@ -94,6 +102,11 @@ flowchart TB
 - 交通规则：两条主路相交是红绿灯（含左转保护箭头、绿波）；主路和小街相交是行人按钮信号灯；小街路口是斑马线加让行线。不再到处放 STOP 牌，只保留 OpenStreetMap 里真实标注的 STOP。
 - 车道：按 OpenStreetMap 的 lanes 标签模拟真实车道数（查不到用道路等级的默认值），区分单行道和双行道。车只在车道中间行驶，不压线；左转前并到靠中线的车道、在停止线前等灯并礼让对向车，右转并到最外侧车道；到达终点靠边停车。
 - 街道生活：车辆、行人、狗和猫按同一套规则运行：红灯停、绿灯行，车辆礼让行人，行人只走人行道和斑马线。
+
+**太阳系**
+- 地球层打开「太阳系」：太阳在真实方向上（地球的昼夜分界线和此刻一致），月球在真实距离和月相上，水星到海王星出现在它们此刻在天空中的真实方向。
+- 一直缩小，先看到地月系统，再进入「太阳系视角」：八大行星按今天的真实位置排在各自轨道上，可以点任意行星看半径、离太阳和离地球的距离、光行时间、公转和自转周期。土星环和天王星的自转轴按真实朝向画出。
+- 底部时间条：实时、暂停、1 天/秒、1 周/秒、1 月/秒、1 年/秒。位置用 Schlyter 低精度星历计算（约 1–2 角分）；太阳系视角里的距离和大小经过压缩，不是真实比例。
 
 **语言：中文 / EN / 双语**
 - 右上角三个按钮切换：中文、English、双语（中英并排，例如「限速 / LIMIT」）。选择会记在浏览器里。
@@ -157,6 +170,11 @@ flowchart TB
 - Lanes: real lane counts from the OpenStreetMap lanes tag (class defaults where it is missing), one-way and two-way roads. Cars stay centred in a lane; before a left turn they move to the lane by the centre line and wait at the stop line, giving way to oncoming traffic; right turns use the outside lane; at the destination the car pulls over to the kerb.
 - Street life: cars, pedestrians, dogs and cats follow the same rules: stop on red, go on green, cars give way to people, people walk only on pavements and crossings.
 
+**Solar system**
+- Turn on "Solar system" on the globe: the Sun sits in its true direction (Earth's day/night line matches this moment), the Moon at its true distance and phase, and Mercury to Neptune in their true directions in the sky.
+- Keep zooming out to see the Earth–Moon system, then the solar-system view: the eight planets at today's real positions on their orbits. Click any planet for its radius, distance from the Sun and from Earth, light time, and orbital and rotation periods. Saturn's rings and Uranus's axis are drawn in their real orientation.
+- Time bar at the bottom: live, pause, 1 day/s, 1 week/s, 1 month/s, 1 year/s. Positions come from Schlyter's low-precision ephemeris (about 1–2′); distances and sizes in the solar-system view are compressed, not to scale.
+
 **Language: 中文 / EN / 双语 (bilingual)**
 - Three buttons at the top right: Chinese, English and bilingual (both side by side, e.g. "限速 / LIMIT"). The choice is remembered in the browser.
 - Every interface string lives in the language pack `i18n.js`: `ui` holds interface labels, `s` holds every other on-screen string (HUDs, panels, toasts, driving, sky eye, street life), each as key → [Chinese, English]. `pick()` is the one rule all three modes use. To add a string, add a key to the pack and call `I18T('key')` in the code.
@@ -219,6 +237,11 @@ flowchart TB
 - 차로: OpenStreetMap의 lanes 태그로 실제 차로 수를 재현하고(없으면 도로 등급 기본값), 일방통행과 양방향을 구분합니다. 차는 차로 한가운데로만 달리고 선을 밟지 않습니다. 좌회전 전에는 중앙선 쪽 차로로 옮겨 정지선 앞에서 신호를 기다리며 맞은편 차에 양보하고, 우회전은 바깥 차로를 씁니다. 목적지에서는 길가에 세웁니다.
 - 거리 생활: 차, 보행자, 개와 고양이가 같은 규칙을 따릅니다. 빨간불에 서고 초록불에 가며, 차는 보행자에게 양보하고, 보행자는 보도와 횡단보도로만 다닙니다.
 
+**태양계**
+- 지구본에서 "태양계"를 켜면 태양이 실제 방향에 놓이고(지구의 낮밤 경계가 지금과 같음), 달은 실제 거리와 위상으로, 수성부터 해왕성까지는 지금 하늘에서의 실제 방향에 나타납니다.
+- 계속 축소하면 지구–달 시스템을 거쳐 "태양계 시점"으로 들어가, 여덟 행성이 오늘의 실제 위치로 궤도 위에 놓입니다. 행성을 클릭하면 반지름, 태양·지구까지의 거리, 빛의 도달 시간, 공전·자전 주기를 볼 수 있습니다. 토성 고리와 천왕성 자전축은 실제 방향으로 그립니다.
+- 아래 시간 막대: 실시간, 일시정지, 1일/초, 1주/초, 1개월/초, 1년/초. 위치는 Schlyter 저정밀 천체력(약 1–2′)으로 계산하며, 태양계 시점의 거리와 크기는 압축되어 실제 비율이 아닙니다.
+
 **언어: 中文 / EN / 双语(이중 언어)**
 - 오른쪽 위 세 버튼으로 중국어, 영어, 이중 언어(두 언어를 나란히, 예: "限速 / LIMIT")를 고릅니다. 선택은 브라우저에 저장됩니다.
 - 모든 화면 문구는 언어 팩 `i18n.js`에 모여 있습니다. `ui`는 인터페이스 라벨, `s`는 그 밖의 모든 화면 문구(HUD, 패널, 알림, 주행, 천안, 거리 생활)이며 각 항목은 키 → [중국어, 영어]입니다. `pick()`은 세 모드가 함께 쓰는 선택 규칙입니다. 문구를 추가하려면 언어 팩에 키를 넣고 코드에서 `I18T('키')`로 부릅니다.
@@ -280,6 +303,11 @@ flowchart TB
 - Verkehrsregeln: Wo zwei Hauptstraßen kreuzen, gibt es Ampeln (geschützter Linksabbiegerpfeil, grüne Welle); wo eine Nebenstraße auf eine Hauptstraße trifft, eine Fußgänger-Bedarfsampel; an Kreuzungen von Nebenstraßen Zebrastreifen mit Wartelinie. Keine pauschalen STOP-Schilder mehr; nur in OpenStreetMap tatsächlich eingetragene STOP-Schilder bleiben.
 - Fahrstreifen: echte Fahrstreifenzahl aus dem OpenStreetMap-Tag lanes (sonst Standard nach Straßenklasse), Einbahn- und Zweirichtungsstraßen. Autos fahren mittig im Fahrstreifen; vor dem Linksabbiegen ordnen sie sich zur Mittellinie ein, warten an der Haltelinie und lassen Gegenverkehr vor; Rechtsabbieger nutzen den äußeren Fahrstreifen; am Ziel hält das Auto am Fahrbahnrand.
 - Straßenleben: Autos, Fußgänger, Hunde und Katzen folgen denselben Regeln: bei Rot halten, bei Grün fahren, Autos lassen Fußgänger vor, Fußgänger gehen nur auf Gehwegen und Überwegen.
+
+**Sonnensystem**
+- „Sonnensystem“ auf dem Globus einschalten: Die Sonne steht in ihrer echten Richtung (die Tag-Nacht-Grenze der Erde entspricht diesem Moment), der Mond in echter Entfernung und Phase, Merkur bis Neptun in ihrer echten Richtung am Himmel.
+- Weiter herauszoomen zeigt erst das Erde-Mond-System, dann die Sonnensystem-Ansicht: die acht Planeten an ihrer heutigen echten Position auf ihren Bahnen. Ein Klick auf einen Planeten zeigt Radius, Abstand zur Sonne und zur Erde, Lichtlaufzeit sowie Umlauf- und Rotationsdauer. Saturnringe und Uranusachse sind in ihrer echten Ausrichtung gezeichnet.
+- Zeitleiste unten: live, Pause, 1 Tag/s, 1 Woche/s, 1 Monat/s, 1 Jahr/s. Die Positionen stammen aus Schlyters Ephemeride niedriger Genauigkeit (etwa 1–2′); Abstände und Größen in der Sonnensystem-Ansicht sind gestaucht, nicht maßstäblich.
 
 **Sprache: 中文 / EN / 双语 (zweisprachig)**
 - Drei Schaltflächen oben rechts: Chinesisch, Englisch und zweisprachig (beides nebeneinander, z. B. „限速 / LIMIT“). Die Wahl bleibt im Browser gespeichert.
