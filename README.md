@@ -95,6 +95,10 @@ flowchart TB
 - 车道：按 OpenStreetMap 的 lanes 标签模拟真实车道数（查不到用道路等级的默认值），区分单行道和双行道。车只在车道中间行驶，不压线；左转前并到靠中线的车道、在停止线前等灯并礼让对向车，右转并到最外侧车道；到达终点靠边停车。
 - 街道生活：车辆、行人、狗和猫按同一套规则运行：红灯停、绿灯行，车辆礼让行人，行人只走人行道和斑马线。
 
+**语言：中文 / EN / 双语**
+- 右上角三个按钮切换：中文、English、双语（中英并排，例如「限速 / LIMIT」）。选择会记在浏览器里。
+- 所有界面文字集中在语言包 `i18n.js`：`ui` 是界面标签，`s` 是其余全部屏幕文字（抬头显示、面板、提示、驾驶、天眼、街道生活），每条都是「键 → [中文, English]」。`pick()` 是三种模式共用的取词规则。新增文字时在语言包里加一个键，代码里用 `I18T('键')` 调用。
+
 **本地运行**：双击 `start-sentinel-earth.bat`（Windows），或运行 `python srv.py 8000`，再打开 http://localhost:8000 。`data/bundles` 里是离线城市包，没有网络时也能看这些城市。
 
 **部署**：这个文件夹就是网站本身，不需要构建步骤。
@@ -128,7 +132,7 @@ flowchart TB
 - Sources: Esri high-res, Sentinel-2, NASA MODIS/VIIRS daily near-real-time imagery (pick the date; shows that day's real clouds), VIIRS night lights, and the Esri Wayback archive (from 2014, with a split-screen change swipe).
 - Sensors: visible, panchromatic, night vision, vegetation ExG (computed from visible bands), building-height DSM, SAR (simulated), thermal (simulated).
 - Intel panel: nearby events, satellites overhead now and passing in the next 2 h (CelesTrak elements + SGP4), USGS earthquakes from the past 7 days, NASA EONET natural hazards.
-- Tools: precipitation radar overlay (RainViewer), distance and area measuring (M), UTM grid (G). All labels switch between Chinese and English.
+- Tools: precipitation radar overlay (RainViewer), distance and area measuring (M), UTM grid (G). All labels switch between Chinese, English and bilingual.
 
 **Address search and day/night**
 - A search box at the top of street level finds addresses, streets, places and cities (OpenStreetMap Photon / Nominatim). Nearby results fly there over the ground; distant ones drop straight in, marked with a yellow pin.
@@ -152,6 +156,10 @@ flowchart TB
 - Traffic rules: two major roads meet at traffic signals (protected left arrow, green wave); a side street joining a major road gets a pedestrian push-button signal; side-street junctions get a zebra crossing with a give-way line. No blanket STOP signs; only STOP signs actually mapped in OpenStreetMap are kept.
 - Lanes: real lane counts from the OpenStreetMap lanes tag (class defaults where it is missing), one-way and two-way roads. Cars stay centred in a lane; before a left turn they move to the lane by the centre line and wait at the stop line, giving way to oncoming traffic; right turns use the outside lane; at the destination the car pulls over to the kerb.
 - Street life: cars, pedestrians, dogs and cats follow the same rules: stop on red, go on green, cars give way to people, people walk only on pavements and crossings.
+
+**Language: 中文 / EN / 双语 (bilingual)**
+- Three buttons at the top right: Chinese, English and bilingual (both side by side, e.g. "限速 / LIMIT"). The choice is remembered in the browser.
+- Every interface string lives in the language pack `i18n.js`: `ui` holds interface labels, `s` holds every other on-screen string (HUDs, panels, toasts, driving, sky eye, street life), each as key → [Chinese, English]. `pick()` is the one rule all three modes use. To add a string, add a key to the pack and call `I18T('key')` in the code.
 
 **Run locally**: double-click `start-sentinel-earth.bat` (Windows) or run `python srv.py 8000`, then open http://localhost:8000. `data/bundles` holds offline city bundles that work without a network.
 
@@ -211,6 +219,10 @@ flowchart TB
 - 차로: OpenStreetMap의 lanes 태그로 실제 차로 수를 재현하고(없으면 도로 등급 기본값), 일방통행과 양방향을 구분합니다. 차는 차로 한가운데로만 달리고 선을 밟지 않습니다. 좌회전 전에는 중앙선 쪽 차로로 옮겨 정지선 앞에서 신호를 기다리며 맞은편 차에 양보하고, 우회전은 바깥 차로를 씁니다. 목적지에서는 길가에 세웁니다.
 - 거리 생활: 차, 보행자, 개와 고양이가 같은 규칙을 따릅니다. 빨간불에 서고 초록불에 가며, 차는 보행자에게 양보하고, 보행자는 보도와 횡단보도로만 다닙니다.
 
+**언어: 中文 / EN / 双语(이중 언어)**
+- 오른쪽 위 세 버튼으로 중국어, 영어, 이중 언어(두 언어를 나란히, 예: "限速 / LIMIT")를 고릅니다. 선택은 브라우저에 저장됩니다.
+- 모든 화면 문구는 언어 팩 `i18n.js`에 모여 있습니다. `ui`는 인터페이스 라벨, `s`는 그 밖의 모든 화면 문구(HUD, 패널, 알림, 주행, 천안, 거리 생활)이며 각 항목은 키 → [중국어, 영어]입니다. `pick()`은 세 모드가 함께 쓰는 선택 규칙입니다. 문구를 추가하려면 언어 팩에 키를 넣고 코드에서 `I18T('키')`로 부릅니다.
+
 **로컬 실행**: Windows에서 `start-sentinel-earth.bat`를 더블클릭하거나 `python srv.py 8000`을 실행한 뒤 http://localhost:8000 을 엽니다. `data/bundles`에는 네트워크 없이도 볼 수 있는 오프라인 도시 데이터가 있습니다.
 
 **배포**: 이 폴더가 곧 사이트이며, 빌드 단계는 없습니다.
@@ -268,6 +280,10 @@ flowchart TB
 - Verkehrsregeln: Wo zwei Hauptstraßen kreuzen, gibt es Ampeln (geschützter Linksabbiegerpfeil, grüne Welle); wo eine Nebenstraße auf eine Hauptstraße trifft, eine Fußgänger-Bedarfsampel; an Kreuzungen von Nebenstraßen Zebrastreifen mit Wartelinie. Keine pauschalen STOP-Schilder mehr; nur in OpenStreetMap tatsächlich eingetragene STOP-Schilder bleiben.
 - Fahrstreifen: echte Fahrstreifenzahl aus dem OpenStreetMap-Tag lanes (sonst Standard nach Straßenklasse), Einbahn- und Zweirichtungsstraßen. Autos fahren mittig im Fahrstreifen; vor dem Linksabbiegen ordnen sie sich zur Mittellinie ein, warten an der Haltelinie und lassen Gegenverkehr vor; Rechtsabbieger nutzen den äußeren Fahrstreifen; am Ziel hält das Auto am Fahrbahnrand.
 - Straßenleben: Autos, Fußgänger, Hunde und Katzen folgen denselben Regeln: bei Rot halten, bei Grün fahren, Autos lassen Fußgänger vor, Fußgänger gehen nur auf Gehwegen und Überwegen.
+
+**Sprache: 中文 / EN / 双语 (zweisprachig)**
+- Drei Schaltflächen oben rechts: Chinesisch, Englisch und zweisprachig (beides nebeneinander, z. B. „限速 / LIMIT“). Die Wahl bleibt im Browser gespeichert.
+- Alle Oberflächentexte liegen im Sprachpaket `i18n.js`: `ui` enthält die Oberflächenbeschriftungen, `s` alle übrigen Bildschirmtexte (HUDs, Panels, Hinweise, Fahren, Himmelsauge, Straßenleben), jeweils Schlüssel → [Chinesisch, Englisch]. `pick()` ist die gemeinsame Auswahlregel aller drei Modi. Für einen neuen Text einen Schlüssel ins Paket aufnehmen und im Code `I18T('Schlüssel')` aufrufen.
 
 **Lokal starten**: unter Windows `start-sentinel-earth.bat` doppelklicken oder `python srv.py 8000` ausführen und http://localhost:8000 öffnen. `data/bundles` enthält Offline-Stadtpakete, die ohne Netz funktionieren.
 

@@ -459,6 +459,8 @@ ul.notes li::before{content:"";position:absolute;left:2px;top:.62em;width:6px;he
 .zh-only{}.en-only{display:none}
 :root[data-lang="en"] .zh-only{display:none}
 :root[data-lang="en"] .en-only{display:revert}
+:root[data-lang="bi"] .en-only{display:revert}:root[data-lang="bi"] .en-only::before{content:" / ";opacity:.6}
+.bi-en{opacity:.78}:root[data-lang="bi"] #drvHud .dvLim span{font-size:6.5px;line-height:1.05;display:block;max-width:44px;text-align:center}:root[data-lang="bi"] #drvHud .dvSig em,:root[data-lang="bi"] #drvHud .dvSign em{font-size:8.5px;line-height:1.15}.bi-en::before{content:" / ";opacity:.6}
 #srchCats{position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 6px);width:min(600px,62vw);display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 #srchCats::-webkit-scrollbar{display:none}
 #srchCats button{all:unset;cursor:pointer;flex:none;display:flex;align-items:center;gap:4px;padding:4px 9px;border-radius:14px;font:500 11px var(--body);color:#dff;background:rgba(6,16,32,.82);border:1px solid rgba(88,224,200,.3);backdrop-filter:blur(8px)}
@@ -621,7 +623,7 @@ body.winDrag,body.winDrag *{user-select:none!important;cursor:grabbing!important
     <span class="s" id="hSub">拖动旋转，滚轮缩放。点任意国家看其监管与安全级别；点城市飞入街道层，点建筑按类型看它的联网链路与安全考量。</span>
     <div class="crumb" id="crumb"></div>
   </div>
-  <div class="pill" role="group" aria-label="Language"><button id="bZh" aria-pressed="true">中文</button><button id="bEn" aria-pressed="false">EN</button></div>
+  <div class="pill" role="group" aria-label="Language"><button id="bZh" aria-pressed="true">中文</button><button id="bEn" aria-pressed="false">EN</button><button id="bBi" aria-pressed="false" title="中文 + English">双语</button></div>
   <div class="pill"><button id="bPanel" aria-pressed="true" aria-label="Toggle panel">☰</button></div>
 </header>
 
@@ -700,5 +702,6 @@ body.winDrag,body.winDrag *{user-select:none!important;cursor:grabbing!important
 <div id="drvHud" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
 <script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
-<script charset="utf-8" src="data.js?v=20261024e"></script>
-<script charset="utf-8" src="app.js?v=20261024e"></script>
+<script charset="utf-8" src="i18n.js?v=20261024f"></script>
+<script charset="utf-8" src="data.js?v=20261024f"></script>
+<script charset="utf-8" src="app.js?v=20261024f"></script>

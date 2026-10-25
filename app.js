@@ -3,8 +3,15 @@
 "use strict";
 var D=window.SE, T3=window.THREE;
 var root=document.documentElement;
-var lang='zh'; try{var s=localStorage.getItem('se-lang');if(s==='en'||s==='zh')lang=s;}catch(e){}
-function T(k){return D.UI[lang][k];}
+var lang='zh'; try{var s=localStorage.getItem('se-lang');if(s==='en'||s==='zh'||s==='bi')lang=s;}catch(e){}
+// ---------- language pack (i18n.js): 'zh' 中文 · 'en' English · 'bi' 双语 ----------
+var I18=window.SE_I18N||{ui:D.UI,s:{},pick:function(a,b,m){return m==='en'?b:a;}};
+function LZ(){return lang!=='en';}                         // prefer Chinese data (中文 and 双语)
+function I18P(a,b){return I18.pick(a,b,lang);}              // a 中文/English pair, chosen or joined by the mode
+function I18T(k){var p=I18.s[k];return p?I18.pick(p[0],p[1],lang):k;}   // a string from the language pack
+var LXC=typeof WeakMap!=='undefined'?new WeakMap():null;
+function LX(o){if(!o)return o;if(lang!=='bi')return o[lang]||o.zh;var c=LXC&&LXC.get(o);if(c)return c;c=I18.pick(o.zh||{},o.en||{},'bi');if(LXC)LXC.set(o,c);return c;}
+function T(k){var U=I18.ui||D.UI;return I18.pick(U.zh[k],U.en[k],lang);}
 function cv(n){return getComputedStyle(root).getPropertyValue(n).trim();}
 function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
 var D2R=Math.PI/180, R2D=180/Math.PI, R=100; // globe radius in world units
@@ -18,7 +25,7 @@ function lvColor(i){return cv(D.LEVELS[i].c);}
 var loadTxt=document.getElementById('loadTxt'),loadBar=document.getElementById('loadBar');
 function prog(p,t){loadBar.style.width=Math.round(p*100)+'%';if(t)loadTxt.textContent=t;}
 function loadImg(u){return new Promise(function(res,rej){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){res(i);};i.onerror=rej;i.src=u;});}
-var SEV='20261024e';function loadJSON(u){return fetch(u+(u.indexOf('?')<0&&!/bundles/.test(u)?'?v='+SEV:'')).then(function(r){return r.json();});}
+var SEV='20261024f';function loadJSON(u){return fetch(u+(u.indexOf('?')<0&&!/bundles/.test(u)?'?v='+SEV:'')).then(function(r){return r.json();});}
 
 if(!T3){loadTxt.textContent='WebGL / three.js unavailable';return;}
 
@@ -166,7 +173,7 @@ function buildLabels(){
  labelsEl.innerHTML='';POOL=[];ASSIGNED=[];ctryLabelEls=[];
  for(var i=0;i<90;i++){var d=document.createElement('div');d.className='lab';d.style.opacity=0;d._on=false;labelsEl.appendChild(d);POOL.push(d);}
  var cs=V.countries.map(function(c,i){return {c:c,i:i};}).filter(function(o){return (o.c[5]||9)<=3;});
- cs.forEach(function(o){var d=document.createElement('div');d.className='lab ctry';d.textContent=lang==='zh'&&o.c[1]?o.c[1]:o.c[0];d._p=ll2v(o.c[4],o.c[3],R*1.01);d._n=d._p.clone().normalize();labelsEl.appendChild(d);ctryLabelEls.push(d);});
+ cs.forEach(function(o){var d=document.createElement('div');d.className='lab ctry';d.textContent=LZ()&&o.c[1]?o.c[1]:o.c[0];d._p=ll2v(o.c[4],o.c[3],R*1.01);d._n=d._p.clone().normalize();labelsEl.appendChild(d);ctryLabelEls.push(d);});
  layoutDirty=true;
 }
 labelsEl.addEventListener('click',function(e){var el=e.target.closest('.lab');if(!el||!el._item)return;e.stopPropagation();var it=el._item;
@@ -192,7 +199,7 @@ function layoutLabels(){
   el._item=item;el._dy=dy;el.style.transform='translate('+x+'px,'+y+'px) translate(-50%,-50%)';if(!el._on){el.style.opacity=1;el._on=true;}
   ASSIGNED.push(el);}
  if(glob){
-  var zh=lang==='zh';function textW(s){return s.length*(zh?11:6.4)+18;}
+  var zh=LZ();function textW(s){return s.length*((LZ()?11:6.4))+18;}
   // featured cities first, always
   for(var i=0;i<ORDER.length&&ORDER[i].tier===0;i++){var r=ORDER[i];if(facingOK(r.p,r.n,.15)&&toScreen(r.p,w,h)){var t=cityName(r.c);place({kind:'city',rec:r,p:r.p,n:r.n,thr:.15},t,'lab cty',textW(t),-12);}}
   if(lvl>=0){var L=CLU[lvl].list;for(var j=0;j<L.length&&used<budget;j++){var cl=L[j];if(!facingOK(cl.p,cl.n,.25)||!toScreen(cl.p,w,h))continue;
@@ -466,7 +473,7 @@ function prefetchCity(c){if(!c||prefetched[c.id])return;prefetched[c.id]=1;var g
  if(window.requestIdleCallback)requestIdleCallback(go,{timeout:800});else setTimeout(go,50);}
 function enterCity(id){
  var c=CITYBY[id];if(!c)return;stopPlay();
- fadeT.textContent=(lang==='zh'?'正在载入街道 · ':'Loading streets · ')+cityName(c);fade.classList.add('on');
+ fadeT.textContent=(I18T('loading_streets'))+cityName(c);fade.classList.add('on');
  autoRot=false;
  setTimeout(function(){envMats();envEnterCity(c);
   var job=LIVE?enterLive(c).then(function(){return {b:L2.picks||[],rd:{length:L2._rd||0}};})
@@ -495,7 +502,7 @@ function streetCamPos(){var el=L2.cam.el,az=L2.cam.az,d=L2.cam.d,tg=L2.target||(
 // ====================================================================
 var panel=document.getElementById('panel'),pHead=document.getElementById('pHead'),pBody=document.getElementById('pBody');
 var state={type:'intro'};
-function ladderHTML(sl){var h='<div class="ladder">';for(var i=0;i<5;i++)h+='<div class="'+(i===sl?'on':'')+'" style="background:'+lvColor(i)+'">SL'+(i+1)+'</div>';return h+'</div><div class="cap">'+(lang==='zh'?'安全级别':'Level')+' <b style="color:'+lvColor(sl)+'">SL'+(sl+1)+' · '+esc(D.LEVELS[sl][lang].n)+'</b> — '+esc(D.LEVELS[sl][lang].d)+'</div>';}
+function ladderHTML(sl){var h='<div class="ladder">';for(var i=0;i<5;i++)h+='<div class="'+(i===sl?'on':'')+'" style="background:'+lvColor(i)+'">SL'+(i+1)+'</div>';return h+'</div><div class="cap">'+(I18T('level'))+' <b style="color:'+lvColor(sl)+'">SL'+(sl+1)+' · '+esc(LX(D.LEVELS[sl]).n)+'</b> — '+esc(LX(D.LEVELS[sl]).d)+'</div>';}
 function triHTML(a,p,e){return '<div class="tri"><div class="blk a"><div class="t"><i></i>'+T('auth')+'</div><p>'+esc(a)+'</p></div><div class="blk p"><div class="t"><i></i>'+T('plain')+'</div><p>'+esc(p)+'</p></div><div class="blk e"><div class="t"><i></i>'+T('ex')+'</div><p>'+esc(e)+'</p></div></div>';}
 function chipsHTML(list){return (list||[]).map(function(r){return '<span class="chip">'+esc(r)+'</span>';}).join('');}
 function headHTML(eye,title,meta,closable){return '<div class="p-row"><span class="p-eye">'+esc(eye)+'</span></div><div class="p-row"><h2>'+esc(title)+'</h2>'+(closable?'<button class="x" id="pClose">✕</button>':'')+'</div>'+(meta?'<div class="p-meta">'+meta+'</div>':'');}
@@ -507,93 +514,93 @@ function wire(){var x=document.getElementById('pClose');if(x)x.onclick=function(
  pBody.querySelectorAll('[data-back]').forEach(function(b){b.onclick=function(){var t=b.getAttribute('data-back');if(t==='globe')exitCity();else if(t==='city')renderCityIntro(L2.city);else resetToIntro();};});
 }
 var NETD={zh:{0:[['接入','光纤 / 同轴 / 5G 家庭宽带 → 光猫或调制解调器 → 家用路由器（NAT）'],['局域网','Wi-Fi WPA2/WPA3；访客网络把智能家居、摄像头和主力设备隔开'],['地址与 DNS','运营商 DHCP 下发 IPv4/IPv6，DNS 默认走运营商，可改用 DoH/DoT 加密解析'],['常见协议与端口','HTTPS 443、QUIC UDP 443、DNS 53 / DoT 853；智能设备连云多用 MQTT 8883'],['主要风险面','UPnP 自动开端口、路由器管理口暴露到公网、IoT 默认口令、固件长期不更新'],['监测能力','基本没有集中监测，靠路由器日志、DNS 过滤和设备自动更新']],1:[['接入','双运营商专线或 SD-WAN，4G/5G 做备份链路'],['边界','下一代防火墙 + IPS；远程办公用 VPN 或零信任（ZTNA）；邮件安全网关'],['网络分区','办公 VLAN、访客 Wi-Fi、服务器/DMZ、楼宇系统（门禁、电梯、空调 BMS）分开'],['准入与身份','802.1X 有线/无线准入；SSO + MFA；特权账号单独管理（PAM）'],['常见协议与端口','HTTPS 443、SAML/OIDC 单点登录、LDAPS 636；SMB 445 只在内网，RDP 3389 只经跳板机'],['监测能力','SIEM 汇总防火墙、终端 EDR 和身份日志；NDR 看内网东西向流量']],2:[['接入','门店宽带 + LTE 备份，SD-WAN 连回总部或云'],['网络分区','收银/收单网（PCI 持卡人数据环境）、门店办公、顾客 Wi-Fi、摄像头/NVR 各自独立'],['支付链路','P2PE 读卡器点对点加密 + 令牌化；到收单行全程 TLS 1.2 以上'],['门店物联网','电子价签、客流计数、摄像头——默认口令和过期固件是常见短板'],['常见协议与端口','HTTPS 443；支付报文 ISO 8583 走 TLS；摄像头 RTSP 554 只允许内网'],['监测能力','PCI DSS 要求日志保留至少一年、文件完整性监控、每季度外部漏洞扫描']],3:[['参考模型','Purdue 分层：L0 现场仪表 → L1 PLC → L2 SCADA/HMI → L3 生产运营 → 工业 DMZ → L4/5 企业网'],['IT/OT 边界','IT 和 OT 之间设工业 DMZ；数据尽量单向外送（单向网关/数据二极管）'],['工控协议与端口','Modbus/TCP 502、DNP3 20000、EtherNet/IP 44818、S7 102、OPC UA 4840——老协议大多没有认证'],['远程维护','厂商远程访问经跳板机并录像，按工单临时开通，用完关闭'],['现场无线','工业 Wi-Fi 或专网 5G；传感器常用 LoRaWAN'],['监测能力','被动式 OT 流量监测（不主动扫描 PLC），维护完整资产清单']],4:[['接入','行业专网（教育网、政务外网）或多租户商用宽带'],['网络分区','公众 Wi-Fi（门户认证）、员工网、楼宇系统、监控网分开'],['对外服务','网站、预约和缴费系统放在 DMZ，后端数据库只走内网'],['常见协议与端口','HTTPS 443、eduroam 802.1X、SIP 5060/5061（电话）、ONVIF（摄像头）'],['主要风险面','访客多、人员流动大：社会工程、尾随进门、公共终端被植入'],['监测能力','SOC 或托管安全服务集中收日志；公共终端定期还原']]},en:{0:[['Access','Fibre / cable / 5G home broadband → ONT or modem → home router (NAT)'],['LAN','Wi-Fi WPA2/WPA3; a guest SSID isolates smart-home kit and cameras from main devices'],['Addressing & DNS','ISP DHCP hands out IPv4/IPv6; DNS defaults to the ISP — DoH/DoT encrypts lookups'],['Protocols & ports','HTTPS 443, QUIC UDP 443, DNS 53 / DoT 853; IoT clouds often use MQTT 8883'],['Main exposure','UPnP opening ports, router admin exposed to the internet, IoT default passwords, stale firmware'],['Monitoring','Practically none centrally — router logs, DNS filtering and auto-updates']],1:[['Access','Dual-carrier leased lines or SD-WAN, with 4G/5G backup'],['Perimeter','Next-gen firewall + IPS; remote work via VPN or ZTNA; secure email gateway'],['Segmentation','Office VLAN, guest Wi-Fi, servers/DMZ and building systems (access control, lifts, HVAC BMS) kept apart'],['Admission & identity','802.1X wired/wireless NAC; SSO + MFA; privileged accounts under PAM'],['Protocols & ports','HTTPS 443, SAML/OIDC SSO, LDAPS 636; SMB 445 internal only, RDP 3389 only through a jump host'],['Monitoring','SIEM collects firewall, EDR and identity logs; NDR watches east-west traffic']],2:[['Access','Store broadband + LTE backup, SD-WAN back to HQ or cloud'],['Segmentation','POS/acquiring net (PCI cardholder data environment), store office, guest Wi-Fi and cameras/NVR all separate'],['Payment path','P2PE readers + tokenization; TLS 1.2+ end to end to the acquirer'],['Store IoT','Electronic shelf labels, footfall counters, cameras — default passwords and old firmware are the weak spot'],['Protocols & ports','HTTPS 443; ISO 8583 payment messages over TLS; camera RTSP 554 internal only'],['Monitoring','PCI DSS: logs kept ≥ 1 year, file-integrity monitoring, quarterly external scans']],3:[['Reference model','Purdue levels: L0 field devices → L1 PLC → L2 SCADA/HMI → L3 operations → industrial DMZ → L4/5 enterprise'],['IT/OT boundary','An industrial DMZ between IT and OT; push data out one way where possible (unidirectional gateway / data diode)'],['ICS protocols & ports','Modbus/TCP 502, DNP3 20000, EtherNet/IP 44818, S7 102, OPC UA 4840 — legacy ones mostly unauthenticated'],['Remote maintenance','Vendor access through a recorded jump host, opened per work order and closed afterwards'],['Field wireless','Industrial Wi-Fi or private 5G; sensors often on LoRaWAN'],['Monitoring','Passive OT traffic monitoring (never active-scan PLCs) and a complete asset inventory']],4:[['Access','Sector networks (education, government) or multi-tenant commercial broadband'],['Segmentation','Public Wi-Fi (captive portal), staff network, building systems and CCTV network kept apart'],['Public services','Website, booking and payment systems in a DMZ; back-end databases reachable only internally'],['Protocols & ports','HTTPS 443, eduroam 802.1X, SIP 5060/5061 (phones), ONVIF (cameras)'],['Main exposure','Many visitors and high turnover: social engineering, tailgating, tampered public terminals'],['Monitoring','A SOC or managed security service centralizes logs; public terminals reset regularly']]}};
-function netDetailHTML(catId){var rows=NETD[lang][catId]||[];var cols=['--sl1','--sl2','--sl3','--sl4','--sl5','--hud'];return '<div class="netd">'+rows.map(function(r,i){return '<div class="nr" style="--nc:var('+cols[i%cols.length]+')"><b>'+esc(r[0])+'</b><span>'+esc(r[1])+'</span></div>';}).join('')+'</div><div class="envsrc">'+(lang==='zh'?'这一类场所的典型网络架构，作教学参考，不代表这栋楼的实际网络。':'Typical network architecture for this type of place — a teaching reference, not this building\'s actual network.')+'</div>';}
-function chainHTML(catId){var hops=D.CHAINS[catId];var h='<div class="chain">';hops.forEach(function(hp){var d=hp[lang];h+='<div class="hop"><div class="rail"><div class="dot'+(hp.risk?' risk':'')+'"></div><div class="ln"></div></div><div class="body"><div class="hn">'+(hp.risk?'<span style="color:var(--alert)">● '+T('riskHop')+'</span> · ':'')+'</div><div class="ht">'+esc(d.n)+'</div><div class="hr">'+esc(d.r)+'</div></div></div>';});return h+'</div>';}
+function netDetailHTML(catId){var rows=LX(NETD)[catId]||[];var cols=['--sl1','--sl2','--sl3','--sl4','--sl5','--hud'];return '<div class="netd">'+rows.map(function(r,i){return '<div class="nr" style="--nc:var('+cols[i%cols.length]+')"><b>'+esc(r[0])+'</b><span>'+esc(r[1])+'</span></div>';}).join('')+'</div><div class="envsrc">'+(I18T('typical_network_architecture_for'))+'</div>';}
+function chainHTML(catId){var hops=D.CHAINS[catId];var h='<div class="chain">';hops.forEach(function(hp){var d=LX(hp);h+='<div class="hop"><div class="rail"><div class="dot'+(hp.risk?' risk':'')+'"></div><div class="ln"></div></div><div class="body"><div class="hn">'+(hp.risk?'<span style="color:var(--alert)">● '+T('riskHop')+'</span> · ':'')+'</div><div class="ht">'+esc(d.n)+'</div><div class="hr">'+esc(d.r)+'</div></div></div>';});return h+'</div>';}
 
 function renderIntro(){resetToIntro();}
 function resetToIntro(){
  state={type:'intro'};
  pHead.innerHTML=headHTML(T('introEye'),T('introT'),'',false);
- var lv='<div style="display:grid;gap:5px">'+D.LEVELS.map(function(L,i){return '<div style="display:grid;grid-template-columns:42px 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:9px;padding:7px 9px"><span class="badge" style="background:'+lvColor(i)+'">SL'+(i+1)+'</span><div style="font-size:12.5px;color:var(--soft)">'+esc(L[lang].n)+' — '+esc(L[lang].d)+'</div></div>';}).join('')+'</div>';
- var cats='<div class="catgrid">'+D.CATS.map(function(c){return '<div class="catbtn" style="--cc:'+cv(c.cvar)+'"><div class="cn"><i></i>'+esc(c[lang].n)+'</div></div>';}).join('')+'</div>';
+ var lv='<div style="display:grid;gap:5px">'+D.LEVELS.map(function(L,i){return '<div style="display:grid;grid-template-columns:42px 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:9px;padding:7px 9px"><span class="badge" style="background:'+lvColor(i)+'">SL'+(i+1)+'</span><div style="font-size:12.5px;color:var(--soft)">'+esc(LX(L).n)+' — '+esc(LX(L).d)+'</div></div>';}).join('')+'</div>';
+ var cats='<div class="catgrid">'+D.CATS.map(function(c){return '<div class="catbtn" style="--cc:'+cv(c.cvar)+'"><div class="cn"><i></i>'+esc(LX(c).n)+'</div></div>';}).join('')+'</div>';
  pBody.innerHTML='<p class="ctrl" style="margin:0">'+esc(T('introP'))+'</p>'
   +'<div class="sec"><h3>'+T('how')+'</h3><ul class="notes">'+T('howList').map(function(s){return '<li class="ctrl">'+s+'</li>';}).join('')+'</ul></div>'
   +'<div class="sec"><h3>'+T('ladder')+'</h3>'+lv+'</div>'
   +'<div class="sec"><h3>'+T('cats')+'</h3>'+cats+'</div>'
-  +'<div class="sec"><h3>'+T('fly')+' · '+CITIES.length+'</h3><input id="cSearch" type="search" placeholder="'+(lang==='zh'?'搜索国家或城市…':'Search a country or city…')+'" style="width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--glass-2);color:var(--ink);font:inherit;font-size:13px"><div class="flychips" id="cList">'+flyList('')+'</div></div>';
+  +'<div class="sec"><h3>'+T('fly')+' · '+CITIES.length+'</h3><input id="cSearch" type="search" placeholder="'+(I18T('search_a_country_or'))+'" style="width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--glass-2);color:var(--ink);font:inherit;font-size:13px"><div class="flychips" id="cList">'+flyList('')+'</div></div>';
  wire();pBody.scrollTop=0;
  var si=document.getElementById('cSearch');if(si)si.addEventListener('input',function(){document.getElementById('cList').innerHTML=flyList(si.value);wire();});
 }
-function cityName(c){return lang==='zh'?(c.zh||c.en):(c.en||c.zh);}
+function cityName(c){return I18P(c.zh||c.en,c.en||c.zh);}
 function flyList(q){q=(q||'').trim().toLowerCase();
  var list=CITIES.filter(function(c){if(!q)return c.f;return (c.en+' '+(c.zh||'')+' '+(c.country||'')+' '+(c.czh||'')+' '+(c.iso||'')).toLowerCase().indexOf(q)>=0;}).slice(0,60);
- if(!list.length)return '<span class="ctrl">'+(lang==='zh'?'没有匹配的城市':'No match')+'</span>';
+ if(!list.length)return '<span class="ctrl">'+(I18T('no_match'))+'</span>';
  return list.map(function(c){return '<button data-city="'+c.id+'"><i style="background:'+(c.f?'#58e0c8':'#9fe8ff')+'"></i>'+esc(cityName(c))+(c.f?'':' <span style="color:var(--faint)">'+esc(c.iso||'')+'</span>')+'</button>';}).join('');}
 function regForPoint(lat,lon){var land=countryAt(lat,lon);if(!land)return {ocean:true,sl:D.OCEANREG.sl,reg:D.OCEANREG};
  var iso=land[2];var r=D.CTRYREG[iso];if(r)return {ocean:false,c:land,sl:r.sl,r:r};
  var cont=land[7];var cr=D.CONTREG[cont]||D.CONTREG['Asia'];return {ocean:false,c:land,sl:cr.sl,r:cr,generic:true};}
 function renderCountry(lat,lon){
  var info=regForPoint(lat,lon);
- if(info.ocean){var O=D.OCEANREG;var nm=lang==='zh'?'海洋':'Ocean';
+ if(info.ocean){var O=D.OCEANREG;var nm=I18T('ocean');
   pHead.innerHTML=headHTML(T('ocean'),nm,'<span class="badge" style="background:'+lvColor(O.sl)+'">SL'+(O.sl+1)+'</span><span class="chip">'+fmtLL(lat,lon)+'</span>',true);
-  pBody.innerHTML='<div class="sec"><h3>'+T('regime')+'</h3><div class="p-meta">'+chipsHTML(O.r)+'</div></div><div class="sec"><h3>'+T('ladder')+'</h3>'+ladderHTML(O.sl)+'</div><div class="blk a"><div class="t"><i></i>'+T('auth')+'</div><p>'+esc(lang==='zh'?O.z:O.e)+'</p></div>';
+  pBody.innerHTML='<div class="sec"><h3>'+T('regime')+'</h3><div class="p-meta">'+chipsHTML(O.r)+'</div></div><div class="sec"><h3>'+T('ladder')+'</h3>'+ladderHTML(O.sl)+'</div><div class="blk a"><div class="t"><i></i>'+T('auth')+'</div><p>'+esc(I18P(O.z,O.e))+'</p></div>';
   wire();pBody.scrollTop=0;state={type:'country'};return;}
- var c=info.c,r=info.r,sl=info.sl;var nm=lang==='zh'&&c[1]?c[1]:c[0];
+ var c=info.c,r=info.r,sl=info.sl;var nm=LZ()&&c[1]?c[1]:c[0];
  // nearest featured city
  var best=ISO2CITY[c[2]]||null,bd=best?hav(lat,lon,best.lat,best.lon):1e9;
  if(!best)CITIES.forEach(function(ct){var d=hav(lat,lon,ct.lat,ct.lon);if(d<bd){bd=d;best=ct;}});
- pHead.innerHTML=headHTML(T('country'),nm,'<span class="badge" style="background:'+lvColor(sl)+'">SL'+(sl+1)+' · '+esc(D.LEVELS[sl][lang].n)+'</span><span class="chip">'+esc(c[0])+' · '+esc(c[2])+'</span>',true);
+ pHead.innerHTML=headHTML(T('country'),nm,'<span class="badge" style="background:'+lvColor(sl)+'">SL'+(sl+1)+' · '+esc(LX(D.LEVELS[sl]).n)+'</span><span class="chip">'+esc(c[0])+' · '+esc(c[2])+'</span>',true);
  pBody.innerHTML='<dl class="kv"><dt>'+T('coords')+'</dt><dd>'+fmtLL(lat,lon)+'</dd><dt>'+T('pop')+'</dt><dd>'+(c[8]?(c[8]/1e6).toFixed(1)+'M':'—')+'</dd></dl>'
   +'<div class="sec"><h3>'+T('regime')+'</h3><div class="p-meta">'+chipsHTML(r.r)+'</div></div>'
   +'<div class="sec"><h3>'+T('ladder')+'</h3>'+ladderHTML(sl)+'</div>'
-  +'<div class="blk a"><div class="t"><i></i>'+T('auth')+'</div><p>'+esc(lang==='zh'?r.z:r.e)+'</p></div>'
-  +(best?'<div class="sec"><h3>'+T('cityEye')+'</h3><div class="btns"><button class="btn pri" data-city="'+best.id+'">'+T('toCity')+' · '+esc(best[lang])+' · '+Math.round(bd).toLocaleString()+' '+T('km')+'</button></div></div>':'');
+  +'<div class="blk a"><div class="t"><i></i>'+T('auth')+'</div><p>'+esc(I18P(r.z,r.e))+'</p></div>'
+  +(best?'<div class="sec"><h3>'+T('cityEye')+'</h3><div class="btns"><button class="btn pri" data-city="'+best.id+'">'+T('toCity')+' · '+esc(LX(best))+' · '+Math.round(bd).toLocaleString()+' '+T('km')+'</button></div></div>':'');
  wire();pBody.scrollTop=0;state={type:'country'};
 }
 function renderCityIntro(c,data){
  setCrumb();
  var counts=null;if(data){counts={};data.b.forEach(function(b){var k=b[b.length-1];counts[k]=(counts[k]||0)+1;});L2._counts=counts;L2._rd=data.rd.length;}else counts=L2._counts;
- pHead.innerHTML=headHTML(T('cityEye'),cityName(c)+(c.czh&&lang==='zh'?' · '+c.czh:(c.country&&lang==='en'?' · '+c.country:'')),'<span class="chip">'+T('buildings')+' '+(L2.picks?L2.picks.length:'—')+'</span><span class="chip">'+T('roads')+' '+(L2._rd||'—')+'</span>',true);
- var txc=L2.picks?txCounts().n:{};var cats='<div class="catgrid">'+TAX.map(function(M,ti){var n=txc[ti]||0;return '<button class="catbtn" data-tx="'+ti+'" style="--cc:'+M.col+'"><div class="cn"><i></i>'+(ti+1)+' '+esc(lang==='zh'?M.zh:M.en)+'</div><div class="cd">'+n+' '+T('buildings')+'</div></button>';}).join('')+'</div>';
- pBody.innerHTML='<p class="ctrl" style="margin:0">'+(L2.live?(lang==='zh'?'实时街区（OpenStreetMap，边走边加载）：拖动地图可以一直走到相邻城镇，前方街区自动加载、身后远处自动释放。建筑按规划类型着色——点一栋楼看它的端到端安全链路。':'Live streets (OpenStreetMap, streamed as you move): drag to walk on into neighbouring towns; tiles ahead load, tiles far behind are freed. Click a building for its end-to-end security chain.')+'</p><p style="display:none">':'')+(lang==='zh'?'这是该市真实街道的 1.3 公里见方核心区（OpenStreetMap）。建筑按规划类型着色——点一栋楼，或点下方任一类型，看它从用户到后端的端到端安全链路。':'A 1.3 km real street core (OpenStreetMap). Buildings are coloured by planning type — click a building, or a type below, for its end-to-end security chain.')+'</p>'
+ pHead.innerHTML=headHTML(T('cityEye'),cityName(c)+(c.czh&&LZ()?' · '+c.czh:(c.country&&lang==='en'?' · '+c.country:'')),'<span class="chip">'+T('buildings')+' '+(L2.picks?L2.picks.length:'—')+'</span><span class="chip">'+T('roads')+' '+(L2._rd||'—')+'</span>',true);
+ var txc=L2.picks?txCounts().n:{};var cats='<div class="catgrid">'+TAX.map(function(M,ti){var n=txc[ti]||0;return '<button class="catbtn" data-tx="'+ti+'" style="--cc:'+M.col+'"><div class="cn"><i></i>'+(ti+1)+' '+esc(I18P(M.zh,M.en))+'</div><div class="cd">'+n+' '+T('buildings')+'</div></button>';}).join('')+'</div>';
+ pBody.innerHTML='<p class="ctrl" style="margin:0">'+(L2.live?(I18T('live_streets_openstreetmap_streamed'))+'</p><p style="display:none">':'')+(I18T('a_1_3_km'))+'</p>'
   +'<div class="sec envsec" id="envSec"></div>'
   +'<div class="sec"><h3>'+T('cats')+'</h3>'+cats+'</div>'
-  +'<div class="sec"><h3>'+T('district')+'</h3><div class="warnote">'+esc(D.DISTRICT[lang].sub)+'</div><div class="btns"><button class="btn" data-dist="0">'+T('openDistrict')+' →</button></div></div>'
+  +'<div class="sec"><h3>'+T('district')+'</h3><div class="warnote">'+esc(LX(D.DISTRICT).sub)+'</div><div class="btns"><button class="btn" data-dist="0">'+T('openDistrict')+' →</button></div></div>'
   +'<div class="btns"><button class="btn" data-back="globe">← '+T('back')+'</button></div>';
  wire();pBody.scrollTop=0;state={type:'cityIntro'};ENV.secHTML='';envUI(true);
 }
 function renderCategory(catId,b){
- var cat=D.CATS[catId],ape=D.CATAPE[catId][lang],tx=b?txOf(b):null,TM=tx?TAX[tx.m]:null;
- pHead.innerHTML=headHTML(T('bEye'),TM?txSub(tx):cat[lang].n,'<span class="badge" style="background:'+lvColor(cat.sl)+'">SL'+(cat.sl+1)+'</span>'+(TM?'<span class="chip" style="color:'+TM.col+'">■ '+(tx.m+1)+' · '+esc(lang==='zh'?TM.zh:TM.en)+' → '+esc(txSub(tx))+'</span>':'<span class="chip" style="color:'+cv(cat.cvar)+'">'+esc(cat[lang].n)+'</span>'),true);
+ var cat=D.CATS[catId],ape=LX(D.CATAPE[catId]),tx=b?txOf(b):null,TM=tx?TAX[tx.m]:null;
+ pHead.innerHTML=headHTML(T('bEye'),TM?txSub(tx):LX(cat).n,'<span class="badge" style="background:'+lvColor(cat.sl)+'">SL'+(cat.sl+1)+'</span>'+(TM?'<span class="chip" style="color:'+TM.col+'">■ '+(tx.m+1)+' · '+esc(I18P(TM.zh,TM.en))+' → '+esc(txSub(tx))+'</span>':'<span class="chip" style="color:'+cv(cat.cvar)+'">'+esc(LX(cat).n)+'</span>'),true);
  var info='';
- if(b){var foot=Math.abs(polyArea(b.slice(2,b.length-1),0));var h=b[0];var est=h===5;var bf=buildingFacts(b),zh=lang==='zh';
-  var addr=bf.live?(bf.num||bf.street?esc((bf.num?bf.num+' ':'')+(bf.street?(zh&&bf.street.zh?bf.street.zh:bf.street.n):''))+(bf.num?'':' <span style="color:var(--faint)">'+(zh?'（OSM 未登记门牌，显示最近街道）':'(no house number in OSM; nearest street)')+'</span>'):'<span style="color:var(--faint)">'+(zh?'OSM 未登记':'not in OSM')+'</span>'):'<span style="color:var(--faint)">'+(zh?'离线核心区不含地址数据，部署后的实时街区会显示门牌和街道':'not in the offline core — the deployed live streets show house number and street')+'</span>';
+ if(b){var foot=Math.abs(polyArea(b.slice(2,b.length-1),0));var h=b[0];var est=h===5;var bf=buildingFacts(b),zh=LZ();
+  var addr=bf.live?(bf.num||bf.street?esc((bf.num?bf.num+' ':'')+(bf.street?(zh&&bf.street.zh?bf.street.zh:bf.street.n):''))+(bf.num?'':' <span style="color:var(--faint)">'+(I18T('no_house_number_in'))+'</span>'):'<span style="color:var(--faint)">'+(I18T('not_in_osm'))+'</span>'):'<span style="color:var(--faint)">'+(I18T('not_in_the_offline'))+'</span>';
   var places=bf.places.length?bf.places.map(function(p){return esc(zh&&p.zh?p.zh:p.n)+' <span style="color:var(--faint)">'+esc(p.sc||p.cl)+'</span>';}).join('<br>'):'';
   var nm=bf.places.length?(zh&&bf.places[0].zh?bf.places[0].zh:bf.places[0].n):'',fl=Math.max(1,Math.round(h/3.4));
   if(nm)pHead.querySelector('h2,.ttl,h1')&&(pHead.querySelector('h2,.ttl,h1').textContent=nm);
   function tile(k,v,u){return '<div><em>'+k+'</em><b>'+v+'</b>'+(u?'<small>'+u+'</small>':'')+'</div>';}
-  var nav=[['ov',zh?'概览':'Overview'],['loc',zh?'位置':'Location'],['cls',zh?'分类':'Class'],['lzr',zh?'测距':'Survey'],['ph',zh?'实景':'Photos'],['mno',zh?'运营商':'Networks'],['sec',zh?'安全画像':'Security']];
+  var nav=[['ov',I18T('overview')],['loc',I18T('location')],['cls',I18T('class')],['lzr',I18T('survey')],['ph',I18T('photos')],['mno',I18T('networks')],['sec',I18T('security')]];
   info='<nav class="bxnav">'+nav.map(function(n){return '<button data-go="'+n[0]+'">'+n[1]+'</button>';}).join('')+'</nav>'
-   +'<div class="sec bxs" data-sec="ov"><h3>'+(zh?'概览':'Overview')+'</h3><div class="bxk">'
-   +tile(zh?'高度':'Height',h.toFixed(h<20?1:0),'m'+(est?(zh?' · 默认值':' · default'):''))+tile(zh?'估算楼层':'Est. floors','≈ '+fl,'')+tile(zh?'占地':'Footprint',Math.round(foot).toLocaleString(),'m²')
-   +tile(zh?'周长':'Perimeter',Math.round(bf.per).toLocaleString(),'m')+tile(zh?'估算体积':'Est. volume','≈ '+Math.round(foot*h).toLocaleString(),'m³')+tile(zh?'坐标':'Coords','<span class="ll">'+bf.ll.lat.toFixed(5)+'°<br>'+bf.ll.lon.toFixed(5)+'°</span>','<a href="https://www.openstreetmap.org/#map=19/'+bf.ll.lat.toFixed(5)+'/'+bf.ll.lon.toFixed(5)+'" target="_blank" rel="noopener">OSM ↗</a>')+'</div></div>'
-   +'<div class="sec bxs" data-sec="loc"><h3>'+(zh?'位置与行政归属':'Location & jurisdiction')+'</h3><dl class="kv"><dt>'+(zh?'门牌 / 街道':'Street')+'</dt><dd>'+addr+'</dd>'
-   +(bf.live?'<dt>'+(zh?'完整地址':'Full address')+'</dt><dd id="fullAddr"></dd><dt>'+(zh?'行政归属':'Jurisdiction')+'</dt><dd id="jurisA"></dd>':'')+'</dl></div>'
-   +'<div class="sec bxs" data-sec="cls"><h3>'+(zh?'建筑分类':'Building class')+'</h3><div class="bxcls" style="--tc:'+TM.col+'"><i></i><div><b>'+(tx.m+1)+' · '+esc(zh?TM.zh:TM.en)+'</b><span>→ '+esc(txSub(tx))+'</span><em>'+(zh?'依据：':'Basis: ')+esc(txWhy(tx.why))+'</em></div></div>'
-   +(places?'<dl class="kv"><dt>'+(zh?'楼内地图标注':'Listed inside')+'</dt><dd>'+places+'</dd></dl>':'')+txSecHTML(tx.m)+'</div>';}
+   +'<div class="sec bxs" data-sec="ov"><h3>'+(I18T('overview'))+'</h3><div class="bxk">'
+   +tile(I18T('height'),h.toFixed(h<20?1:0),'m'+(est?(I18T('default')):''))+tile(I18T('est_floors'),'≈ '+fl,'')+tile(I18T('footprint'),Math.round(foot).toLocaleString(),'m²')
+   +tile(I18T('perimeter'),Math.round(bf.per).toLocaleString(),'m')+tile(I18T('est_volume'),'≈ '+Math.round(foot*h).toLocaleString(),'m³')+tile(I18T('coords'),'<span class="ll">'+bf.ll.lat.toFixed(5)+'°<br>'+bf.ll.lon.toFixed(5)+'°</span>','<a href="https://www.openstreetmap.org/#map=19/'+bf.ll.lat.toFixed(5)+'/'+bf.ll.lon.toFixed(5)+'" target="_blank" rel="noopener">OSM ↗</a>')+'</div></div>'
+   +'<div class="sec bxs" data-sec="loc"><h3>'+(I18T('location_jurisdiction'))+'</h3><dl class="kv"><dt>'+(I18T('street'))+'</dt><dd>'+addr+'</dd>'
+   +(bf.live?'<dt>'+(I18T('full_address'))+'</dt><dd id="fullAddr"></dd><dt>'+(I18T('jurisdiction'))+'</dt><dd id="jurisA"></dd>':'')+'</dl></div>'
+   +'<div class="sec bxs" data-sec="cls"><h3>'+(I18T('building_class'))+'</h3><div class="bxcls" style="--tc:'+TM.col+'"><i></i><div><b>'+(tx.m+1)+' · '+esc(I18P(TM.zh,TM.en))+'</b><span>→ '+esc(txSub(tx))+'</span><em>'+(I18T('basis'))+esc(txWhy(tx.why))+'</em></div></div>'
+   +(places?'<dl class="kv"><dt>'+(I18T('listed_inside'))+'</dt><dd>'+places+'</dd></dl>':'')+txSecHTML(tx.m)+'</div>';}
  pBody.innerHTML=info+(b?'<div class="sec bxs" data-sec="lzr" id="bxLaser"></div><div class="sec bxs" data-sec="ph" id="bxPhotos"></div><div class="sec bxs" data-sec="mno" id="bxNet"></div>':'')
-  +(b?'<div class="sec bxs" data-sec="sec"><h3>'+(lang==='zh'?'网络安全画像 · ':'Network security profile · ')+esc(cat[lang].n)+'</h3><div class="blk"><p>'+esc(cat[lang].net)+'</p></div>'+triHTML(ape.a,ape.p,ape.e)+'<h4 class="bxh4">'+T('chain')+'</h4>'+chainHTML(catId)+'<h4 class="bxh4">'+(lang==='zh'?'网络细节（分层）':'Network detail (by layer)')+'</h4>'+netDetailHTML(catId)+'</div>'
-   :'<div class="sec"><h3>'+T('net')+'</h3><div class="blk"><p>'+esc(cat[lang].net)+'</p></div></div><div class="sec">'+triHTML(ape.a,ape.p,ape.e)+'</div><div class="sec"><h3>'+T('chain')+'</h3>'+chainHTML(catId)+'</div><div class="sec"><h3>'+(lang==='zh'?'网络细节（分层）':'Network detail (by layer)')+'</h3>'+netDetailHTML(catId)+'</div>')
+  +(b?'<div class="sec bxs" data-sec="sec"><h3>'+(I18T('network_security_profile'))+esc(LX(cat).n)+'</h3><div class="blk"><p>'+esc(LX(cat).net)+'</p></div>'+triHTML(ape.a,ape.p,ape.e)+'<h4 class="bxh4">'+T('chain')+'</h4>'+chainHTML(catId)+'<h4 class="bxh4">'+(I18T('network_detail_by_layer'))+'</h4>'+netDetailHTML(catId)+'</div>'
+   :'<div class="sec"><h3>'+T('net')+'</h3><div class="blk"><p>'+esc(LX(cat).net)+'</p></div></div><div class="sec">'+triHTML(ape.a,ape.p,ape.e)+'</div><div class="sec"><h3>'+T('chain')+'</h3>'+chainHTML(catId)+'</div><div class="sec"><h3>'+(I18T('network_detail_by_layer'))+'</h3>'+netDetailHTML(catId)+'</div>')
   +'<div class="btns"><button class="btn" data-back="city">← '+esc(cityName(L2.city))+'</button><button class="btn" data-back="globe">'+T('back')+'</button></div>';
  pBody.classList.toggle('bxmode',!!b);pBody.querySelectorAll('[data-go]').forEach(function(btn){btn.onclick=function(){var t=pBody.querySelector('[data-sec="'+btn.getAttribute('data-go')+'"]');if(t)pBody.scrollTo({top:t.offsetTop-44,behavior:'smooth'});};});
  wire();pBody.scrollTop=0;state={type:'cat',cat:catId,b:b};
  if(b){bxFill(b);var bf2=buildingFacts(b);if(bf2.live)fillFullAddr(bf2.ll.lat,bf2.ll.lon);}
 }
 function renderDistrict(idx){
- var bd=D.DISTRICT.blds[idx],d=bd[lang];
- pHead.innerHTML=headHTML(T('district')+' · '+(lang==='zh'?'虚构':'fictional'),d.n,'<span class="badge" style="background:'+lvColor(bd.sl)+'">SL'+(bd.sl+1)+'</span>',true);
- var tabs='<div class="flychips" style="margin-bottom:4px">'+D.DISTRICT.blds.map(function(b,i){return '<button data-dist="'+i+'"'+(i===idx?' style="border-color:var(--hud);color:var(--hud)"':'')+'><i style="background:#'+b.col.toString(16).padStart(6,'0')+'"></i>'+esc(b[lang].n)+'</button>';}).join('')+'</div>';
- pBody.innerHTML='<div class="warnote">'+esc(D.DISTRICT[lang].sub)+'</div>'+tabs
+ var bd=D.DISTRICT.blds[idx],d=LX(bd);
+ pHead.innerHTML=headHTML(T('district')+' · '+(I18T('fictional')),d.n,'<span class="badge" style="background:'+lvColor(bd.sl)+'">SL'+(bd.sl+1)+'</span>',true);
+ var tabs='<div class="flychips" style="margin-bottom:4px">'+D.DISTRICT.blds.map(function(b,i){return '<button data-dist="'+i+'"'+(i===idx?' style="border-color:var(--hud);color:var(--hud)"':'')+'><i style="background:#'+b.col.toString(16).padStart(6,'0')+'"></i>'+esc(LX(b).n)+'</button>';}).join('')+'</div>';
+ pBody.innerHTML='<div class="warnote">'+esc(LX(D.DISTRICT).sub)+'</div>'+tabs
   +'<div class="sec"><h3>'+T('regime')+'</h3><div class="p-meta">'+chipsHTML(d.reg)+'</div></div>'
   +'<div class="sec"><h3>'+T('ladder')+'</h3>'+ladderHTML(bd.sl)+'</div>'
   +'<div class="sec">'+triHTML(d.a,d.p,d.e)+'</div>'
@@ -602,13 +609,13 @@ function renderDistrict(idx){
 }
 function setCrumb(){var cr=document.getElementById('crumb');
  if(mode==='globe'){cr.innerHTML='';return;}
- var parts=['<button data-cb="globe">'+(lang==='zh'?'全球':'Globe')+'</button>','<span class="sep">/</span>','<b>'+esc(cityName(L2.city))+'</b>'];
+ var parts=['<button data-cb="globe">'+(I18T('globe'))+'</button>','<span class="sep">/</span>','<b>'+esc(cityName(L2.city))+'</b>'];
  cr.innerHTML=parts.join(' ');cr.querySelectorAll('[data-cb]').forEach(function(b){b.onclick=exitCity;});}
 
 function rerender(){if(state.type==='intro')resetToIntro();else if(state.type==='cityIntro')renderCityIntro(L2.city);else if(state.type==='cat')renderCategory(state.cat,state.b);else if(state.type==='tax')renderTax(state.m);else if(state.type==='dist')renderDistrict(state.dist);else if(state.type==='event'&&EVBY[state.id])renderEvent(EVBY[state.id]);else if(state.type==='cov')renderCoverage();else resetToIntro();}
 
 // ---------- legends ----------
-function buildLegend(){document.getElementById('legend').innerHTML=D.LEVELS.map(function(L,i){return '<span><i style="background:'+lvColor(i)+'"></i>SL'+(i+1)+' '+esc(L[lang].n)+'</span>';}).join('');}
+function buildLegend(){document.getElementById('legend').innerHTML=D.LEVELS.map(function(L,i){return '<span><i style="background:'+lvColor(i)+'"></i>SL'+(i+1)+' '+esc(LX(L).n)+'</span>';}).join('');}
 function catCounts(){return txCounts().n;}
 function buildCatLegend(){var n=catCounts();var el=document.getElementById('catLegend');el.innerHTML=txLegendHTML(n);
  el.querySelectorAll('.lgb').forEach(function(b){b.onclick=function(){var id=+b.dataset.tx;setFocus(U.uFocus.value===id?-1:id);};});}
@@ -627,8 +634,8 @@ canvas.addEventListener('pointermove',function(ev){
   if(mode==='globe'){var k=.0045*(orb.d/(R*3));want.th-=dx*k;want.ph=Math.max(.12,Math.min(Math.PI-.12,want.ph-dy*k));if(moved>6)autoPause=performance.now();}
   else if(!(ev.shiftKey||(ev.buttons&2)||ev.ctrlKey)){livePan(dx,dy);}
   else{L2.camWant.az-=dx*0.006;if(!SKYV.on)L2.camWant.el=Math.max(0.14,Math.min(1.45,L2.camWant.el+dy*0.006));}
- } else if(mode==='street'&&L2.group){var nowp=performance.now();if(nowp-(L2._hv||0)>70){L2._hv=nowp;setNdc(ev);var hb=(DRV.on&&DRV.view==='fp')?null:pickBuilding();setHover(hb);var tip=document.getElementById('tip');if(hb){var htx=txOf(hb),hM=TAX[htx.m];tip.style.display='block';tip.style.left=ev.clientX+'px';tip.style.top=ev.clientY+'px';tip.innerHTML='<i style="background:'+hM.col+'"></i>'+esc(lang==='zh'?hM.zh:hM.en)+' · '+esc(txSub(htx))+' · '+Math.round(hb[0])+' m';}else tip.style.display='none';}}
- else if(mode==='globe'){setNdc(ev);ray.setFromCamera(ndc,camera);var h=ray.intersectObject(globe,false);var ro=document.getElementById('readout');if(h.length){var ll=v2ll(h[0].point);var land=countryAt(ll.lat,ll.lon);ro.innerHTML='<span>'+fmtLL(ll.lat,ll.lon)+'</span>'+(land?'<span><b>'+esc(lang==='zh'&&land[1]?land[1]:land[0])+'</b></span>':'<span>'+(lang==='zh'?'海洋':'Ocean')+'</span>');}}
+ } else if(mode==='street'&&L2.group){var nowp=performance.now();if(nowp-(L2._hv||0)>70){L2._hv=nowp;setNdc(ev);var hb=(DRV.on&&DRV.view==='fp')?null:pickBuilding();setHover(hb);var tip=document.getElementById('tip');if(hb){var htx=txOf(hb),hM=TAX[htx.m];tip.style.display='block';tip.style.left=ev.clientX+'px';tip.style.top=ev.clientY+'px';tip.innerHTML='<i style="background:'+hM.col+'"></i>'+esc(I18P(hM.zh,hM.en))+' · '+esc(txSub(htx))+' · '+Math.round(hb[0])+' m';}else tip.style.display='none';}}
+ else if(mode==='globe'){setNdc(ev);ray.setFromCamera(ndc,camera);var h=ray.intersectObject(globe,false);var ro=document.getElementById('readout');if(h.length){var ll=v2ll(h[0].point);var land=countryAt(ll.lat,ll.lon);ro.innerHTML='<span>'+fmtLL(ll.lat,ll.lon)+'</span>'+(land?'<span><b>'+esc(LZ()&&land[1]?land[1]:land[0])+'</b></span>':'<span>'+(I18T('ocean'))+'</span>');}}
 });
 function endPtr(ev){delete ptrs[ev.pointerId];if(Object.keys(ptrs).length<2)lastPinch=0;if(!Object.keys(ptrs).length)canvas.classList.remove('drag');}
 canvas.addEventListener('pointerup',function(ev){invalidate(600);var tap=downAt&&moved<8&&(performance.now()-downAt.t)<600&&Object.keys(ptrs).length<=1;endPtr(ev);if(tap){setNdc(ev);handleClick();}});
@@ -643,12 +650,12 @@ window.addEventListener('keydown',function(e){invalidate(800);if(e.key==='Escape
 var WORLD={out:0,busy:0},EXIT_D=0;
 // enter the street level anywhere on land (not only at listed cities)
 function enterAt(lat,lon){var c=nearestCity(lat,lon,LIVE?8:60);if(c&&!LIVE){enterCity(c.id);return;}
- if(!LIVE){toast(lang==='zh'?'离线模式只能进入已打包的城市':'Offline mode can only open packed cities');return;}
+ if(!LIVE){toast(I18T('offline_mode_can_only'));return;}
  var nm=null,nd=40;if(NODES)NODES.rows.forEach(function(r){var d=hav(lat,lon,r[5],r[6]);if(d<nd){nd=d;nm=r;}});
  var id='pt_'+lat.toFixed(3)+'_'+lon.toFixed(3),ca=countryAt(lat,lon),z2=iso2zh(),iso=ca?ca[2]:(nm?nm[4]:'');
  if(!CITYBY[id])CITYBY[id]={id:id,en:nm?(nm[0]+(nd>3?' · '+fmtKm(nd):'')):fmtLL(lat,lon),zh:nm&&nm[1]?(nm[1]+(nd>3?' · '+fmtKm(nd):'')):'',iso:iso,czh:z2[iso]||'',country:ca?ca[0]||'':'',lat:lat,lon:lon,round:9};
  if(c&&hav(lat,lon,c.lat,c.lon)<2){enterCity(c.id);return;}enterCity(id);}
-function worldDive(){if(WORLD.busy||mode!=='globe'||CINE)return;var ll=v2ll(camera.position);var ca=countryAt(ll.lat,ll.lon);if(!ca){var t=performance.now();if(t-(WORLD.tt||0)>5000){WORLD.tt=t;toast(lang==='zh'?'这里是海面——把陆地转到屏幕中央再放大，就会直接落到街道上':'Over water — centre some land and keep zooming to drop to street level');}return;}
+function worldDive(){if(WORLD.busy||mode!=='globe'||CINE)return;var ll=v2ll(camera.position);var ca=countryAt(ll.lat,ll.lon);if(!ca){var t=performance.now();if(t-(WORLD.tt||0)>5000){WORLD.tt=t;toast(I18T('over_water_centre_some'));}return;}
  WORLD.busy=1;setTimeout(function(){WORLD.busy=0;},3000);enterAt(ll.lat,ll.lon);}
 canvas.addEventListener('dblclick',function(ev){if(mode!=='globe')return;setNdc(ev);ray.setFromCamera(ndc,camera);var h=ray.intersectObject(globe,false);if(!h.length)return;var ll=v2ll(h[0].point);if(!countryAt(ll.lat,ll.lon))return;ev.preventDefault();enterAt(ll.lat,ll.lon);});
 function handleClick(){
@@ -683,17 +690,17 @@ var groundPlane=new T3.Plane(new T3.Vector3(0,1,0),0);
 function rayGround(){ray.setFromCamera(ndc,camera);var pt=new T3.Vector3();if(ray.ray.intersectPlane(groundPlane,pt))return pt;return null;}
 
 // ---------- controls ----------
-var bZh=document.getElementById('bZh'),bEn=document.getElementById('bEn'),bPanel=document.getElementById('bPanel');
+var bZh=document.getElementById('bZh'),bEn=document.getElementById('bEn'),bBi=document.getElementById('bBi'),bPanel=document.getElementById('bPanel');
 function applyOffset(){invalidate();layoutDirty=true;var w=window.innerWidth,h=window.innerHeight,open=!panel.classList.contains('min');if(open&&w>900){var pw=Math.min(408,w-32)+16;camera.setViewOffset(w,h,pw/2,0,w,h);}else camera.clearViewOffset();}
 function setPanel(open){panel.classList.toggle('min',!open);bPanel.setAttribute('aria-pressed',open);applyOffset();}
 bPanel.onclick=function(){setPanel(panel.classList.contains('min'));};
-function applyLang(){var qb=document.getElementById('bQual');if(qb&&QUAL)qualLabel(qb);try{if(typeof catChips==='function')catChips();if(mode==='street'&&L2.active)updateLiveHud(L2.live?localToLL(L2.target.x,L2.target.z):undefined);lidUI();drvUI();DRV.hudAt=0;DRV.scrAt=0;DRV.alAt=0;NAV.radarAt=0;NAV.uiAt=0;if(typeof FAR!=='undefined'&&FAR.lab)FAR.lab.key=null;if(toastEl)toastEl.classList.remove('on');if(L2.drone)L2.drone.tmAt=0;if(typeof trvUI==='function')trvUI(true);if(DRV.on)drvAlong();if(typeof PERF!=='undefined'&&PERF&&PERF.at!=null)PERF.at=0;}catch(e){}setTimeout(function(){var si=document.getElementById('srchIn');if(si)si.placeholder=lang==='zh'?'搜索地址、街道、地点或城市…':'Search an address, street, place or city…';if(typeof skyControls==='function'){skyControls();SKYV.evAt=0;SKYV.uiAt=0;}if(typeof renderEvFilter==='function'&&EV&&EV.length)renderEvFilter();},0);root.setAttribute('data-lang',lang);root.lang=lang==='zh'?'zh-CN':'en';
- bZh.setAttribute('aria-pressed',lang==='zh');bEn.setAttribute('aria-pressed',lang==='en');
+function applyLang(){var qb=document.getElementById('bQual');if(qb&&QUAL)qualLabel(qb);try{if(typeof catChips==='function')catChips();if(mode==='street'&&L2.active)updateLiveHud(L2.live?localToLL(L2.target.x,L2.target.z):undefined);lidUI();drvUI();DRV.hudAt=0;DRV.scrAt=0;DRV.alAt=0;NAV.radarAt=0;NAV.uiAt=0;if(typeof FAR!=='undefined'&&FAR.lab)FAR.lab.key=null;if(toastEl)toastEl.classList.remove('on');if(L2.drone)L2.drone.tmAt=0;if(typeof trvUI==='function')trvUI(true);if(DRV.on)drvAlong();if(typeof PERF!=='undefined'&&PERF&&PERF.at!=null)PERF.at=0;}catch(e){}setTimeout(function(){var si=document.getElementById('srchIn');if(si)si.placeholder=I18T('search_an_address_street');if(typeof skyControls==='function'){skyControls();SKYV.evAt=0;SKYV.uiAt=0;}if(typeof renderEvFilter==='function'&&EV&&EV.length)renderEvFilter();},0);root.setAttribute('data-lang',lang);root.lang=(LZ()?'zh-CN':'en');
+ bZh.setAttribute('aria-pressed',lang==='zh');bEn.setAttribute('aria-pressed',lang==='en');if(bBi)bBi.setAttribute('aria-pressed',lang==='bi');
  document.getElementById('hTitle').textContent=T('title');document.getElementById('hSub').textContent=T('sub');
  document.querySelectorAll('[data-k]').forEach(function(el){el.textContent=T(el.getAttribute('data-k'));});
  buildLegend();if(L2.active)buildCatLegend();if(V)buildLabels();if(EV.length)selectYear(tlYear,false);rerender();setCrumb();
  try{localStorage.setItem('se-lang',lang);}catch(e){}}
-bZh.onclick=function(){lang='zh';applyLang();};bEn.onclick=function(){lang='en';applyLang();};
+bZh.onclick=function(){lang='zh';applyLang();};bEn.onclick=function(){lang='en';applyLang();};if(bBi)bBi.onclick=function(){lang='bi';applyLang();};
 var tRot=document.getElementById('tRot'),tNight=document.getElementById('tNight');
 tRot.onclick=function(){invalidate();var on=tRot.getAttribute('aria-pressed')!=='true';tRot.setAttribute('aria-pressed',on);autoRot=on;};
 tNight.onclick=function(){invalidate(2500);night=!night;tNight.setAttribute('aria-pressed',night);};
@@ -773,7 +780,7 @@ var CATN={zh:{worm:'蠕虫',virus:'病毒',trojan:'木马',ransomware:'勒索软
  'supply-chain':'供应链',fraud:'金融欺诈',milestone:'里程碑',outage:'故障（非攻击）',espionage:'窃密/间谍',advisory:'通报/处罚',botnet:'僵尸网络',phishing:'钓鱼'},
  en:{worm:'Worm',virus:'Virus',trojan:'Trojan',ransomware:'Ransomware',breach:'Breach',vuln:'Vulnerability',ddos:'DDoS',ics:'ICS / critical infra',
  'supply-chain':'Supply chain',fraud:'Financial fraud',milestone:'Milestone',outage:'Outage (not an attack)',espionage:'Espionage',advisory:'Advisory / penalty',botnet:'Botnet',phishing:'Phishing'}};
-function evTitle(e){return lang==='zh'?e.tz:e.te;}
+function evTitle(e){return I18P(e.tz,e.te);}
 function makeGlowTex(){var c=document.createElement('canvas');c.width=c.height=128;var g=c.getContext('2d');var gr=g.createRadialGradient(64,64,0,64,64,64);
  gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.18,'rgba(255,255,255,.85)');gr.addColorStop(.45,'rgba(255,255,255,.25)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,128,128);
  var t=new T3.CanvasTexture(c);return t;}
@@ -803,9 +810,9 @@ function buildHist(){var h=document.getElementById('tlHist');var max=1;for(var y
 function selectYear(y,strike){tlYear=y;var rg=document.getElementById('tlRange');if(+rg.value!==y)rg.value=y;
  document.getElementById('tlYear').textContent=y;
  var list=EVY[y]||[];var top=list.reduce(function(m,e){return Math.max(m,e.sl);},-1);
- document.getElementById('tlInfo').textContent=list.length?(lang==='zh'?list.length+' 起事件 · 最高 SL'+(top+1)+' · 点光点看详情':list.length+' events · max SL'+(top+1)+' · click a marker'):(lang==='zh'?'这一年没有收录的重大事件':'No recorded major event this year');
+ document.getElementById('tlInfo').textContent=list.length?(I18P(list.length+' 起事件 · 最高 SL'+(top+1)+' · 点光点看详情',list.length+' events · max SL'+(top+1)+' · click a marker')):(I18T('no_recorded_major_event'));
  document.querySelectorAll('#tlHist i').forEach(function(b){b.classList.toggle('on',+b.dataset.y===y);});
- var g=document.getElementById('tlGlob');g.innerHTML=list.filter(function(e){return e.g;}).map(function(e){return '<button data-ev="'+e.id+'"><i style="background:'+lvColor(e.sl)+'"></i>'+(lang==='zh'?'全球 · ':'Global · ')+esc(evTitle(e))+'</button>';}).join('');
+ var g=document.getElementById('tlGlob');g.innerHTML=list.filter(function(e){return e.g;}).map(function(e){return '<button data-ev="'+e.id+'"><i style="background:'+lvColor(e.sl)+'"></i>'+(I18T('global'))+esc(evTitle(e))+'</button>';}).join('');
  g.onclick=function(ev){var b=ev.target.closest('button');if(b)openEvent(b.dataset.ev);};
  if(evPts){var A=evPts.geometry.attributes.alpha;EV.forEach(function(e){if(e.g)return;var age=y-e.y;A.array[e.pi]=(age<0||!evPass(e))?0:age===0?1:Math.max(.16,.62-age*.05);});A.needsUpdate=true;}
  if(strike){list.slice(0,8).forEach(function(e,i){setTimeout(function(){if(tlYear===y&&STRIKES.length<4)strikeEvent(e);},i*1100);});}
@@ -878,7 +885,7 @@ function strikeEvent(e){if(mode!=='globe')return;if(STRIKES.length>=5)return;var
  world.add(grp);
  STRIKES.push({g:grp,t:0,life:4.2,e:e,n:n,bot:bot,top:top,ret:ret,beam:beam,orb:orbS,bolts:bolts,flash:flash,white:white,rings:rings,sparks:sparks,vel:vel,hit:false,tag:makeTag(e,bot.clone().addScaledVector(n,H*.55))});invalidate(4400);}
 function makeTag(e,anchor){var d=document.createElement('div');d.className='strike-tag';d.style.setProperty('--c',lvColor(e.sl));
- d.innerHTML='<b>'+e.y+' · SL'+(e.sl+1)+'</b><span>'+esc(evTitle(e))+'</span><em>'+esc(e.g?(lang==='zh'?'全球':'GLOBAL'):(lang==='zh'?e.pz:e.pe))+'</em>';
+ d.innerHTML='<b>'+e.y+' · SL'+(e.sl+1)+'</b><span>'+esc(evTitle(e))+'</span><em>'+esc(e.g?(I18T('global_2')):(I18P(e.pz,e.pe)))+'</em>';
  d.onclick=function(){openEvent(e.id);};labelsEl.appendChild(d);return {el:d,anchor:anchor};}
 function ease(x){return x<0?0:x>1?1:x*x*(3-2*x);}
 function seg(u,a,b){return ease((u-a)/(b-a));}
@@ -915,16 +922,16 @@ function nearestEvent(cx,cy,W,H,maxPx){if(!evPts)return null;var best=null,bd=ma
  EV.forEach(function(e){if(e.g||A[e.pi]<=0)return;if(!facingOK(e.P,e.N,.2)||!toScreen(e.P,W,H))return;var d=Math.hypot(SCR.x-cx,SCR.y-cy)-(A[e.pi]>=1?4:0);if(d<bd){bd=d;best=e;}});return best;}
 function openEvent(id){var e=EVBY[id];if(!e)return;if(panel.classList.contains('min'))setPanel(true);renderEvent(e);if(mode==='globe'){if(!e.g)cineView(e);setTimeout(function(){strikeEvent(e);},e.g?0:700);}}
 function renderEvent(e){
- var zh=lang==='zh';var cat=(CATN[lang]||CATN.zh)[e.cat]||e.cat;
+ var zh=LZ();var cat=(LX(CATN)||CATN.zh)[e.cat]||e.cat;
  var meta='<span class="badge" style="background:'+lvColor(e.sl)+'">SL'+(e.sl+1)+'</span><span class="chip">'+esc(e.d)+'</span><span class="chip">'+esc(cat)+'</span>'+(e.cve?'<span class="chip">'+esc(e.cve)+'</span>':'');
- pHead.innerHTML=headHTML((zh?'安全事件 · ':'Security event · ')+e.y,evTitle(e),meta,true);
- var body='<div class="sec"><h3>'+(zh?'发生地点':'Where')+'</h3><p>'+esc(e.g?(zh?'全球性事件 · ':'Global · ')+(zh?e.pz:e.pe):(zh?e.pz:e.pe))+'</p></div>';
- body+='<div class="sec">'+(zh?triHTML(e.a,e.p,e.x):'<div class="tri"><div class="blk a"><div class="t"><i></i>'+T('auth')+'</div><p>'+esc(e.ae)+'</p></div></div>')+'</div>';
+ pHead.innerHTML=headHTML((I18T('security_event'))+e.y,evTitle(e),meta,true);
+ var body='<div class="sec"><h3>'+(I18T('where'))+'</h3><p>'+esc(e.g?(I18T('global_3'))+(I18P(e.pz,e.pe)):(I18P(e.pz,e.pe)))+'</p></div>';
+ body+='<div class="sec">'+(I18P(triHTML(e.a,e.p,e.x),'<div class="tri"><div class="blk a"><div class="t"><i></i>'+T('auth')+'</div><p>'+esc(e.ae)+'</p></div></div>'))+'</div>';
  body+=orgChipsHTML(e);
- body+='<div class="sec"><h3>'+(zh?'权威来源':'Sources')+'</h3><div class="src">'+e.src.map(function(u){var h=u.replace(/^https?:\/\//,'').split('/')[0];return '<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(h)+'</a>';}).join('')+'</div></div>';
+ body+='<div class="sec"><h3>'+(I18T('sources'))+'</h3><div class="src">'+e.src.map(function(u){var h=u.replace(/^https?:\/\//,'').split('/')[0];return '<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(h)+'</a>';}).join('')+'</div></div>';
  var same=(EVY[e.y]||[]).filter(function(o){return o.id!==e.id;});
- if(same.length)body+='<div class="sec"><h3>'+(zh?'同年其他事件':'Same year')+'</h3><div class="flychips">'+same.map(function(o){return '<button data-ev="'+o.id+'"><i style="background:'+lvColor(o.sl)+'"></i>'+esc(evTitle(o))+'</button>';}).join('')+'</div></div>';
- body+='<div class="warnote">'+(zh?'地点标注的是主要受影响或首次发现的位置，不代表攻击来源或归属。':'Location marks primary impact or first observation, not attack origin or attribution.')+'</div>';
+ if(same.length)body+='<div class="sec"><h3>'+(I18T('same_year'))+'</h3><div class="flychips">'+same.map(function(o){return '<button data-ev="'+o.id+'"><i style="background:'+lvColor(o.sl)+'"></i>'+esc(evTitle(o))+'</button>';}).join('')+'</div></div>';
+ body+='<div class="warnote">'+(I18T('location_marks_primary_impact'))+'</div>';
  pBody.innerHTML=body;wire();pBody.scrollTop=0;state={type:'event',id:e.id};
  pBody.querySelectorAll('[data-ev]').forEach(function(b){b.onclick=function(){openEvent(b.dataset.ev);};});
  if(tlYear!==e.y)selectYear(e.y,false);
@@ -1008,7 +1015,7 @@ var LODC={n:3,at:0,stats:{f:0,b:0,x:0}};
 // quality mode: 'hq' = everything full detail at native resolution (like before), 'bal' = LOD + motion-adaptive resolution
 var QUAL={m:'bal'};try{var qm=localStorage.getItem('se.qual');if(qm==='hq'||qm==='bal')QUAL.m=qm;}catch(_e){}
 function setQual(m){QUAL.m=m;try{localStorage.setItem('se.qual',m);}catch(_e){}LODC.at=0;if(m==='hq'&&pr<PR_MAX){pr=PR_MAX;renderer.setPixelRatio(pr);resize();}var b=document.getElementById('bQual');if(b){b.setAttribute('aria-pressed',m==='hq');qualLabel(b);}invalidate(600);}
-function qualLabel(b){var zh=lang==='zh';b.querySelector('span').textContent=QUAL.m==='hq'?(zh?'画质：最高':'Quality: max'):(zh?'画质：均衡':'Quality: balanced');}
+function qualLabel(b){var zh=LZ();b.querySelector('span').textContent=QUAL.m==='hq'?(I18T('quality_max')):(I18T('quality_balanced'));}
 function buildLodBoxes(list){var P=[],N=[],C=[],CY=[],BC=[],rc=new T3.Color(),rt=new T3.Color(),W=new T3.Color(0xffffff);
  for(var i=0;i<list.length;i++){var x=list[i],bb=x._bb;if(!bb)continue;var ar=(bb[2]-bb[0])*(bb[3]-bb[1]),h=Math.max(3,x[0]),mh=x[1]||0;if(mh>=h)mh=0;if(ar<60&&h<9)continue;
   var cat=x[x.length-1],txb=txOf(x),base=new T3.Color(TAX[txb.m]?TAX[txb.m].col:'#8899aa'),mj=txb.m,top=base.clone().lerp(W,.18);realBuildingColor(cat,h,x[2],x[3],rc);rt.copy(rc).lerp(TMPC.setHex(h>=45?0x5d6670:0x77797c),.55);
@@ -1122,13 +1129,13 @@ function unloadTile(k){var lv=L2.live,T=lv.tiles[k];if(!T)return;if(T.group){L2.
 function rebuildPicks(){var lv=L2.live;if(!lv)return;var all=[],rd=0;Object.keys(lv.tiles).forEach(function(k){var T=lv.tiles[k];if(T.state==='ready'&&T.data){Array.prototype.push.apply(all,T.data.b);rd+=T.data.rd.length;}});L2.picks=all;L2._rd=rd;if(L2.active){buildCatLegend();if(state.type==='cityIntro'){var ch=pHead.querySelectorAll('.p-meta .chip');if(ch[0])ch[0].textContent=T('buildings')+' '+all.length;if(ch[1])ch[1].textContent=T('roads')+' '+rd;}}}
 function liveTraffic(dt){var lv=L2.live;if(!lv)return;for(var k in lv.tiles){var T=lv.tiles[k];if(T.traffic)stepTraffic(T.traffic,dt);}}
 var nearestCache=null;
-function updateLiveHud(ll){var el=document.getElementById('liveInfo');if(!el)return;if(!L2.live){var zh0=lang==='zh';el.innerHTML='<b style="color:var(--warn)">'+(zh0?'离线核心区':'OFFLINE CORE')+'</b> '+(LIVE?(zh0?'地图服务器现在已经连上。':'The map server is reachable now. ')+'<button class="golive" data-golive>'+(zh0?'⟳ 切换到实时街区':'⟳ Switch to live streets')+'</button>':(zh0?'暂时连不上地图服务器（网络慢或断开，或页面安全策略阻止），只能显示预先打包的 1.3 km 核心区，城市之间是断开的。后台每隔一会儿重试一次，连上后会提示你切换。':'The map server is not reachable right now (slow or no network, or a page security policy), so only the packed 1.3 km core is shown and cities are separate. Retrying in the background; you will be prompted once it connects.'))+'<span class="hint">'+(zh0?'拖动平移 · 右键或 Shift+拖动旋转 · WASD/方向键移动 · Q/E 转向':'drag to pan · right-drag or Shift+drag to rotate · WASD/arrows move · Q/E turn')+'</span>';return;}var lv=L2.live;ll=ll||localToLL(L2.target.x,L2.target.z);
+function updateLiveHud(ll){var el=document.getElementById('liveInfo');if(!el)return;if(!L2.live){var zh0=LZ();el.innerHTML='<b style="color:var(--warn)">'+(zh0?'离线核心区':'OFFLINE CORE')+'</b> '+(LIVE?(zh0?'地图服务器现在已经连上。':'The map server is reachable now. ')+'<button class="golive" data-golive>'+(zh0?'⟳ 切换到实时街区':'⟳ Switch to live streets')+'</button>':(zh0?'暂时连不上地图服务器（网络慢或断开，或页面安全策略阻止），只能显示预先打包的 1.3 km 核心区，城市之间是断开的。后台每隔一会儿重试一次，连上后会提示你切换。':'The map server is not reachable right now (slow or no network, or a page security policy), so only the packed 1.3 km core is shown and cities are separate. Retrying in the background; you will be prompted once it connects.'))+'<span class="hint">'+(zh0?'拖动平移 · 右键或 Shift+拖动旋转 · WASD/方向键移动 · Q/E 转向':'drag to pan · right-drag or Shift+drag to rotate · WASD/arrows move · Q/E turn')+'</span>';return;}var lv=L2.live;ll=ll||localToLL(L2.target.x,L2.target.z);
  var ready=0,tot=0,rt=0,fl=0;for(var k in lv.tiles){tot++;var st=lv.tiles[k].state;if(st==='ready'||st==='empty')ready++;else if(st==='retry')rt++;else if(st==='failed')fl++;}
  // nearest named place (Natural Earth) to the current view
  var best=null,bd=1e9;if(NODES){var rows=NODES.rows;for(var i=0;i<rows.length;i++){var r=rows[i];var d=hav(ll.lat,ll.lon,r[5],r[6]);if(d<bd){bd=d;best=r;}}}
- var zh=lang==='zh';var place=best?((zh&&best[1]?best[1]:best[0])+' · '+(bd<1?(zh?'就在这里':'here'):bd.toFixed(1)+' km')):'';
- el.innerHTML='<b>'+(zh?'实时街区':'LIVE STREETS')+'</b> '+fmtLL(ll.lat,ll.lon)+' · '+(zh?'街区块 ':'tiles ')+ready+'/'+tot+(rt?'<span class="rt"> · '+(zh?'重试 ':'retry ')+rt+'</span>':'')+(fl?'<span class="fl"> · '+(zh?'失败 ':'failed ')+fl+'</span>':'')+(function(){var o=0;for(var q in lv.tiles)if(lv.tiles[q].ovt)o++;return o?'<span class="ov"> · '+(zh?'Overture 补全 ':'Overture fill ')+o+'</span>':'';})()+(function(){var mc=midCount();return mc[1]?'<span class="ov"> · '+(zh?'远景 ':'far ')+mc[0]+'/'+mc[1]+'</span>':'';})()+' <button class="ringb" data-ring>'+(LIVEP.ring===2?'5×5':'3×3')+'</button>'+(place?' · '+(zh?'最近地名 ':'nearest ')+esc(place):'')+
-  '<span class="hint">'+(zh?'拖动平移 · 右键或 Shift+拖动旋转 · WASD/方向键移动 · Q/E 转向':'drag to pan · right-drag or Shift+drag to rotate · WASD/arrows move · Q/E turn')+'</span>';}
+ var zh=LZ();var place=best?((zh&&best[1]?best[1]:best[0])+' · '+(bd<1?(I18T('here')):bd.toFixed(1)+' km')):'';
+ el.innerHTML='<b>'+(I18T('live_streets'))+'</b> '+fmtLL(ll.lat,ll.lon)+' · '+(I18T('tiles'))+ready+'/'+tot+(rt?'<span class="rt"> · '+(I18T('retry'))+rt+'</span>':'')+(fl?'<span class="fl"> · '+(I18T('failed'))+fl+'</span>':'')+(function(){var o=0;for(var q in lv.tiles)if(lv.tiles[q].ovt)o++;return o?'<span class="ov"> · '+(I18T('overture_fill'))+o+'</span>':'';})()+(function(){var mc=midCount();return mc[1]?'<span class="ov"> · '+(I18T('far'))+mc[0]+'/'+mc[1]+'</span>':'';})()+' <button class="ringb" data-ring>'+(LIVEP.ring===2?'5×5':'3×3')+'</button>'+(place?' · '+(I18T('nearest'))+esc(place):'')+
+  '<span class="hint">'+(I18T('drag_to_pan_right'))+'</span>';}
 // keyboard movement in live street mode
 var KEYS={};window.addEventListener('keydown',function(e){if(mode==='street'&&!/INPUT|TEXTAREA/.test((e.target||{}).tagName||'')){KEYS[e.key.toLowerCase()]=true;}});window.addEventListener('keyup',function(e){KEYS[e.key.toLowerCase()]=false;});
 function liveKeys(dt){if(!L2.group)return;var sp=L2.cam.d*.9*dt,az=L2.cam.az;var fx=-Math.cos(az),fz=-Math.sin(az),rx=Math.sin(az),rz=-Math.cos(az);var mx=0,mz=0;
@@ -1150,7 +1157,7 @@ function enterLive(c){TRV.on=false;
  var lv=L2.live,ck=lv.cx+','+lv.cy,T=lv.tiles[ck];
  return new Promise(function(res){var done=false;function fin(){if(!done){done=true;res();}}
   if(T)T.onReady=fin;setTimeout(fin,9000);
-  var iv=setInterval(function(){if(done||!L2.live){clearInterval(iv);return;}var n=0,r=0;for(var k in lv.tiles){n++;if(lv.tiles[k].state==='ready')r++;}fadeT.textContent=base+' · '+(lang==='zh'?'实时加载 ':'streaming ')+r+'/'+n;},200);})
+  var iv=setInterval(function(){if(done||!L2.live){clearInterval(iv);return;}var n=0,r=0;for(var k in lv.tiles){n++;if(lv.tiles[k].state==='ready')r++;}fadeT.textContent=base+' · '+(I18T('streaming'))+r+'/'+n;},200);})
   .then(function(){return (renderer.compileAsync?renderer.compileAsync(streetScene,camera):Promise.resolve()).catch(function(){});});}
 
 // ====================================================================
@@ -1490,58 +1497,58 @@ function dirFromAzEl(az,el){var a=az*D2R,e=el*D2R;return new T3.Vector3(Math.sin
 var TMPC=new T3.Color(),TMPC2=new T3.Color(),CYBERHEMI=new T3.Color(0x8fb2ff),CYBERBG=new T3.Color(0x050b16);
 
 // ---- environmental security posture (generic teaching reference; condition-based, never building-specific) ----
-function envSecurity(){var c=ENV.cur,zh=lang==='zh',lux=ENV.lux,items=[];if(!c)return items;
+function envSecurity(){var c=ENV.cur,zh=LZ(),lux=ENV.lux,items=[];if(!c)return items;
  function add(k,lv,val,note){items.push({k:k,lv:lv,val:val,note:note});}
- var cctv=lux>=50?(zh?'彩色成像':'colour imaging'):lux>=1?(zh?'低照度彩色/黑白切换':'low-light colour→mono'):(zh?'红外夜视（黑白）':'IR night mode (mono)');
+ var cctv=lux>=50?(I18T('colour_imaging')):lux>=1?(I18T('low_light_colour_mono')):(I18T('ir_night_mode_mono'));
  var lvI=lux>=1000?(ENV.gold>.3?1:0):lux>=50?1:lux>=1?2:3;
- add(zh?'照度':'Illumination',lvI,(lux>=1000?Math.round(lux/1000)+'k':lux>=10?Math.round(lux):lux.toFixed(lux<.1?3:1))+' lux · '+cctv,
-  lvI===0?(zh?'自然光充足，监控彩色成像，人脸/车牌识别条件最好。':'Ample daylight: colour CCTV, best conditions for face/plate recognition.'):
-  lvI===1&&lux>=1000?(zh?'低太阳角：镜头逆光与眩光，朝东/朝西的摄像机易过曝，阴影区细节丢失。':'Low sun: backlight and glare blow out east/west-facing cameras; detail lost in long shadows.'):
-  lvI===1?(zh?'黄昏/阴暗：画面噪点增加，路灯已陆续亮起，照明盲区开始显现。':'Dusk/gloom: image noise rises, street lights switching on, unlit gaps start to matter.'):
-  lvI===2?(zh?'夜间靠路灯照明：摄像机在彩色和黑白之间切换，路灯照不到的地方就是监控盲区。':'Lit night: cameras switch colour/mono; anything outside lamp pools is a blind spot.'):
-  (zh?'低于 1 lux：多数摄像机进入红外黑白模式，人脸识别率明显下降，要靠补光灯和热成像。':'Below 1 lux: most cameras fall back to IR mono; recognition drops sharply — rely on illuminators and thermal.'));
+ add(I18T('illumination'),lvI,(lux>=1000?Math.round(lux/1000)+'k':lux>=10?Math.round(lux):lux.toFixed(lux<.1?3:1))+' lux · '+cctv,
+  lvI===0?(I18T('ample_daylight_colour_cctv')):
+  lvI===1&&lux>=1000?(I18T('low_sun_backlight_and')):
+  lvI===1?(I18T('dusk_gloom_image_noise')):
+  lvI===2?(I18T('lit_night_cameras_switch')):
+  (I18T('below_1_lux_most')));
  var v=c.vis,lvV=v>=10000?0:v>=4000?1:v>=1000?2:v>=200?3:4;
- add(zh?'能见度':'Visibility',lvV,(v>=1000?(v/1000).toFixed(v>=10000?0:1)+' km':Math.round(v)+' m'),
-  lvV===0?(zh?'通视良好，周界视频分析和远距离识别正常。':'Clear line of sight; perimeter video analytics and long-range ID nominal.'):
-  lvV<=2?(zh?'雾、霾或降水降低了有效识别距离：远处目标会被漏检，视频分析误报增加。':'Haze/precipitation shortens effective ID range: far targets missed, analytics false alarms rise.'):
-  (zh?'浓雾：可见光监控几乎失效，周界要靠雷达、震动光纤、热成像等不依赖可见光的手段。':'Dense fog: visible-light CCTV nearly blind — perimeter relies on radar, fibre and thermal sensing.'));
+ add(I18T('visibility'),lvV,(v>=1000?(v/1000).toFixed(v>=10000?0:1)+' km':Math.round(v)+' m'),
+  lvV===0?(I18T('clear_line_of_sight')):
+  lvV<=2?(I18T('haze_precipitation_shortens_effective')):
+  (I18T('dense_fog_visible_light')));
  var w=c.wind,g=c.gust||w,lvW=g<8?0:g<11?1:g<15?2:g<20?3:4;
- add(zh?'风':'Wind',lvW,w.toFixed(1)+' m/s'+(g>w+1?(zh?' · 阵风 ':' · gust ')+g.toFixed(0):'')+' · '+(zh?'无人机巡检':'drone patrol')+' '+(g<8?(zh?'适宜':'OK'):g<12?(zh?'受限':'limited'):(zh?'不宜起飞':'grounded')),
-  lvW===0?(zh?'适合无人机巡检；同样也适合外来小型无人机，反无人机系统应保持值守。':'Good for drone patrol — and for hostile small UAVs too; keep counter-UAS on watch.'):
-  lvW<=2?(zh?'阵风接近消费级无人机的抗风上限（约 10–12 m/s）；户外摄像机抖动会让画面模糊。':'Gusts near consumer-drone limits (~10–12 m/s); outdoor cameras shake and blur.'):
-  (zh?'强风：无人机停飞；临时围挡、广告牌、外墙设备有倒塌和坠落风险，户外线缆需加固。':'Strong wind: drones grounded; hoardings, signage and façade kit at risk; secure outdoor cabling.'));
- var pr=Math.max(c.rain,c.snow),lvP=pr<.05?0:pr<.3?1:pr<.65?2:3,ptype=c.snow>c.rain?(zh?'降雪':'snow'):(zh?'降雨':'rain');
- add(zh?'降水':'Precipitation',lvP,pr<.05?(zh?'无':'none'):ptype+' '+Math.round(pr*100)+'%',
-  lvP===0?(zh?'无降水。':'Dry.'):c.snow>c.rain?(zh?'积雪会遮挡镜头和路面标线，低温让电池掉电更快；红外/微波探测器误报会增加。':'Snow obscures lenses and markings; cold drains batteries; PIR/microwave false alarms increase.'):
-  (zh?'降雨让户外红外/微波探测器误报增加，激光雷达和热成像性能下降；地下室、配电间和机房要防水、防倒灌。':'Rain raises PIR/microwave false alarms and degrades lidar/thermal; protect basements, switch rooms and data rooms from water ingress.'));
- add(zh?'雷电':'Lightning',c.thunder>.5?4:0,c.thunder>.5?(zh?'雷暴活动':'thunderstorm'):(zh?'无':'none'),
-  c.thunder>.5?(zh?'雷击浪涌可能损坏供电、网络和监控前端：检查浪涌保护器和接地，暂停户外与高空作业，关注 UPS 状态。':'Surges can kill power, network and camera front-ends: verify SPDs and earthing, stop outdoor/height work, watch UPS state.'):(zh?'无雷暴风险。':'No storm risk.'));
+ add(I18T('wind'),lvW,w.toFixed(1)+' m/s'+(g>w+1?(I18T('gust'))+g.toFixed(0):'')+' · '+(I18T('drone_patrol'))+' '+(g<8?(I18T('ok')):g<12?(I18T('limited')):(I18T('grounded'))),
+  lvW===0?(I18T('good_for_drone_patrol')):
+  lvW<=2?(I18T('gusts_near_consumer_drone')):
+  (I18T('strong_wind_drones_grounded')));
+ var pr=Math.max(c.rain,c.snow),lvP=pr<.05?0:pr<.3?1:pr<.65?2:3,ptype=c.snow>c.rain?(I18T('snow')):(I18T('rain'));
+ add(I18T('precipitation'),lvP,pr<.05?(I18T('none')):ptype+' '+Math.round(pr*100)+'%',
+  lvP===0?(I18T('dry')):c.snow>c.rain?(I18T('snow_obscures_lenses_and')):
+  (I18T('rain_raises_pir_microwave')));
+ add(I18T('lightning'),c.thunder>.5?4:0,c.thunder>.5?(I18T('thunderstorm')):(I18T('none')),
+  c.thunder>.5?(I18T('surges_can_kill_power')):(I18T('no_storm_risk')));
  var tp=c.temp!=null?c.temp:15,lvT=tp>=38||tp<=-10?3:tp>=33||tp<=0?2:tp>=28?1:0;
- add(zh?'温度':'Temperature',lvT,tp.toFixed(0)+' °C · '+(zh?'湿度 ':'RH ')+Math.round(c.hum||0)+'%',
-  tp>=28?(zh?'高温：机房制冷负荷和电网峰值上升，UPS 电池老化加快；户外设备注意散热。':'Heat: data-room cooling load and grid peak rise; UPS batteries age faster; mind outdoor enclosure cooling.'):
-  tp<=0?(zh?'低温：电池容量下降，镜头结霜或结冰，门禁机械件可能卡滞。':'Cold: battery capacity drops; lenses frost/ice; access-control mechanics can stick.'):(zh?'温度在设备正常工作范围内。':'Within normal equipment range.'));
+ add(I18T('temperature'),lvT,tp.toFixed(0)+' °C · '+(I18T('rh'))+Math.round(c.hum||0)+'%',
+  tp>=28?(I18T('heat_data_room_cooling')):
+  tp<=0?(I18T('cold_battery_capacity_drops')):(I18T('within_normal_equipment_range')));
  var lh=localHour(envNow()),lvH=lh<5?2:(lh>=7&&lh<9.5)||(lh>=17&&lh<19.5)?2:lh>=22?1:0;
- add(zh?'时段':'Time window',lvH,fmtHM(envNow())+(zh?' 当地':' local'),
-  lh<5?(zh?'深夜：值守人员最少，响应最慢，异常登录和物理闯入更不容易被及时发现。':'Small hours: thinnest staffing, slowest response — anomalous logins and intrusions are least likely to be noticed.'):
-  lvH===2?(zh?'通勤高峰：人流和车流密集，注意人群安全、交通疏导和尾随进门。':'Rush hour: dense crowds and traffic — crowd safety, traffic flow, tailgating at entrances.'):
-  lh>=22?(zh?'夜间轮班交接：交接班前后容易出现盲区。':'Night shift handover: gaps appear around handovers.'):(zh?'常规工作时段。':'Regular working hours.'));
+ add(I18T('time_window'),lvH,fmtHM(envNow())+(I18T('local')),
+  lh<5?(I18T('small_hours_thinnest_staffing')):
+  lvH===2?(I18T('rush_hour_dense_crowds')):
+  lh>=22?(I18T('night_shift_handover_gaps')):(I18T('regular_working_hours')));
  return items;}
-function envSecHTML(){var it=envSecurity();if(!it.length)return '';var zh=lang==='zh';var mx=0,sum=0;it.forEach(function(x){mx=Math.max(mx,x.lv);sum+=x.lv;});var overall=Math.min(4,Math.round(Math.max(mx*.7,sum/it.length*1.6)));
- var rs=ENV.riseSet||{},m=ENV.moon;var phaseN=zh?(m.illum<.05?'新月':m.illum>.95?'满月':m.waxing?(m.illum<.5?'蛾眉月':'盈凸月'):(m.illum<.5?'残月':'亏凸月')):(m.illum<.05?'New moon':m.illum>.95?'Full moon':m.waxing?(m.illum<.5?'Waxing crescent':'Waxing gibbous'):(m.illum<.5?'Waning crescent':'Waning gibbous'));
- var src=ENV.wxMode!=='live'?(zh?'手动设定的天气':'manual weather preset'):ENV.wxLive?(zh?'Open-Meteo 实况 ':'Open-Meteo live ')+(ENV.wxLive.time||'').replace('T',' '):ENV.wxErr?(zh?'连不上气象服务，正在用预设天气（部署版会自动接入实况）':'weather service unreachable — preset in use (the deployed site goes live)'):(zh?'正在获取实况…':'fetching live weather…');
- var h='<h3>'+(zh?'环境安全态势':'Environmental security posture')+'</h3><div class="envsum"><div class="ladder sm">';for(var i=0;i<5;i++)h+='<div class="'+(i===overall?'on':'')+'" style="background:'+lvColor(i)+'"></div>';
- h+='</div><span>'+(zh?'综合环境风险 ':'Overall ')+'<b style="color:'+lvColor(overall)+'">'+(zh?['低','较低','中','高','严重']:['Low','Guarded','Elevated','High','Severe'])[overall]+'</b></span></div>';
- h+='<div class="envastro"><span>☀ '+(zh?'日出 ':'rise ')+fmtHM(rs.rise)+' · '+(zh?'日落 ':'set ')+fmtHM(rs.set)+' · '+(zh?'太阳高度 ':'sun ')+ENV.sun.el.toFixed(1)+'°</span><span>☾ '+phaseN+' '+Math.round(m.illum*100)+'% · '+(zh?'月亮高度 ':'moon ')+m.el.toFixed(0)+'°</span></div>';
+function envSecHTML(){var it=envSecurity();if(!it.length)return '';var zh=LZ();var mx=0,sum=0;it.forEach(function(x){mx=Math.max(mx,x.lv);sum+=x.lv;});var overall=Math.min(4,Math.round(Math.max(mx*.7,sum/it.length*1.6)));
+ var rs=ENV.riseSet||{},m=ENV.moon;var phaseN=I18P(m.illum<.05?'新月':m.illum>.95?'满月':m.waxing?(m.illum<.5?'蛾眉月':'盈凸月'):(m.illum<.5?'残月':'亏凸月'),m.illum<.05?'New moon':m.illum>.95?'Full moon':m.waxing?(m.illum<.5?'Waxing crescent':'Waxing gibbous'):(m.illum<.5?'Waning crescent':'Waning gibbous'));
+ var src=ENV.wxMode!=='live'?(I18T('manual_weather_preset')):ENV.wxLive?(I18T('open_meteo_live'))+(ENV.wxLive.time||'').replace('T',' '):ENV.wxErr?(I18T('weather_service_unreachable_preset')):(I18T('fetching_live_weather'));
+ var h='<h3>'+(I18T('environmental_security_posture'))+'</h3><div class="envsum"><div class="ladder sm">';for(var i=0;i<5;i++)h+='<div class="'+(i===overall?'on':'')+'" style="background:'+lvColor(i)+'"></div>';
+ h+='</div><span>'+(I18T('overall'))+'<b style="color:'+lvColor(overall)+'">'+(I18P(['低','较低','中','高','严重'],['Low','Guarded','Elevated','High','Severe']))[overall]+'</b></span></div>';
+ h+='<div class="envastro"><span>☀ '+(I18T('rise'))+fmtHM(rs.rise)+' · '+(I18T('set'))+fmtHM(rs.set)+' · '+(I18T('sun'))+ENV.sun.el.toFixed(1)+'°</span><span>☾ '+phaseN+' '+Math.round(m.illum*100)+'% · '+(I18T('moon'))+m.el.toFixed(0)+'°</span></div>';
  h+='<div class="envlist">'+it.map(function(x){return '<div class="envit"><i style="background:'+lvColor(x.lv)+'"></i><div><div class="et"><b>'+esc(x.k)+'</b><span>'+esc(x.val)+'</span></div><p>'+esc(x.note)+'</p></div></div>';}).join('')+'</div>';
- h+='<div class="envsrc">'+esc(src)+' · '+(zh?'太阳和月亮位置按本地经纬度和时间计算 · 以上是针对环境条件的通用教学参考，不评估任何具体建筑':'sun & moon computed for this location and time · generic teaching reference about conditions, not an assessment of any specific building')+'</div>';
+ h+='<div class="envsrc">'+esc(src)+' · '+(I18T('sun_moon_computed_for'))+'</div>';
  return h;}
-function envUI(force){if(!ENV.on||mode!=='street'&&!force)return;var zh=lang==='zh',c=ENV.cur||{};var ms=envNow();
- var ck=document.getElementById('envClock');if(ck){var d=new Date(ms+utcOff()*1000);ck.textContent=d.getUTCFullYear()+'-'+('0'+(d.getUTCMonth()+1)).slice(-2)+'-'+('0'+d.getUTCDate()).slice(-2)+' '+fmtHM(ms)+' '+(ENV.tz!=null?(ENV.tzName||('UTC'+(ENV.tz>=0?'+':'')+(ENV.tz/3600))):(zh?'太阳时':'solar'));}
- var wx=document.getElementById('envWx');if(wx&&ENV.tgt){var code=ENV.tgt.code;wx.textContent=(WXN[lang][code]||WXN[lang][Math.floor(code/10)*10]||'—')+' · '+(c.temp!=null?c.temp.toFixed(0):'—')+'°C · '+(zh?'风 ':'wind ')+(c.wind!=null?c.wind.toFixed(1):'—')+' m/s';}
- var ws=document.getElementById('envWs');if(ws){var t;if(ENV.wxMode!=='live'){t=zh?'手动天气：已停止跟随实况，点「实况」恢复':'Manual weather — live tracking paused; press Live wx to resume';ws.className='ws man';}
-  else if(ENV.wxLive){var ag=Math.max(0,Math.round((Date.now()-ENV.wxAt)/60000)),nx=Math.max(0,5-ag);t=(zh?'实况跟随中 · Open-Meteo · ':'Tracking live · Open-Meteo · ')+(zh?'更新于 ':'updated ')+(ag?ag+(zh?' 分钟前':' min ago'):(zh?'刚刚':'just now'))+(zh?' · 约 '+nx+' 分钟后自动刷新':' · auto-refresh in ~'+nx+' min')+(ENV.wxErr?(zh?'（上次刷新失败，沿用旧数据）':' (last refresh failed; keeping data)'):'');ws.className='ws live';var wl=windLine(zh);if(wl)t+='\n'+wl;}
-  else if(ENV.wxBusy){t=zh?'正在获取当地实况…':'Fetching local conditions…';ws.className='ws';}
-  else{t=zh?'连不上气象服务（这个页面的安全策略所限），暂用预设天气；部署后自动跟随实况':'Weather service unreachable here (page security policy) — preset in use; the deployed site tracks live';ws.className='ws off';}ws.textContent=t;}
+function envUI(force){if(!ENV.on||mode!=='street'&&!force)return;var zh=LZ(),c=ENV.cur||{};var ms=envNow();
+ var ck=document.getElementById('envClock');if(ck){var d=new Date(ms+utcOff()*1000);ck.textContent=d.getUTCFullYear()+'-'+('0'+(d.getUTCMonth()+1)).slice(-2)+'-'+('0'+d.getUTCDate()).slice(-2)+' '+fmtHM(ms)+' '+(ENV.tz!=null?(ENV.tzName||('UTC'+(ENV.tz>=0?'+':'')+(ENV.tz/3600))):(I18T('solar')));}
+ var wx=document.getElementById('envWx');if(wx&&ENV.tgt){var code=ENV.tgt.code;wx.textContent=(LX(WXN)[code]||LX(WXN)[Math.floor(code/10)*10]||'—')+' · '+(c.temp!=null?c.temp.toFixed(0):'—')+'°C · '+(I18T('wind_2'))+(c.wind!=null?c.wind.toFixed(1):'—')+' m/s';}
+ var ws=document.getElementById('envWs');if(ws){var t;if(ENV.wxMode!=='live'){t=I18T('manual_weather_live_tracking');ws.className='ws man';}
+  else if(ENV.wxLive){var ag=Math.max(0,Math.round((Date.now()-ENV.wxAt)/60000)),nx=Math.max(0,5-ag);t=(I18T('tracking_live_open_meteo'))+(I18T('updated'))+(ag?ag+(I18T('min_ago')):(I18T('just_now')))+(I18P(' · 约 '+nx+' 分钟后自动刷新',' · auto-refresh in ~'+nx+' min'))+(ENV.wxErr?(I18T('last_refresh_failed_keeping')):'');ws.className='ws live';var wl=windLine(zh);if(wl)t+='\n'+wl;}
+  else if(ENV.wxBusy){t=I18T('fetching_local_conditions');ws.className='ws';}
+  else{t=I18T('weather_service_unreachable_here');ws.className='ws off';}ws.textContent=t;}
  var hr=document.getElementById('eHour');if(hr&&document.activeElement!==hr)hr.value=localHour(ms).toFixed(2);
  var el=document.getElementById('eLive');if(el)el.setAttribute('aria-pressed',ENV.timeMode==='live');var lp=document.getElementById('eLapse');if(lp)lp.setAttribute('aria-pressed',!!ENV.lapse);
  document.querySelectorAll('#eWx button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.wx===ENV.wxMode);});
@@ -1639,13 +1646,13 @@ function computeAhead(ll,hdg){if(!NODES)return;var rows=NODES.rows,near=null,nd=
  NAV.border=bc?{name:bc.r[3],iso:bc.r[4],lat:bc.r[5],lon:bc.r[6],d:bc.d,rel:bc.rel,via:bc.r[0]}:null;
  NAV.radar=cand.filter(function(c){return c.d<220;}).slice(0,160);}
 function fmtKm(d){return d<1?Math.round(d*1000)+' m':d<10?d.toFixed(1)+' km':Math.round(d)+' km';}
-function stepAhead(now,ll,hdg){var el=document.getElementById('aheadList'),rd=document.getElementById('rdDots');if(!el)return;var zh=lang==='zh';
+function stepAhead(now,ll,hdg){var el=document.getElementById('aheadList'),rd=document.getElementById('rdDots');if(!el)return;var zh=LZ();
  if(now-NAV.radarAt>320){NAV.radarAt=now;computeAhead(ll,hdg);var z2=iso2zh();
   var h='';NAV.ahead.forEach(function(a,i){h+='<div data-i="'+i+'" class="ah'+(TRV.on&&TRV.dest&&TRV.dest.name===a.name?' going':'')+(i===0?' first':'')+(a.closing?' closing':'')+'"><i style="transform:rotate('+a.rel.toFixed(0)+'deg)">▲</i><span class="nm">'+esc(zh&&a.zh?a.zh:a.name)+'<em>'+esc((zh&&z2[a.iso]?z2[a.iso]:a.ctry)||'')+'</em></span><b>'+fmtKm(a.d)+'</b></div>';});
-  if(!NAV.ahead.length)h='<div class="ah none">'+(zh?'前方 400 km 内没有已登记的城镇':'No listed places within 400 km ahead')+'</div>';
-  var B=NAV.border;if(B)h+='<div data-i="b" class="ah border"><i style="transform:rotate('+B.rel.toFixed(0)+'deg)">▲</i><span class="nm">'+(zh?'邻国 ':'Border ')+esc(zh&&z2[B.iso]?z2[B.iso]:B.name)+'<em>'+esc(zh?'经 ':'via ')+esc(B.via)+'</em></span><b>'+fmtKm(B.d)+'</b></div>';
+  if(!NAV.ahead.length)h='<div class="ah none">'+(I18T('no_listed_places_within'))+'</div>';
+  var B=NAV.border;if(B)h+='<div data-i="b" class="ah border"><i style="transform:rotate('+B.rel.toFixed(0)+'deg)">▲</i><span class="nm">'+(I18T('border'))+esc(zh&&z2[B.iso]?z2[B.iso]:B.name)+'<em>'+esc(I18T('via'))+esc(B.via)+'</em></span><b>'+fmtKm(B.d)+'</b></div>';
   var here=NAV.here&&NAV.here.r?(zh&&NAV.here.r[1]?NAV.here.r[1]:NAV.here.r[0])+' · '+(zh&&z2[NAV.here.iso]?z2[NAV.here.iso]:NAV.here.r[3]):'';
-  document.getElementById('aheadHere').textContent=(zh?'位于 ':'Near ')+here;el.innerHTML=h;wireAhead();trvUI();
+  document.getElementById('aheadHere').textContent=(I18T('near'))+here;el.innerHTML=h;wireAhead();trvUI();
   // radar dots (heading-up, log range rings 10/50/200 km)
   var s='';function rr(d){return 52*Math.log(1+d/10)/Math.log(1+220/10);}(NAV.radar||[]).forEach(function(c){var r=rr(c.d),a=c.rel*D2R,x=60+Math.sin(a)*r,y=60-Math.cos(a)*r;var hot=NAV.ahead.length&&c.r[0]===NAV.ahead[0].name;var foreign=NAV.here&&c.r[4]!==NAV.here.iso;
    s+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(hot?3.2:1.7)+'" fill="'+(hot?'#ffd24a':foreign?'#ff8a3d':'#58e0c8')+'" fill-opacity="'+(Math.abs(c.rel)<=40?1:.45)+'"/>';});rd.innerHTML=s;}
@@ -1671,7 +1678,7 @@ var LIVEP={tries:0,timer:null,ring:1};
 try{LIVEP.ring=localStorage.getItem('se.ring')==='2'?2:1;}catch(e){}
 function reprobe(){if(LIVE||/nolive/.test(location.hash))return;clearTimeout(LIVEP.timer);
  LIVEP.timer=setTimeout(function(){LIVEP.tries++;probeLive().then(function(ok){if(ok)onLiveUp();else reprobe();});},Math.min(60000,6000*Math.pow(1.6,LIVEP.tries)));}
-function onLiveUp(){ovtInit();toast(lang==='zh'?'地图服务器已连接 · 实时街区可用':'Map server reachable · live streets available');
+function onLiveUp(){ovtInit();toast(I18T('map_server_reachable_live'));
  if(mode==='street'&&L2.active&&!L2.live)updateLiveHud();if(COV.panelOpen)renderCoverage();}
 // fetchTile: see PERFORMANCE PIPELINE (cache + prefetch)
 function liveRetryPass(lv,now){var n=0;for(var k in lv.tiles){var T=lv.tiles[k];if(T.state==='retry'&&now>=T.retryAt){T.state='queued';T.fetch=fetchTile(T.x,T.y);lv.queue.push(k);n++;}}if(n)livePump();}
@@ -1689,12 +1696,12 @@ function nearestCity(lat,lon,maxKm){var best=null,bd=maxKm||1e9;CITIES.forEach(f
 function azForBearing(bDeg){var b=bDeg*D2R,az=Math.atan2(Math.cos(b),-Math.sin(b));while(az-L2.cam.az>Math.PI)az-=2*Math.PI;while(az-L2.cam.az<-Math.PI)az+=2*Math.PI;return az;}
 function travelTo(dest){if(!L2.active)return;
  if(!L2.live){var c=nearestCity(dest.lat,dest.lon,60);
-  if(c){toast((lang==='zh'?'离线模式：直接跳到 ':'Offline: jumping to ')+cityName(c));enterCity(c.id);}
-  else toast(lang==='zh'?'离线模式下这个地点没有打包街区，连上地图服务器后可以一路飞过去':'No offline core here; once the map server is reachable you can fly there');return;}
+  if(c){toast((I18T('offline_jumping_to'))+cityName(c));enterCity(c.id);}
+  else toast(I18T('no_offline_core_here'));return;}
  var lv=L2.live,x=(dest.lon-lv.lon0)*lv.mLon,z=(dest.lat-lv.lat0)*lv.mLat,dx=x-L2.target.x,dz=z-L2.target.z,dist=Math.hypot(dx,dz);if(dist<30)return;
  var ll=viewLL();TRV.on=true;TRV.dest=dest;TRV.x=x;TRV.z=z;TRV.total=dist;TRV.v=0;TRV.t0=performance.now();
  L2.camWant.az=azForBearing(bearingTo(ll.lat,ll.lon,dest.lat,dest.lon));L2.camWant.el=0.5;L2.camWant.d=Math.min(2300,950+dist/120);if(SKYV.on){L2.camWant.el=SKYV.el;L2.camWant.d=Math.min(9000,Math.max(L2.camWant.d,3500+dist/60));}
- toast((lang==='zh'?'巡航前往 ':'Travelling to ')+(lang==='zh'&&dest.zh?dest.zh:dest.name)+' · '+fmtKm(dist/1000));trvUI(true);}
+ toast((I18T('travelling_to'))+(LZ()&&dest.zh?dest.zh:dest.name)+' · '+fmtKm(dist/1000));trvUI(true);}
 function travelStop(arrived){if(!TRV.on)return;TRV.on=false;if(!SKYV.on){L2.camWant.d=Math.max(700,Math.min(L2.camWant.d,1100));L2.camWant.el=0.62;}trvUI(true);
  if(arrived)arriveAt(TRV.dest);}
 function travelStep(dt){if(!L2.live){if(TRV.on)TRV.on=false;return;}
@@ -1723,18 +1730,18 @@ function liveRebase(ll){var lv=L2.live;if(!lv)return;midClear();farClear();var o
 function arriveAt(dest){liveRebase({lat:dest.lat,lon:dest.lon});
  var c=nearestCity(dest.lat,dest.lon,25);
  if(!c){var z2=iso2zh();c={id:'pt_'+Math.round(dest.lat*1e3)+'_'+Math.round(dest.lon*1e3),en:dest.name,zh:dest.zh||'',iso:dest.iso||'',czh:z2[dest.iso]||'',country:dest.ctry||'',lat:dest.lat,lon:dest.lon};}
- L2.city=c;setCrumb();toast((lang==='zh'?'已抵达 ':'Arrived · ')+cityName(c));
+ L2.city=c;setCrumb();toast((I18T('arrived'))+cityName(c));
  setTimeout(function(){if(L2.active&&L2.city===c&&(state.type==='cityIntro'||state.type==='intro'))renderCityIntro(c,{b:L2.picks||[],rd:{length:L2._rd||0}});},2600);}
 function trvUI(force){var box=document.getElementById('aheadTrv');if(!box){var ah=document.getElementById('ahead');if(!ah)return;box=document.createElement('div');box.id='aheadTrv';ah.appendChild(box);
   box.addEventListener('pointerdown',function(e){var b=e.target.closest('[data-sp]');if(b){TRV.speed=+b.getAttribute('data-sp');try{localStorage.setItem('se.trvSpeed',String(TRV.speed));}catch(_){}trvUI(true);e.stopPropagation();return;}
    if(e.target.closest('[data-stop]')){travelStop(false);e.stopPropagation();}});}
- var zh=lang==='zh',sp='<span class="sp">'+TRV_SPEEDS.map(function(s,i){return '<button data-sp="'+i+'" class="'+(i===TRV.speed?'on':'')+'">'+(zh?s.zh:s.en)+'</button>';}).join('')+'</span>';
+ var zh=LZ(),sp='<span class="sp">'+TRV_SPEEDS.map(function(s,i){return '<button data-sp="'+i+'" class="'+(i===TRV.speed?'on':'')+'">'+(I18P(s.zh,s.en))+'</button>';}).join('')+'</span>';
  if(TRV.on&&TRV.dest&&isFinite(TRV.x)){var rem=Math.hypot(TRV.x-L2.target.x,TRV.z-L2.target.z)/1000;
   box.innerHTML='<div class="tr go"><span>▶ '+esc(zh&&TRV.dest.zh?TRV.dest.zh:TRV.dest.name)+'</span><b>'+fmtKm(rem)+'</b><em>'+Math.round(TRV.v*3.6)+' km/h</em>'+sp+'<button data-stop>■</button></div>';}
- else box.innerHTML=(typeof DRV!=='undefined'&&DRV.on)?'<div class="tr"><span>'+(DRV.fly?(zh?'点城市名，飞行模式直飞过去':'Click a place to fly straight there'):(zh?'点城市名，按真实路线开过去':'Click a place to drive there on real roads'))+'</span></div>':'<div class="tr"><span>'+(L2.live?(zh?'点上面的城市名，沿地面一路飞过去':'Click a place above to fly there over the ground'):(zh?'离线模式：点城市名直接跳过去':'Offline: click a place to jump there'))+'</span>'+(L2.live?sp:'')+'</div>';}
+ else box.innerHTML=(typeof DRV!=='undefined'&&DRV.on)?'<div class="tr"><span>'+(DRV.fly?(I18T('click_a_place_to')):(I18T('click_a_place_to_2')))+'</span></div>':'<div class="tr"><span>'+(L2.live?(I18T('click_a_place_above')):(I18T('offline_click_a_place')))+'</span>'+(L2.live?sp:'')+'</div>';}
 function wireAhead(){var el=document.getElementById('aheadList');if(!el||el._wired)return;el._wired=1;
  el.addEventListener('pointerdown',function(e){var r=e.target.closest('[data-i]');if(!r)return;e.stopPropagation();var i=r.getAttribute('data-i'),a=i==='b'?NAV.border:NAV.ahead[+i];if(!a)return;
-  if(DRV.on){drvSetDest({lat:a.lat,lon:a.lon,n:i==='b'?a.via:(lang==='zh'&&a.zh?a.zh:a.name)});return;}
+  if(DRV.on){drvSetDest({lat:a.lat,lon:a.lon,n:i==='b'?a.via:(LZ()&&a.zh?a.zh:a.name)});return;}
   travelTo(i==='b'?{lat:a.lat,lon:a.lon,name:a.via,zh:'',iso:a.iso,ctry:a.name}:{lat:a.lat,lon:a.lon,name:a.name,zh:a.zh,iso:a.iso,ctry:a.ctry});});}
 
 // ---- coverage: grade every city's street data, deep-scan the weak ones ----
@@ -1744,16 +1751,16 @@ var GRADES={A:{zh:'完整',en:'Complete',c:'#3ee0a0'},B:{zh:'良好',en:'Good',c
 function gradeOf(d){return d==null?'?':d>=900?'A':d>=240?'B':d>=30?'C':'D';}
 function tileKm2(lat){var s=40075.016*Math.cos(lat*D2R)/TN;return s*s;}
 function covCentre(c){var r=COV.re[c.id];return r?{lat:r.lat,lon:r.lon}:c.clat!=null?{lat:c.clat,lon:c.clon}:{lat:c.lat,lon:c.lon};}
-function covInfo(c){var dp=COV.deep[c.id],off=(c.nd!=null||c.od!=null)?Math.max(c.nd||0,c.od||0):null,d=dp?Math.max(dp.cd,off||0):off,g=gradeOf(d),zh=lang==='zh',diag='',sug=null;
+function covInfo(c){var dp=COV.deep[c.id],off=(c.nd!=null||c.od!=null)?Math.max(c.nd||0,c.od||0):null,d=dp?Math.max(dp.cd,off||0):off,g=gradeOf(d),zh=LZ(),diag='',sug=null;
  if(dp&&dp.bd>=240&&dp.bd>=2*Math.max(dp.cd,30)&&dp.bk>0.7)sug={lat:dp.bl[0],lon:dp.bl[1],km:dp.bk,d:dp.bd};
  if(g==='C'||g==='D'||g==='?'){
-  if(COV.re[c.id])diag=zh?'已采用新中心点（实时模式生效）':'Re-centred (applies in live mode)';
-  else if(sug)diag=(zh?'中心点偏了：':'Centre is off: ')+fmtKm(sug.km)+(zh?' 外有 '+sug.d+' 栋/km² 的街区，建议移过去':' away there are '+sug.d+' bldg/km² — move it there');
-  else if(dp&&dp.td<30&&dp.rd>=150)diag=zh?'周边道路已测绘，但几乎没有建筑轮廓：OSM 缺建筑数据':'Roads mapped around it but almost no buildings: OSM lacks footprints';
-  else if(dp&&dp.td<30)diag=zh?'周边 6 km 内道路和建筑都很少：当地地图数据稀缺，或本身是小镇':'Few roads and buildings within 6 km: sparse map data, or a small town';
-  else if(dp)diag=zh?'周边有一定数据，中心核心区偏稀':'Some data around, thin core';
-  else if((c.r||0)>=60)diag=zh?'核心区道路 '+c.r+' 条但建筑少：可能缺建筑轮廓（建议深度扫描）':c.r+' roads in core but few buildings: footprints likely missing (deep-scan it)';
-  else diag=zh?'核心区道路和建筑都少：坐标可能偏离城区（建议深度扫描）':'Few roads and buildings in core: coordinate may be off (deep-scan it)';}
+  if(COV.re[c.id])diag=I18T('re_centred_applies_in');
+  else if(sug)diag=(I18T('centre_is_off'))+fmtKm(sug.km)+(I18P(' 外有 '+sug.d+' 栋/km² 的街区，建议移过去',' away there are '+sug.d+' bldg/km² — move it there'));
+  else if(dp&&dp.td<30&&dp.rd>=150)diag=I18T('roads_mapped_around_it');
+  else if(dp&&dp.td<30)diag=I18T('few_roads_and_buildings');
+  else if(dp)diag=I18T('some_data_around_thin');
+  else if((c.r||0)>=60)diag=I18P('核心区道路 '+c.r+' 条但建筑少：可能缺建筑轮廓（建议深度扫描）',c.r+' roads in core but few buildings: footprints likely missing (deep-scan it)');
+  else diag=I18T('few_roads_and_buildings_2');}
  return {g:g,d:d,off:off,dp:dp,diag:diag,sug:sug};}
 function covSave(){try{localStorage.setItem('se.covDeep',JSON.stringify(COV.deep));localStorage.setItem('se.recentre',JSON.stringify(COV.re));}catch(e){}}
 function buildCovPts(){if(COV.pts){world.remove(COV.pts);COV.pts.geometry.dispose();}
@@ -1779,38 +1786,38 @@ function deepScan(c){var lat=c.lat,lon=c.lon,cx=Math.floor(tlx(lon)),cy=Math.flo
   return {cd:cd==null?0:cd,bd:best?Math.round(best.d):0,bl:[+bl[0].toFixed(4),+bl[1].toFixed(4)],bk:+hav(lat,lon,bl[0],bl[1]).toFixed(2),td:Math.round(tb/(a*(9-fails))),rd:tr,f:fails,at:Date.now()};});}
 function covList(){var f=COV.filt,out=[];CITIES.forEach(function(c){var ci=covInfo(c);if(!f.g[ci.g])return;if(f.iso&&c.iso!==f.iso)return;out.push([c,ci]);});
  var ord={D:0,'?':1,C:2,B:3,A:4};out.sort(function(a,b){return (ord[a[1].g]-ord[b[1].g])||((a[1].d||0)-(b[1].d||0));});return out;}
-function covStart(){if(!LIVE){toast(lang==='zh'?'深度扫描需要连上地图服务器':'Deep scan needs the map server');return;}if(COV.job)return;
- var list=covList().filter(function(x){return !COV.deep[x[0].id];}).map(function(x){return x[0];});if(!list.length){toast(lang==='zh'?'筛选范围内都已扫描过':'Everything in this filter is already scanned');return;}
+function covStart(){if(!LIVE){toast(I18T('deep_scan_needs_the'));return;}if(COV.job)return;
+ var list=covList().filter(function(x){return !COV.deep[x[0].id];}).map(function(x){return x[0];});if(!list.length){toast(I18T('everything_in_this_filter'));return;}
  var J=COV.job={list:list,i:0,done:0,run:0,paused:false,t0:Date.now(),total:list.length};covPump(J);renderCoverage();}
 function covPump(J){if(COV.job!==J||J.paused)return;
  while(J.run<3&&J.i<J.list.length){(function(c){J.run++;J.i++;deepScan(c).then(function(r){if(r)COV.deep[c.id]=r;}).catch(function(){}).then(function(){J.run--;J.done++;COV.dirty++;
   if(J.done%12===0)covSave();if(J.done%30===0&&COV.pts)buildCovPts();if(COV.panelOpen)covProgress();
-  if(J.done>=J.total){covSave();COV.job=null;if(COV.pts)buildCovPts();if(COV.panelOpen)renderCoverage();toast(lang==='zh'?'深度扫描完成':'Deep scan finished');}else covPump(J);});})(J.list[J.i]);}}
+  if(J.done>=J.total){covSave();COV.job=null;if(COV.pts)buildCovPts();if(COV.panelOpen)renderCoverage();toast(I18T('deep_scan_finished'));}else covPump(J);});})(J.list[J.i]);}}
 function covPause(){var J=COV.job;if(!J)return;J.paused=!J.paused;covSave();if(!J.paused){J.t0=Date.now();J.base=J.done;covPump(J);}renderCoverage();}
 function covProgress(){var el=document.getElementById('covProg');if(!el||!COV.job)return;var J=COV.job,p=J.total?J.done/J.total:0,el2=(Date.now()-J.t0)/1000,dn=J.done-(J.base||0),eta=dn?el2/dn*(J.total-J.done):0;
- el.innerHTML='<div class="cbar"><i style="width:'+(p*100).toFixed(1)+'%"></i></div><span>'+(J.paused?(lang==='zh'?'已暂停 ':'Paused '):'')+J.done+' / '+J.total+(J.done&&!J.paused?' · '+(lang==='zh'?'约剩 ':'~')+Math.ceil(eta/60)+(lang==='zh'?' 分钟':' min left'):'')+'</span>';
+ el.innerHTML='<div class="cbar"><i style="width:'+(p*100).toFixed(1)+'%"></i></div><span>'+(J.paused?(I18T('paused')):'')+J.done+' / '+J.total+(J.done&&!J.paused?' · '+(I18T('s'))+Math.ceil(eta/60)+(I18T('min_left')):'')+'</span>';
  if(COV.dirty>40){COV.dirty=0;var lst=document.getElementById('covRows');if(lst)lst.innerHTML=covRowsHTML();}}
-function covRowsHTML(){var zh=lang==='zh',z2=iso2zh(),L=covList(),h='';L.slice(0,250).forEach(function(x){var c=x[0],ci=x[1],G=GRADES[ci.g];
-  h+='<div class="crow"><span class="gb" style="--g:'+G.c+'">'+ci.g+'</span><div class="cm"><div class="cn">'+esc(cityName(c))+'<em>'+esc(zh?(c.czh||''):(c.country||c.iso||''))+'</em></div><div class="cs">'+
-  (zh?'核心 ':'core ')+(c.n!=null?c.n:'—')+(zh?' 栋':' bldg')+' · '+(c.nd!=null?c.nd:'—')+'/km²'+(c.od!=null?' · Overture '+c.od+'/km²':'')+(ci.dp?' · '+(zh?'周边 ':'around ')+ci.dp.td+'/km² · '+(zh?'道路 ':'roads ')+ci.dp.rd:'')+'</div>'+(ci.diag?'<div class="cd">'+esc(ci.diag)+'</div>':'')+'</div>'+
-  '<div class="ca"><button data-go="'+c.id+'">'+(zh?'进入':'Open')+'</button>'+(ci.sug&&!COV.re[c.id]?'<button data-re="'+c.id+'">'+(zh?'采用新中心':'Re-centre')+'</button>':'')+(COV.re[c.id]?'<button data-unre="'+c.id+'">'+(zh?'还原':'Undo')+'</button>':'')+(LIVE&&!COV.job?'<button data-scan="'+c.id+'">'+(zh?'扫描':'Scan')+'</button>':'')+'</div></div>';});
- if(L.length>250)h+='<div class="cmore">'+(zh?'只列出前 250 座（共 '+L.length+'），导出报告看全部':'Showing 250 of '+L.length+' — export the report for all')+'</div>';
- if(!L.length)h='<div class="cmore">'+(zh?'筛选范围内没有城市':'No cities in this filter')+'</div>';return h;}
-function renderCoverage(){COV.panelOpen=true;state={type:'cov'};var zh=lang==='zh',cnt={A:0,B:0,C:0,D:0,'?':0},byIso={},z2=iso2zh(),scanned=0;
+function covRowsHTML(){var zh=LZ(),z2=iso2zh(),L=covList(),h='';L.slice(0,250).forEach(function(x){var c=x[0],ci=x[1],G=GRADES[ci.g];
+  h+='<div class="crow"><span class="gb" style="--g:'+G.c+'">'+ci.g+'</span><div class="cm"><div class="cn">'+esc(cityName(c))+'<em>'+esc(I18P(c.czh||'',c.country||c.iso||''))+'</em></div><div class="cs">'+
+  (I18T('core'))+(c.n!=null?c.n:'—')+(I18T('bldg'))+' · '+(c.nd!=null?c.nd:'—')+'/km²'+(c.od!=null?' · Overture '+c.od+'/km²':'')+(ci.dp?' · '+(I18T('around'))+ci.dp.td+'/km² · '+(I18T('roads'))+ci.dp.rd:'')+'</div>'+(ci.diag?'<div class="cd">'+esc(ci.diag)+'</div>':'')+'</div>'+
+  '<div class="ca"><button data-go="'+c.id+'">'+(I18T('open'))+'</button>'+(ci.sug&&!COV.re[c.id]?'<button data-re="'+c.id+'">'+(I18T('re_centre'))+'</button>':'')+(COV.re[c.id]?'<button data-unre="'+c.id+'">'+(I18T('undo'))+'</button>':'')+(LIVE&&!COV.job?'<button data-scan="'+c.id+'">'+(I18T('scan'))+'</button>':'')+'</div></div>';});
+ if(L.length>250)h+='<div class="cmore">'+(I18P('只列出前 250 座（共 '+L.length+'），导出报告看全部','Showing 250 of '+L.length+' — export the report for all'))+'</div>';
+ if(!L.length)h='<div class="cmore">'+(I18T('no_cities_in_this'))+'</div>';return h;}
+function renderCoverage(){COV.panelOpen=true;state={type:'cov'};var zh=LZ(),cnt={A:0,B:0,C:0,D:0,'?':0},byIso={},z2=iso2zh(),scanned=0;
  CITIES.forEach(function(c){var g=covInfo(c).g;cnt[g]++;if(COV.deep[c.id])scanned++;if(g==='C'||g==='D'){byIso[c.iso]=(byIso[c.iso]||0)+1;}});
  var meta=['A','B','C','D'].map(function(g){return '<span class="chip" style="color:'+GRADES[g].c+'">'+g+' '+cnt[g]+'</span>';}).join('');
- pHead.innerHTML=headHTML(zh?'数据覆盖 · COVERAGE':'DATA COVERAGE',zh?'城市街区数据扫描 · '+CITIES.length+' 城':'Street-data scan · '+CITIES.length+' cities',meta,true);
- var gb=['A','B','C','D'].map(function(g){var G=GRADES[g];return '<button class="cg'+(COV.filt.g[g]?' on':'')+'" data-g="'+g+'" style="--g:'+G.c+'"><b>'+g+'</b><span>'+(zh?G.zh:G.en)+'</span><em>'+cnt[g]+'</em></button>';}).join('');
+ pHead.innerHTML=headHTML(I18T('data_coverage'),I18P('城市街区数据扫描 · '+CITIES.length+' 城','Street-data scan · '+CITIES.length+' cities'),meta,true);
+ var gb=['A','B','C','D'].map(function(g){var G=GRADES[g];return '<button class="cg'+(COV.filt.g[g]?' on':'')+'" data-g="'+g+'" style="--g:'+G.c+'"><b>'+g+'</b><span>'+(I18P(G.zh,G.en))+'</span><em>'+cnt[g]+'</em></button>';}).join('');
  var isos=Object.keys(byIso).sort(function(a,b){return byIso[b]-byIso[a];});
- var sel='<select id="covIso"><option value="">'+(zh?'全部国家':'All countries')+'</option>'+isos.map(function(i){return '<option value="'+i+'"'+(COV.filt.iso===i?' selected':'')+'>'+esc((zh&&z2[i]?z2[i]:i)+' · '+byIso[i])+'</option>';}).join('')+'</select>';
+ var sel='<select id="covIso"><option value="">'+(I18T('all_countries'))+'</option>'+isos.map(function(i){return '<option value="'+i+'"'+(COV.filt.iso===i?' selected':'')+'>'+esc((zh&&z2[i]?z2[i]:i)+' · '+byIso[i])+'</option>';}).join('')+'</select>';
  var nf=covList().filter(function(x){return !COV.deep[x[0].id];}).length,J=COV.job;
  pBody.innerHTML='<div class="cov">'+
-  '<p class="ctrl" style="margin:0 0 8px">'+(zh?'等级按城市中心每平方公里的建筑轮廓数：A ≥900 · B 240–900 · C 30–240 · D <30。离线等级来自已打包的 1.3 km 核心区；<b>深度扫描</b>实时读取中心周围 3×3 街区块（约 6 km 见方），分辨是坐标偏了、OSM 缺建筑，还是当地本来就稀疏。地球上的彩点就是每座城的等级。':'Grade = building footprints per km² at the city centre: A ≥900 · B 240–900 · C 30–240 · D <30. Offline grades come from the packed 1.3 km core; a <b>deep scan</b> reads the 3×3 tiles (~6 km) around the centre live to tell an off-centre coordinate from missing OSM footprints or a genuinely sparse place. The coloured dots on the globe show each city\'s grade.')+'</p>'+
-  '<div class="cgs">'+gb+'</div><div class="crowc">'+sel+'<span class="cst">'+(zh?'已深度扫描 ':'Deep-scanned ')+scanned+'</span></div>'+
-  '<div class="cbtns">'+(J?'<button id="covPause">'+(J.paused?(zh?'继续':'Resume'):(zh?'暂停':'Pause'))+'</button>':'<button id="covGo"'+(LIVE&&nf?'':' disabled')+'>'+(zh?'深度扫描筛选出的 '+nf+' 座':'Deep-scan '+nf+' in filter')+'</button>')+
-  '<button id="covCsv">'+(zh?'导出 CSV':'Export CSV')+'</button><button id="covJson">JSON</button>'+(scanned?'<button id="covClr">'+(zh?'清除扫描':'Clear scans')+'</button>':'')+'</div>'+
-  (LIVE?'':'<div class="cwarn">'+(zh?'现在连不上地图服务器，深度扫描不可用（后台在重试）。离线等级仍然有效。':'Map server not reachable, deep scan unavailable (retrying in background). Offline grades still apply.')+'</div>')+
-  (nf>400&&!J?'<div class="cwarn soft">'+(zh?'每座城读 9 个街区块，稀疏城市每块通常只有几十 KB；'+nf+' 座大约要下载 '+Math.round(nf*9*0.04)+'–'+Math.round(nf*9*0.12)+' MB，可以先选一个国家。':'9 tiles per city; sparse tiles are usually tens of KB. '+nf+' cities ≈ '+Math.round(nf*9*0.04)+'–'+Math.round(nf*9*0.12)+' MB — you can pick one country first.')+'</div>':'')+
+  '<p class="ctrl" style="margin:0 0 8px">'+(I18T('grade_building_footprints_per'))+'</p>'+
+  '<div class="cgs">'+gb+'</div><div class="crowc">'+sel+'<span class="cst">'+(I18T('deep_scanned'))+scanned+'</span></div>'+
+  '<div class="cbtns">'+(J?'<button id="covPause">'+(J.paused?(I18T('resume')):(I18T('pause')))+'</button>':'<button id="covGo"'+(LIVE&&nf?'':' disabled')+'>'+(I18P('深度扫描筛选出的 '+nf+' 座','Deep-scan '+nf+' in filter'))+'</button>')+
+  '<button id="covCsv">'+(I18T('export_csv'))+'</button><button id="covJson">JSON</button>'+(scanned?'<button id="covClr">'+(I18T('clear_scans'))+'</button>':'')+'</div>'+
+  (LIVE?'':'<div class="cwarn">'+(I18T('map_server_not_reachable'))+'</div>')+
+  (nf>400&&!J?'<div class="cwarn soft">'+(I18P('每座城读 9 个街区块，稀疏城市每块通常只有几十 KB；'+nf+' 座大约要下载 '+Math.round(nf*9*0.04)+'–'+Math.round(nf*9*0.12)+' MB，可以先选一个国家。','9 tiles per city; sparse tiles are usually tens of KB. '+nf+' cities ≈ '+Math.round(nf*9*0.04)+'–'+Math.round(nf*9*0.12)+' MB — you can pick one country first.'))+'</div>':'')+
   '<div id="covProg"></div><div id="covRows">'+covRowsHTML()+'</div></div>';
  covProgress();var x=document.getElementById('pClose');if(x)x.onclick=function(){setCovOn(false);};
  pBody.querySelectorAll('.cg').forEach(function(b){b.onclick=function(){var g=b.getAttribute('data-g');if(COV.filt.g[g])delete COV.filt.g[g];else COV.filt.g[g]=1;renderCoverage();};});
@@ -1820,7 +1827,7 @@ function renderCoverage(){COV.panelOpen=true;state={type:'cov'};var zh=lang==='z
  var cl=document.getElementById('covClr');if(cl)cl.onclick=function(){COV.deep={};covSave();if(COV.pts)buildCovPts();renderCoverage();};
  document.getElementById('covRows').onclick=function(e){var b=e.target.closest('button');if(!b)return;var id;
   if((id=b.getAttribute('data-go'))){setCovOn(false);enterCity(id);}
-  else if((id=b.getAttribute('data-re'))){var ci=covInfo(CITYBY[id]);if(ci.sug){COV.re[id]={lat:ci.sug.lat,lon:ci.sug.lon};covSave();toast(lang==='zh'?'已采用新中心点，下次实时进入这座城就从那里开始':'Re-centred; live entry now starts there');renderCoverage();}}
+  else if((id=b.getAttribute('data-re'))){var ci=covInfo(CITYBY[id]);if(ci.sug){COV.re[id]={lat:ci.sug.lat,lon:ci.sug.lon};covSave();toast(I18T('re_centred_live_entry'));renderCoverage();}}
   else if((id=b.getAttribute('data-unre'))){delete COV.re[id];covSave();renderCoverage();}
   else if((id=b.getAttribute('data-scan'))){b.disabled=true;b.textContent='…';deepScan(CITYBY[id]).then(function(r){if(r){COV.deep[id]=r;covSave();if(COV.pts)buildCovPts();}renderCoverage();});}};}
 function covExport(fmt){var rows=CITIES.map(function(c){var ci=covInfo(c),dp=ci.dp||{};return {id:c.id,name:c.en,name_zh:c.zh||'',iso:c.iso,country:c.country||'',lat:c.lat,lon:c.lon,grade:ci.g,core_buildings:c.n,core_roads:c.r,core_density:c.nd,
@@ -1830,10 +1837,10 @@ function covExport(fmt){var rows=CITIES.map(function(c){var ci=covInfo(c),dp=ci.
  if(fmt==='json'){txt=JSON.stringify({generated:new Date().toISOString(),grades:'A>=900 B>=240 C>=30 D<30 buildings/km2',cities:rows},null,1);mime='application/json';name+='.json';}
  else{var keys=Object.keys(rows[0]);txt='﻿'+keys.join(',')+'\n'+rows.map(function(r){return keys.map(function(k){var v=r[k];v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}).join(',');}).join('\n');mime='text/csv';name+='.csv';}
  try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:mime}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},2000);}
- catch(e){toast(lang==='zh'?'这个页面不允许下载，请在本地版本里导出':'Downloads are blocked here; export from the local copy');}}
+ catch(e){toast(I18T('downloads_are_blocked_here'));}}
 function wireCov(){var li=document.getElementById('liveInfo');if(li&&!li._w){li._w=1;li.addEventListener('click',function(e){
   if(e.target.closest('[data-golive]')&&L2.city&&CITYBY[L2.city.id]){enterCity(L2.city.id);}
-  else if(e.target.closest('[data-ring]')){setRing(LIVEP.ring===2?1:2);updateLiveHud();toast(LIVEP.ring===2?(lang==='zh'?'视野 5×5 街区块（约 12 km），更耗内存':'View 5×5 tiles (~12 km), uses more memory'):(lang==='zh'?'视野 3×3 街区块（约 7 km）':'View 3×3 tiles (~7 km)'));}});}
+  else if(e.target.closest('[data-ring]')){setRing(LIVEP.ring===2?1:2);updateLiveHud();toast(LIVEP.ring===2?(I18T('view_5_5_tiles')):(I18T('view_3_3_tiles')));}});}
  var b=document.getElementById('tCov');if(!b||b._w)return;b._w=1;b.onclick=function(){setCovOn(b.getAttribute('aria-pressed')!=='true');};}
 
 // ====================================================================
@@ -1982,7 +1989,7 @@ function skyApplyLayers(){if(!L2.group)return;var on=SKYV.on,bm=SKYV.bmode;
 function setSky(on,silent){if(on===SKYV.on)return;if(on&&mode!=='street')return;
  if(on){SKYV.prev={el:L2.camWant.el,d:L2.camWant.d,drone:L2.drone&&L2.drone.on};if(L2.drone&&L2.drone.on){L2.drone.on=false;var bd=document.getElementById('bDrone');if(bd)bd.setAttribute('aria-pressed','false');}
   SKYV.on=true;skyEnsureGroups();L2.camWant.el=SKYV.el;L2.camWant.d=Math.max(1500,Math.min(9000,Math.max(2800,L2.camWant.d*2.6)));
-  if(!silent)toast(lang==='zh'?'天眼视角 · 公开卫星影像底图（非实时）':'Sky eye · public satellite basemap (not live)');}
+  if(!silent)toast(I18T('sky_eye_public_satellite'));}
  else{SKYV.on=false;var p=SKYV.prev;if(p){L2.camWant.el=p.el;L2.camWant.d=Math.max(140,Math.min(2400,p.d));if(p.drone&&L2.drone&&!silent){L2.drone.on=true;var bd2=document.getElementById('bDrone');if(bd2)bd2.setAttribute('aria-pressed','true');}}}
  var b=document.getElementById('bSky');if(b)b.setAttribute('aria-pressed',SKYV.on);
  for(var _ln in SKYV.L){if(SKYV.L[_ln].grp)SKYV.L[_ln].grp.visible=SKYV.on;}if(SKYV.gridGrp)SKYV.gridGrp.visible=SKYV.on&&SKYV.grid;
@@ -1996,11 +2003,11 @@ function skySensor(){var s=SKYV.on?SKYV.sensor:'vis',f='';
  if(s==='pan')f='grayscale(1) contrast(1.38) brightness(1.04)';else if(s==='nv')f='grayscale(1) brightness(.92) contrast(1.3) sepia(1) hue-rotate(58deg) saturate(2.1)';
  else if(s==='ir')f='url(#seThermal) contrast(1.1)';else if(s==='veg')f='url(#seVeg)';else if(s==='sar')f='url(#seSar)';
  canvas.style.filter=f;U.uDsm.value=s==='dsm'&&SKYV.on?1:0;var hud=document.getElementById('skyHud');if(hud)hud.setAttribute('data-sensor',s);
- var lg=document.getElementById('skyLegend');if(lg){var zh=lang==='zh',h='';
-  if(s==='dsm')h='<b>'+(zh?'建筑高度':'Building height')+'</b><i class="rmp dsm"></i><span>0</span><span>40</span><span>80</span><span>150+ m</span><em>'+(zh?'高度来自 OSM / Overture 的建筑数据，缺失时为估算':'Heights from OSM / Overture building data; estimated where missing')+'</em>';
-  else if(s==='veg')h='<b>'+(zh?'植被指数 ExG = 2G−R−B':'Excess-green ExG = 2G−R−B')+'</b><i class="rmp veg"></i><span>'+(zh?'裸地/建筑':'bare/built')+'</span><span></span><span></span><span>'+(zh?'茂密植被':'dense veg.')+'</span><em>'+(zh?'由可见光三个波段计算，不是近红外 NDVI':'Computed from the three visible bands, not near-infrared NDVI')+'</em>';
-  else if(s==='sar')h='<b>'+(zh?'SAR 合成孔径雷达（模拟）':'SAR (simulated)')+'</b><em>'+(zh?'用影像亮度加斑点噪声模拟雷达回波的观感；真实 SAR 可穿透云层和黑夜':'Mimics the look of radar backscatter from image brightness plus speckle; real SAR sees through cloud and darkness')+'</em>';
-  else if(s==='ir')h='<b>'+(zh?'伪彩热（模拟）':'Thermal (simulated)')+'</b><i class="rmp ir"></i><span>'+(zh?'暗':'dark')+'</span><span></span><span></span><span>'+(zh?'亮':'bright')+'</span><em>'+(zh?'亮度映射到铁红色带，不是真实温度':'Brightness mapped to an ironbow palette, not real temperature')+'</em>';
+ var lg=document.getElementById('skyLegend');if(lg){var zh=LZ(),h='';
+  if(s==='dsm')h='<b>'+(I18T('building_height'))+'</b><i class="rmp dsm"></i><span>0</span><span>40</span><span>80</span><span>150+ m</span><em>'+(I18T('heights_from_osm_overture'))+'</em>';
+  else if(s==='veg')h='<b>'+(I18T('excess_green_exg_2g'))+'</b><i class="rmp veg"></i><span>'+(I18T('bare_built'))+'</span><span></span><span></span><span>'+(I18T('dense_veg'))+'</span><em>'+(I18T('computed_from_the_three'))+'</em>';
+  else if(s==='sar')h='<b>'+(I18T('sar_simulated'))+'</b><em>'+(I18T('mimics_the_look_of'))+'</em>';
+  else if(s==='ir')h='<b>'+(I18T('thermal_simulated'))+'</b><i class="rmp ir"></i><span>'+(I18T('dark'))+'</span><span></span><span></span><span>'+(I18T('bright'))+'</span><em>'+(I18T('brightness_mapped_to_an'))+'</em>';
   lg.innerHTML=h;lg.style.display=h?'':'none';}}
 // ---- intel feeds: satellites overhead (CelesTrak + SGP4), earthquakes (USGS), natural hazards (NASA EONET) ----
 var INTEL={sat:{st:'idle',recs:[],vis:[],next:[],at:0,passAt:0},eq:{st:'idle',f:[],at:0},nat:{st:'idle',f:[],at:0}};
@@ -2021,26 +2028,26 @@ function eqLoad(){var E=INTEL.eq,now=Date.now();if(E.st==='loading'||(E.st==='ok
 function natLoad(){var N=INTEL.nat,now=Date.now();if(N.st==='loading'||(N.st==='ok'&&now-N.at<1800000))return;N.st='loading';
  fetch('https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=60').then(function(r){return r.json();}).then(function(j){N.f=j.events||[];N.st='ok';N.at=Date.now();}).catch(function(){N.st='err';N.at=Date.now();});}
 var EONET_ZH={wildfires:'野火',severeStorms:'强风暴',volcanoes:'火山',seaLakeIce:'海冰/湖冰',floods:'洪水',drySoil:'干旱',dustHaze:'沙尘/霾',earthquakes:'地震',landslides:'滑坡',manmade:'人为',snow:'暴雪',tempExtremes:'极端温度',waterColor:'水色异常'};
-function agoTxt(ms){var m=Math.round(ms/60000),zh=lang==='zh';if(m<60)return m+(zh?' 分钟前':' min ago');var h=Math.round(m/60);if(h<48)return h+(zh?' 小时前':' h ago');return Math.round(h/24)+(zh?' 天前':' d ago');}
-function intelHTML(ll){var zh=lang==='zh',t=SKYV.tab,h='';
+function agoTxt(ms){var m=Math.round(ms/60000),zh=LZ();if(m<60)return m+(I18T('min_ago'));var h=Math.round(m/60);if(h<48)return h+(I18T('h_ago'));return Math.round(h/24)+(I18T('d_ago'));}
+function intelHTML(ll){var zh=LZ(),t=SKYV.tab,h='';
  if(t==='sat'){satLoad();satStep(ll);var S=INTEL.sat;
-  if(S.st==='loading')return '<div class="none">'+(zh?'正在载入 CelesTrak 轨道根数…':'Loading CelesTrak orbital elements…')+'</div>';
-  if(S.st==='err')return '<div class="none">'+(zh?'轨道数据暂时无法获取':'Orbital data unavailable')+'</div>';
-  h+='<div class="sub">'+(zh?'当前在本地上空 · ':'Above the horizon now · ')+S.vis.length+'</div>';
-  h+=S.vis.slice(0,6).map(function(v){return '<div class="it"><i class="g '+v.g+'"></i><span>'+esc(v.n)+'</span><b>'+(zh?'仰角 ':'el ')+v.el.toFixed(0)+'° · '+(zh?'方位 ':'az ')+v.az.toFixed(0)+'°</b></div>';}).join('');
-  h+='<div class="sub">'+(zh?'未来 2 小时过境（仰角 > 5°）':'Passes in the next 2 h (el > 5°)')+'</div>';
-  h+=S.next.slice(0,5).map(function(v){return '<div class="it"><i class="g '+v.g+'"></i><span>'+esc(v.n)+'</span><b>'+v.min+(zh?' 分钟后 · 最高 ':' min · max ')+v.max.toFixed(0)+'°</b></div>';}).join('')||'<div class="none">—</div>';
-  h+='<div class="foot">'+(zh?'对地观测、空间站、气象卫星的公开轨道根数（CelesTrak），本地 SGP4 计算。':'Public orbital elements for Earth-observation, station and weather satellites (CelesTrak), propagated locally with SGP4.')+'</div>';return h;}
- if(t==='eq'){eqLoad();var E=INTEL.eq;if(E.st==='loading'&&!E.f.length)return '<div class="none">'+(zh?'正在载入 USGS 地震目录…':'Loading USGS earthquake feed…')+'</div>';
+  if(S.st==='loading')return '<div class="none">'+(I18T('loading_celestrak_orbital_elements'))+'</div>';
+  if(S.st==='err')return '<div class="none">'+(I18T('orbital_data_unavailable'))+'</div>';
+  h+='<div class="sub">'+(I18T('above_the_horizon_now'))+S.vis.length+'</div>';
+  h+=S.vis.slice(0,6).map(function(v){return '<div class="it"><i class="g '+v.g+'"></i><span>'+esc(v.n)+'</span><b>'+(I18T('el'))+v.el.toFixed(0)+'° · '+(I18T('az'))+v.az.toFixed(0)+'°</b></div>';}).join('');
+  h+='<div class="sub">'+(I18T('passes_in_the_next'))+'</div>';
+  h+=S.next.slice(0,5).map(function(v){return '<div class="it"><i class="g '+v.g+'"></i><span>'+esc(v.n)+'</span><b>'+v.min+(I18T('min_max'))+v.max.toFixed(0)+'°</b></div>';}).join('')||'<div class="none">—</div>';
+  h+='<div class="foot">'+(I18T('public_orbital_elements_for'))+'</div>';return h;}
+ if(t==='eq'){eqLoad();var E=INTEL.eq;if(E.st==='loading'&&!E.f.length)return '<div class="none">'+(I18T('loading_usgs_earthquake_feed'))+'</div>';
   var L=E.f.map(function(f){var c=f.geometry.coordinates;return {d:hav(ll.lat,ll.lon,c[1],c[0]),m:f.properties.mag,p:f.properties.place,t:f.properties.time,lat:c[1],lon:c[0],dep:c[2]};}).filter(function(x){return x.d<1500;}).sort(function(a,b){return a.d-b.d;});
-  h+='<div class="sub">'+(zh?'近 7 天 M2.5+ · 1500 km 内 · ':'Past 7 days M2.5+ · within 1500 km · ')+L.length+'</div>';
-  h+=L.slice(0,7).map(function(x,i){return '<div class="it go" data-go="'+x.lat+','+x.lon+'"><i style="background:'+(x.m>=6?'#ff4d6a':x.m>=4.5?'#ffb340':'#58c8e0')+'"></i><span>M'+x.m.toFixed(1)+' · '+esc(x.p||'')+'</span><b>'+fmtKm(x.d)+' · '+agoTxt(Date.now()-x.t)+'</b></div>';}).join('')||'<div class="none">'+(zh?'1500 km 内近 7 天没有 M2.5 以上地震':'No M2.5+ quakes within 1500 km in 7 days')+'</div>';
-  return h+'<div class="foot">USGS Earthquake Hazards Program · '+(zh?'点击飞往震中':'click to fly to the epicentre')+'</div>';}
- if(t==='nat'){natLoad();var N=INTEL.nat;if(N.st==='loading'&&!N.f.length)return '<div class="none">'+(zh?'正在载入 NASA EONET…':'Loading NASA EONET…')+'</div>';
+  h+='<div class="sub">'+(I18T('past_7_days_m2'))+L.length+'</div>';
+  h+=L.slice(0,7).map(function(x,i){return '<div class="it go" data-go="'+x.lat+','+x.lon+'"><i style="background:'+(x.m>=6?'#ff4d6a':x.m>=4.5?'#ffb340':'#58c8e0')+'"></i><span>M'+x.m.toFixed(1)+' · '+esc(x.p||'')+'</span><b>'+fmtKm(x.d)+' · '+agoTxt(Date.now()-x.t)+'</b></div>';}).join('')||'<div class="none">'+(I18T('no_m2_5_quakes'))+'</div>';
+  return h+'<div class="foot">USGS Earthquake Hazards Program · '+(I18T('click_to_fly_to'))+'</div>';}
+ if(t==='nat'){natLoad();var N=INTEL.nat;if(N.st==='loading'&&!N.f.length)return '<div class="none">'+(I18T('loading_nasa_eonet'))+'</div>';
   var M=[];N.f.forEach(function(e){var g=e.geometry&&e.geometry[e.geometry.length-1];if(!g||g.type!=='Point')return;var c=g.coordinates,d=hav(ll.lat,ll.lon,c[1],c[0]);if(d<2500)M.push({d:d,t:e.title,c:(e.categories&&e.categories[0]&&e.categories[0].id)||'',lat:c[1],lon:c[0],at:Date.parse(g.date)});});M.sort(function(a,b){return a.d-b.d;});
-  h+='<div class="sub">'+(zh?'进行中的自然灾害 · 2500 km 内 · ':'Open natural events · within 2500 km · ')+M.length+'</div>';
-  h+=M.slice(0,7).map(function(x){return '<div class="it go" data-go="'+x.lat+','+x.lon+'"><i style="background:#ff8a3d"></i><span>'+esc((zh&&EONET_ZH[x.c]?EONET_ZH[x.c]+' · ':'')+x.t)+'</span><b>'+fmtKm(x.d)+'</b></div>';}).join('')||'<div class="none">'+(zh?'附近没有进行中的事件':'No open events nearby')+'</div>';
-  return h+'<div class="foot">NASA Earth Observatory EONET · '+(zh?'野火、风暴、火山等卫星观测事件':'wildfires, storms, volcanoes and more from satellite observation')+'</div>';}
+  h+='<div class="sub">'+(I18T('open_natural_events_within'))+M.length+'</div>';
+  h+=M.slice(0,7).map(function(x){return '<div class="it go" data-go="'+x.lat+','+x.lon+'"><i style="background:#ff8a3d"></i><span>'+esc((zh&&EONET_ZH[x.c]?EONET_ZH[x.c]+' · ':'')+x.t)+'</span><b>'+fmtKm(x.d)+'</b></div>';}).join('')||'<div class="none">'+(I18T('no_open_events_nearby'))+'</div>';
+  return h+'<div class="foot">NASA Earth Observatory EONET · '+(I18T('wildfires_storms_volcanoes_and'))+'</div>';}
  return null;}
 // ---- measuring tool: click ground points for distance (and area when 3+ points) ----
 var MEAS={on:false,pts:[],obj:null};
@@ -2052,22 +2059,22 @@ function measDraw(){if(MEAS.obj){streetScene.remove(MEAS.obj);MEAS.obj.geometry.
  MEAS.d=d;MEAS.a=ar;skyControls();}
 function measClear(){MEAS.pts=[];measDraw();}
 // ---- controls (bilingual; re-rendered on language switch) ----
-function skyControls(){var el=document.getElementById('skyCtl');if(!el)return;var zh=lang==='zh';
+function skyControls(){var el=document.getElementById('skyCtl');if(!el)return;var zh=LZ();
  function chip(attr,val,cur,label,tip){return '<button data-'+attr+'="'+val+'" class="'+(val===cur?'on':'')+'"'+(tip?' title="'+esc(tip)+'"':'')+'>'+label+'</button>';}
- var W=WAYBACK.list,wi=SKYV.histI==null?0:SKYV.histI,wd=W&&W[wi]?W[wi].date:(WAYBACK.err?(zh?'不可用':'n/a'):'…');
- var h='<div class="sr"><span class="sl">'+(zh?'影像源':'SOURCE')+'</span>'+Object.keys(SKY_SRC).map(function(k){var S=SKY_SRC[k];return chip('src',k,SKYV.base,zh?S.zh:S.en,zh?S.dz:S.de);}).join('')+'</div>';
- if(SKYV.base==='modis'||SKYV.base==='viirs')h+='<div class="sr"><span class="sl">'+(zh?'日期':'DATE')+'</span><button data-day="-1">◀</button><b class="dv">'+gibsDate()+'</b><button data-day="1">▶</button></div>';
- if(SKYV.base==='hist'||SKYV.cmp)h+='<div class="sr"><span class="sl">'+(zh?'存档':'ARCHIVE')+'</span><input type="range" id="skyHist" min="0" max="'+(W?W.length-1:0)+'" value="'+wi+'"'+(W?'':' disabled')+'><b class="dv">'+wd+'</b></div>';
- h+='<div class="sr"><span class="sl">'+(zh?'时段':'TIME')+'</span>'+[['live',zh?'实时':'Live'],['dawn',zh?'黎明':'Dawn'],['day',zh?'白天':'Day'],['dusk',zh?'黄昏':'Dusk'],['night',zh?'🌙 黑夜':'🌙 Night']].map(function(t){var on=t[0]==='live'?ENV.timeMode==='live':(ENV.timeMode!=='live'&&ENV.tod===t[0]);return '<button data-stod="'+t[0]+'" class="'+(on?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div>';
- h+='<div class="sr"><span class="sl">'+(zh?'传感器':'SENSOR')+'</span>'+Object.keys(SKY_SENS).map(function(k){return chip('sens',k,SKYV.sensor,zh?SKY_SENS[k].zh:SKY_SENS[k].en);}).join('')+'</div>'+
-  '<div class="sr"><span class="sl">'+(zh?'建筑':'BLDG')+'</span>'+chip('bm','3d',SKYV.bmode,zh?'三维':'3D')+chip('bm','outline',SKYV.bmode,zh?'轮廓':'Outline')+chip('bm','off',SKYV.bmode,zh?'隐藏':'Hide')+'</div>'+
-  '<div class="sr"><span class="sl">'+(zh?'叠加':'OVERLAY')+'</span><button data-tg="roads" class="'+(SKYV.roads?'on':'')+'">'+(zh?'路网':'Roads')+'</button><button data-tg="grid" class="'+(SKYV.grid?'on':'')+'">'+(zh?'网格 G':'Grid G')+'</button>'+
-  '<button data-tg="rain" class="'+(SKYV.rain?'on':'')+'" title="RainViewer">'+(zh?'降水雷达':'Precip radar')+'</button><button data-tg="nauto" class="'+(SKYV.nightAuto?'on':'')+'">'+(zh?'昼夜联动':'Day/night sync')+'</button><button data-tg="cmp" class="'+(SKYV.cmp?'on':'')+'">'+(zh?'变化对比':'Change swipe')+'</button><button data-tg="meas" class="'+(MEAS.on?'on':'')+'">'+(zh?'测距':'Measure')+'</button></div>';
- if(MEAS.on)h+='<div class="sr meas"><span>'+(MEAS.pts.length?(zh?'距离 ':'Dist ')+fmtKm((MEAS.d||0)/1000)+(MEAS.pts.length>=3?' · '+(zh?'面积 ':'Area ')+((MEAS.a||0)>=1e6?(MEAS.a/1e6).toFixed(2)+' km²':Math.round(MEAS.a||0)+' m²'):''):(zh?'在地面上点击取点':'Click the ground to add points'))+'</span><button data-tg="measclr">'+(zh?'清除':'Clear')+'</button></div>';
+ var W=WAYBACK.list,wi=SKYV.histI==null?0:SKYV.histI,wd=W&&W[wi]?W[wi].date:(WAYBACK.err?(I18T('n_a')):'…');
+ var h='<div class="sr"><span class="sl">'+(I18T('source'))+'</span>'+Object.keys(SKY_SRC).map(function(k){var S=SKY_SRC[k];return chip('src',k,SKYV.base,I18P(S.zh,S.en),I18P(S.dz,S.de));}).join('')+'</div>';
+ if(SKYV.base==='modis'||SKYV.base==='viirs')h+='<div class="sr"><span class="sl">'+(I18T('date'))+'</span><button data-day="-1">◀</button><b class="dv">'+gibsDate()+'</b><button data-day="1">▶</button></div>';
+ if(SKYV.base==='hist'||SKYV.cmp)h+='<div class="sr"><span class="sl">'+(I18T('archive'))+'</span><input type="range" id="skyHist" min="0" max="'+(W?W.length-1:0)+'" value="'+wi+'"'+(W?'':' disabled')+'><b class="dv">'+wd+'</b></div>';
+ h+='<div class="sr"><span class="sl">'+(I18T('time'))+'</span>'+[['live',I18T('live')],['dawn',I18T('dawn')],['day',I18T('day')],['dusk',I18T('dusk')],['night',I18T('night')]].map(function(t){var on=t[0]==='live'?ENV.timeMode==='live':(ENV.timeMode!=='live'&&ENV.tod===t[0]);return '<button data-stod="'+t[0]+'" class="'+(on?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div>';
+ h+='<div class="sr"><span class="sl">'+(I18T('sensor'))+'</span>'+Object.keys(SKY_SENS).map(function(k){return chip('sens',k,SKYV.sensor,I18P(SKY_SENS[k].zh,SKY_SENS[k].en));}).join('')+'</div>'+
+  '<div class="sr"><span class="sl">'+(I18T('bldg_2'))+'</span>'+chip('bm','3d',SKYV.bmode,I18T('s_3d'))+chip('bm','outline',SKYV.bmode,I18T('outline'))+chip('bm','off',SKYV.bmode,I18T('hide'))+'</div>'+
+  '<div class="sr"><span class="sl">'+(I18T('overlay'))+'</span><button data-tg="roads" class="'+(SKYV.roads?'on':'')+'">'+(I18T('roads_2'))+'</button><button data-tg="grid" class="'+(SKYV.grid?'on':'')+'">'+(I18T('grid_g'))+'</button>'+
+  '<button data-tg="rain" class="'+(SKYV.rain?'on':'')+'" title="RainViewer">'+(I18T('precip_radar'))+'</button><button data-tg="nauto" class="'+(SKYV.nightAuto?'on':'')+'">'+(I18T('day_night_sync'))+'</button><button data-tg="cmp" class="'+(SKYV.cmp?'on':'')+'">'+(I18T('change_swipe'))+'</button><button data-tg="meas" class="'+(MEAS.on?'on':'')+'">'+(I18T('measure'))+'</button></div>';
+ if(MEAS.on)h+='<div class="sr meas"><span>'+(MEAS.pts.length?(I18T('dist'))+fmtKm((MEAS.d||0)/1000)+(MEAS.pts.length>=3?' · '+(I18T('area'))+((MEAS.a||0)>=1e6?(MEAS.a/1e6).toFixed(2)+' km²':Math.round(MEAS.a||0)+' m²'):''):(I18T('click_the_ground_to')))+'</span><button data-tg="measclr">'+(I18T('clear'))+'</button></div>';
  el.innerHTML=h;var hs=document.getElementById('skyHist');if(hs)hs.oninput=function(){SKYV.histI=+hs.value;var b=hs.nextSibling;if(b&&WAYBACK.list)b.textContent=WAYBACK.list[SKYV.histI].date;};
- var sw=document.getElementById('skySwipe');if(sw){sw.style.display=SKYV.on&&SKYV.cmp?'':'none';var lb=sw.querySelector('.lb');if(lb)lb.innerHTML='<span>'+(zh?'存档 ':'Archive ')+wd+'</span><span>'+(zh?'当前 · ':'Now · ')+esc(zh?SKY_SRC[SKYV.base].zh:SKY_SRC[SKYV.base].en)+'</span>';}
+ var sw=document.getElementById('skySwipe');if(sw){sw.style.display=SKYV.on&&SKYV.cmp?'':'none';var lb=sw.querySelector('.lb');if(lb)lb.innerHTML='<span>'+(I18T('archive_2'))+wd+'</span><span>'+(I18T('now'))+esc(I18P(SKY_SRC[SKYV.base].zh,SKY_SRC[SKYV.base].en))+'</span>';}
  skySensor();}
-function skyTabsHTML(){var zh=lang==='zh',T=[['ev',zh?'事件':'Events'],['sat',zh?'卫星':'Satellites'],['eq',zh?'地震':'Quakes'],['nat',zh?'灾害':'Hazards']];
+function skyTabsHTML(){var zh=LZ(),T=[['ev',I18T('events')],['sat',I18T('satellites')],['eq',I18T('quakes')],['nat',I18T('hazards')]];
  return '<div class="tabs">'+T.map(function(t){return '<button data-tab="'+t[0]+'" class="'+(SKYV.tab===t[0]?'on':'')+'">'+t[1]+'</button>';}).join('')+'</div>';}
 function wireSky(){var b=document.getElementById('bSky');if(b&&!b._w){b._w=1;b.onclick=function(){setSky(!SKYV.on);};}
  var c=document.getElementById('skyCtl');if(c&&!c._w){c._w=1;c.addEventListener('click',function(e){var t=e.target.closest('button');if(!t)return;e.stopPropagation();
@@ -2094,22 +2101,22 @@ function skyLayout(){var W=window.innerWidth,H=window.innerHeight,open=!panel.cl
  var f=document.getElementById('skyFrame');if(f)f.style.right=(W-freeR)+'px';var r=document.getElementById('skyRet');if(r){r.style.left=(W/2)+'px';r.style.top=(H/2)+'px';}
  var ev=document.getElementById('skyEv');if(!ev)return;var gz=document.getElementById('gizmo'),ah=document.getElementById('ahead'),g=gz&&gz.getBoundingClientRect(),a=ah&&ah.getBoundingClientRect();
  var top=g&&g.height?g.bottom+10:130,bot=a&&a.height?a.top-10:H-200;ev.style.right=(W-(g&&g.width?g.right:freeR))+'px';ev.style.top=top+'px';ev.style.maxHeight=Math.max(120,bot-top)+'px';}
-function skyNote(S,zh){var k=SKYV.base;if((SKYV.nf||0)>0.5)return zh?'当地黑夜：光学卫星此时拍不到地面，影像已调暗并叠加 VIIRS 夜间灯光。夜里更适合用 夜视、伪彩热（模拟）和 SAR 雷达（模拟），真实 SAR 不受昼夜影响。':'Local night: optical satellites cannot see the ground now, so the imagery is dimmed with VIIRS night lights overlaid. Night vision, thermal (sim.) and SAR (sim.) suit night better; real SAR works day and night.';if(k==='modis'||k==='viirs')return zh?'NASA 近实时卫星影像（拍摄后数小时发布），显示所选日期当天真实的云层；分辨率较粗，适合看区域。':'NASA near-real-time imagery (published hours after capture) showing that day\'s real clouds; coarse, for regional context.';
- if(k==='night')return zh?'VIIRS 夜间灯光年度合成，反映城市照明与电力分布。':'VIIRS annual night-lights composite, reflecting city lighting and power distribution.';
- if(k==='hist')return zh?'Esri Wayback 历史版本，用滑块选择年份。':'Esri Wayback historical release; pick the date with the slider.';
- return zh?'影像为历史晴空镶嵌，不是实时拍摄；夜间与天气不会反映在影像上。':'Imagery is a historical cloud-free mosaic, not a live capture; night and weather are not shown in it.';}
-function skyHudStep(now){var zh=lang==='zh',ll=viewLL(),S=SKY_SRC[SKYV.base]||SKY_SRC.esri;
+function skyNote(S,zh){var k=SKYV.base;if((SKYV.nf||0)>0.5)return I18T('local_night_optical_satellites');if(k==='modis'||k==='viirs')return I18T('nasa_near_real_time');
+ if(k==='night')return I18T('viirs_annual_night_lights');
+ if(k==='hist')return I18T('esri_wayback_historical_release');
+ return I18T('imagery_is_a_historical');}
+function skyHudStep(now){var zh=LZ(),ll=viewLL(),S=SKY_SRC[SKYV.base]||SKY_SRC.esri;
  if(now-SKYV.uiAt>180){SKYV.uiAt=now;skyLayout();var u=llToUtm(ll.lat,ll.lon),mpp=skyMpp(),cl=Math.cos(ll.lat*D2R),gsd=156543.034*cl/Math.pow(2,Math.min(SKYV.lastZ||17,S.maxZ)),
    hdg=Math.round(camHeading()),alt=Math.round(Math.sin(L2.cam.el)*L2.cam.d),vw=mpp*canvas.clientWidth/1000,t=envNow(),dt=new Date(t),
    utc=dt.toISOString().slice(0,16).replace('T',' '),sun=ENV.sun||{el:0,az:0},cc=ENV.cur?Math.round((ENV.cur.cloud||0)*100):null;
   var row=function(k,v){return '<div class="r"><span>'+k+'</span><b>'+v+'</b></div>';};
   document.getElementById('skyData').innerHTML=
-   '<div class="hd"><b>'+(zh?'天眼':'SKY EYE')+'</b><span>'+(zh?'公开卫星影像（非实时）':'Public satellite basemap (not live)')+'</span></div>'+
+   '<div class="hd"><b>'+(I18T('sky_eye'))+'</b><span>'+(I18T('public_satellite_basemap_not'))+'</span></div>'+
    row('CTR',fmtLL(ll.lat,ll.lon))+row('MGRS',mgrs(ll.lat,ll.lon))+row('UTM',u.zone+(u.south?'S ':'N ')+Math.round(u.E)+'E '+Math.round(u.N)+'N')+
-   row('GSD',gsd.toFixed(gsd<10?2:1)+' m/px · z'+Math.min(SKYV.lastZ,S.maxZ))+row(zh?'视宽':'SWATH',vw.toFixed(vw<10?1:0)+' km')+
-   row('HDG / ALT',('00'+hdg).slice(-3)+'° · '+alt+' m')+row('SUN',(zh?'高度 ':'el ')+sun.el.toFixed(1)+'° · '+(zh?'方位 ':'az ')+Math.round(sun.az)+'°')+
-   row('UTC',utc)+row(zh?'本地':'LOCAL',fmtHM(t))+
-   row(zh?'影像':'IMAGERY',esc((zh?S.zh:S.en)+(S.daily?' · '+gibsDate():SKYV.base==='hist'&&WAYBACK.list?' · '+WAYBACK.list[SKYV.histI||0].date:'')))+row(zh?'载入':'LOAD',(SKYV.need?Math.round((SKYV.frac||0)*100)+'% · '+SKYV.need+(zh?' 块':' tiles'):'—')+(cc!=null?' · '+(zh?'实况云量 ':'cloud ')+cc+'%':''))+
+   row('GSD',gsd.toFixed(gsd<10?2:1)+' m/px · z'+Math.min(SKYV.lastZ,S.maxZ))+row(I18T('swath'),vw.toFixed(vw<10?1:0)+' km')+
+   row('HDG / ALT',('00'+hdg).slice(-3)+'° · '+alt+' m')+row('SUN',(I18T('el_2'))+sun.el.toFixed(1)+'° · '+(I18T('az'))+Math.round(sun.az)+'°')+
+   row('UTC',utc)+row(I18T('local_2'),fmtHM(t))+
+   row(I18T('imagery'),esc((I18P(S.zh,S.en))+(S.daily?' · '+gibsDate():SKYV.base==='hist'&&WAYBACK.list?' · '+WAYBACK.list[SKYV.histI||0].date:'')))+row(I18T('load'),(SKYV.need?Math.round((SKYV.frac||0)*100)+'% · '+SKYV.need+(I18T('tiles_2')):'—')+(cc!=null?' · '+(I18T('cloud'))+cc+'%':''))+
    '<div class="note">'+esc(skyNote(S,zh))+'</div>'+
    '<div class="attr">'+esc(S.attr+(SKYV.cmp?' · Esri Wayback':'')+(SKYV.rain?' · RainViewer':''))+'</div>';
   // north arrow + scale bar
@@ -2118,11 +2125,11 @@ function skyHudStep(now){var zh=lang==='zh',ll=viewLL(),S=SKY_SRC[SKYV.base]||SK
   var sb=document.getElementById('skyScale');if(sb)sb.innerHTML='<i style="width:'+(len/mpp).toFixed(0)+'px"></i><span>'+(len>=1000?len/1000+' km':len+' m')+'</span>';}
  if(now-SKYV.evAt>900){SKYV.evAt=now;var list=[];(EV||[]).forEach(function(e){if(e.g||e.lat==null)return;var d=hav(ll.lat,ll.lon,e.lat,e.lon);if(d<=300)list.push([d,e]);});
   list.sort(function(a,b){return a[0]-b[0];});var nc=nearestCity(ll.lat,ll.lon,250),ci=nc&&typeof covInfo==='function'?covInfo(nc):null,G=ci?GRADES[ci.g]:null;
-  var h='<div class="hd"><b>'+(zh?'附近安全事件':'NEARBY EVENTS')+'</b><span>≤ 300 km · '+list.length+'</span></div>';
+  var h='<div class="hd"><b>'+(I18T('nearby_events'))+'</b><span>≤ 300 km · '+list.length+'</span></div>';
   h+=list.slice(0,7).map(function(x){var e=x[1];return '<div class="ev" data-ev="'+e.id+'"><i style="background:'+lvColor(e.sl)+'"></i><em>'+e.y+'</em><span>'+esc(evTitle(e))+'</span><b>'+fmtKm(x[0])+'</b></div>';}).join('')||
-   '<div class="none">'+(zh?'300 km 内没有时间线事件':'No timeline events within 300 km')+'</div>';
-  if(nc&&G)h+='<div class="cov"><span>'+(zh?'最近城市 ':'Nearest city ')+esc(cityName(nc))+'</span><b style="color:'+G.c+'">'+ci.g+' '+(zh?G.zh:G.en)+'</b></div>';
-  h+='<div class="foot">'+(zh?'地点为主要受影响或首次发现位置，不代表攻击来源':'Places mark primary impact or first observation, not attack origin')+'</div>';
+   '<div class="none">'+(I18T('no_timeline_events_within'))+'</div>';
+  if(nc&&G)h+='<div class="cov"><span>'+(I18T('nearest_city'))+esc(cityName(nc))+'</span><b style="color:'+G.c+'">'+ci.g+' '+(I18P(G.zh,G.en))+'</b></div>';
+  h+='<div class="foot">'+(I18T('places_mark_primary_impact'))+'</div>';
   var ih=SKYV.tab!=='ev'?intelHTML(ll):null;document.getElementById('skyEv').innerHTML=skyTabsHTML()+(ih!=null?ih:h);}}
 function skyStep(dt,now){if(!SKYV.on)return;if(mode!=='street'||!L2.active){setSky(false,true);return;}
  skyEnsureGroups();L2.camWant.el=SKYV.el;if(L2.drone)L2.drone.touch=now;
@@ -2140,12 +2147,12 @@ function applyEvFilter(){try{localStorage.setItem('se.evf',JSON.stringify(EVF));
 function renderEvFilter(){var el=document.getElementById('tlBrain');if(!el){var tl=document.getElementById('tl');if(!tl)return;el=document.createElement('div');el.id='tlBrain';el.className='tl-brain';tl.insertBefore(el,document.getElementById('tlGlob'));
   el.addEventListener('click',function(ev){var b=ev.target.closest('button');if(!b)return;var k=b.getAttribute('data-b');
    if(k==='org'){EVF.orgOnly=!EVF.orgOnly;}else if(k==='all'){EVF.b={1:1,2:1,3:1,4:1};}else{if(EVF.b[k]&&Object.keys(EVF.b).length>1)delete EVF.b[k];else EVF.b[k]=1;}applyEvFilter();});}
- var zh=lang==='zh',cnt={1:0,2:0,3:0,4:0};EV.forEach(function(e){if(!EVF.orgOnly||(e.org&&e.org.length))cnt[e.brain||1]++;});var n=0;for(var y in EVY)n+=EVY[y].length;
- el.innerHTML='<span class="lb">'+(zh?'安全大脑':'BRAINS')+'</span>'+[1,2,3,4].map(function(k){return '<button data-b="'+k+'" class="'+(EVF.b[k]?'on':'')+'" title="'+esc(zh?BRAINS[k].zh:BRAINS[k].en)+'">'+k+'<em>'+cnt[k]+'</em></button>';}).join('')+
-  '<button data-b="org" class="org'+(EVF.orgOnly?' on':'')+'">'+(zh?'仅机构通报':'Org-reported')+'</button><span class="tot">'+n+(zh?' 起':' events')+'</span>';}
-function orgChipsHTML(e){var zh=lang==='zh';var B=BRAINS[e.brain||1];var h='<div class="sec"><h3>'+(zh?'情报来源 · ':'Intel sources · ')+esc(zh?B.zh:B.en)+'</h3>';
- if(e.org&&e.org.length)h+='<div class="orgs">'+e.org.map(function(k){var o=ORGS[k];if(!o)return '';return '<a href="'+esc(o[2])+'" target="_blank" rel="noopener noreferrer"><b>'+esc(o[0])+'</b><span>'+esc(zh?o[1]:o[0])+'</span></a>';}).join('')+'</div>';
- else h+='<p class="ctrl" style="margin:0">'+(zh?'这条事件的来源是下面的公开报道，暂未关联到安全大脑清单里的机构。':'Sourced from the public reports below; not yet linked to an organisation in the source tiers.')+'</p>';return h+'</div>';}
+ var zh=LZ(),cnt={1:0,2:0,3:0,4:0};EV.forEach(function(e){if(!EVF.orgOnly||(e.org&&e.org.length))cnt[e.brain||1]++;});var n=0;for(var y in EVY)n+=EVY[y].length;
+ el.innerHTML='<span class="lb">'+(I18T('brains'))+'</span>'+[1,2,3,4].map(function(k){return '<button data-b="'+k+'" class="'+(EVF.b[k]?'on':'')+'" title="'+esc(I18P(BRAINS[k].zh,BRAINS[k].en))+'">'+k+'<em>'+cnt[k]+'</em></button>';}).join('')+
+  '<button data-b="org" class="org'+(EVF.orgOnly?' on':'')+'">'+(I18T('org_reported'))+'</button><span class="tot">'+n+(I18T('events_2'))+'</span>';}
+function orgChipsHTML(e){var zh=LZ();var B=BRAINS[e.brain||1];var h='<div class="sec"><h3>'+(I18T('intel_sources'))+esc(I18P(B.zh,B.en))+'</h3>';
+ if(e.org&&e.org.length)h+='<div class="orgs">'+e.org.map(function(k){var o=ORGS[k];if(!o)return '';return '<a href="'+esc(o[2])+'" target="_blank" rel="noopener noreferrer"><b>'+esc(o[0])+'</b><span>'+esc(I18P(o[1],o[0]))+'</span></a>';}).join('')+'</div>';
+ else h+='<p class="ctrl" style="margin:0">'+(I18T('sourced_from_the_public'))+'</p>';return h+'</div>';}
 
 // ---- Overture buildings: where OpenStreetMap has few footprints, fill in from the Overture Maps
 // buildings theme (OSM + Microsoft/Google ML footprints + Esri community data), read tile-by-tile
@@ -2256,7 +2263,7 @@ function farLabels(now){var el=document.getElementById('nbrLabels');if(!el){el=d
  var on=mode==='street'&&L2.active&&!!L2.live;el.style.display=on?'':'none';if(!on||!NODES)return;
  var lv=L2.live,ll=localToLL(L2.target.x,L2.target.z),key=Math.round(ll.lat*40)+','+Math.round(ll.lon*40);
  if(key!==FAR.lab.key){FAR.lab.key=key;var c=[];NODES.rows.forEach(function(r){var d=hav(ll.lat,ll.lon,r[5],r[6]);if(d>2.5&&d<70)c.push([d,r]);});c.sort(function(a,b){return a[0]-b[0];});
-  FAR.lab.list=c.slice(0,14).map(function(x){return x[1];});var zh=lang==='zh';
+  FAR.lab.list=c.slice(0,14).map(function(x){return x[1];});var zh=LZ();
   el.innerHTML=FAR.lab.list.map(function(r,i){return '<button data-nb="'+i+'" class="nb"><i></i><b>'+esc(zh&&r[1]?r[1]:r[0])+'</b><em></em></button>';}).join('');}
  if(now-FAR.lab.at<120)return;FAR.lab.at=now;var W=window.innerWidth,H=window.innerHeight,v=new T3.Vector3(),kids=el.children;
  for(var i=0;i<FAR.lab.list.length;i++){var r=FAR.lab.list[i],b=kids[i];if(!b)continue;var x=(r[6]-lv.lon0)*lv.mLon,z=(r[5]-lv.lat0)*lv.mLat;v.set(x,40,z).sub(camera.position).normalize().multiplyScalar(2500).add(camera.position).project(camera);
@@ -2277,21 +2284,21 @@ function wireTod(){var row=document.getElementById('eTod');if(!row||row._w)retur
  var lv=document.getElementById('eLive'),hr=document.getElementById('eHour');if(lv)lv.addEventListener('click',function(){ENV.tod=null;todUI();});if(hr)hr.addEventListener('input',function(){ENV.tod=null;todUI();});
  row.addEventListener('pointerdown',function(e){e.stopPropagation();});}
 function srchLocal(q){var out=[],ql=q.toLowerCase(),seen={};if(!q)return out;
- if(L2.live)for(var k in L2.live.tiles){var T=L2.live.tiles[k];if(!T.data)continue;T.data.rn.forEach(function(r){var nm=r.n,zn=r.zh;if(!nm)return;if((nm.toLowerCase().indexOf(ql)>=0||(zn&&zn.indexOf(q)>=0))&&!seen['s'+nm]){seen['s'+nm]=1;var m=Math.floor(r.c.length/4)*2;var ll=localToLL(r.c[m],r.c[m+1]);out.push({t:'street',n:(lang==='zh'&&zn?zn:nm),s:lang==='zh'?'当前区域的街道':'Street in view',lat:ll.lat,lon:ll.lon});}});}
- CITIES.forEach(function(c){if(out.length>12)return;if((c.en&&c.en.toLowerCase().indexOf(ql)===0)||(c.zh&&c.zh.indexOf(q)===0)){out.push({t:'city',n:cityName(c),s:(lang==='zh'?c.czh:c.country)||c.iso,lat:c.lat,lon:c.lon,id:c.id});}});
+ if(L2.live)for(var k in L2.live.tiles){var T=L2.live.tiles[k];if(!T.data)continue;T.data.rn.forEach(function(r){var nm=r.n,zn=r.zh;if(!nm)return;if((nm.toLowerCase().indexOf(ql)>=0||(zn&&zn.indexOf(q)>=0))&&!seen['s'+nm]){seen['s'+nm]=1;var m=Math.floor(r.c.length/4)*2;var ll=localToLL(r.c[m],r.c[m+1]);out.push({t:'street',n:(LZ()&&zn?zn:nm),s:I18T('street_in_view'),lat:ll.lat,lon:ll.lon});}});}
+ CITIES.forEach(function(c){if(out.length>12)return;if((c.en&&c.en.toLowerCase().indexOf(ql)===0)||(c.zh&&c.zh.indexOf(q)===0)){out.push({t:'city',n:cityName(c),s:(I18P(c.czh,c.country))||c.iso,lat:c.lat,lon:c.lon,id:c.id});}});
  return out.slice(0,8);}
 function srchRemote(q,strict){var my=++SRCH.seq,ll=viewLL(),now=Date.now(),wait=Math.max(0,1100-(now-SRCH.last));
  return new Promise(function(r){setTimeout(r,wait);}).then(function(){if(my!==SRCH.seq)return null;SRCH.last=Date.now();
-  var u=strict?'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&addressdetails=0&accept-language='+(lang==='zh'?'zh,en':'en')+'&q='+encodeURIComponent(q)
-   :'https://photon.komoot.io/api/?limit=8&lang='+(lang==='zh'?'default':'en')+'&lat='+ll.lat.toFixed(4)+'&lon='+ll.lon.toFixed(4)+'&location_bias_scale=0.1&zoom=4&q='+encodeURIComponent(q);
+  var u=strict?'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=8&addressdetails=0&accept-language='+(I18T('en'))+'&q='+encodeURIComponent(q)
+   :'https://photon.komoot.io/api/?limit=8&lang='+((LZ()?'default':'en'))+'&lat='+ll.lat.toFixed(4)+'&lon='+ll.lon.toFixed(4)+'&location_bias_scale=0.1&zoom=4&q='+encodeURIComponent(q);
   return fetch(u).then(function(x){return x.json();}).then(function(j){if(my!==SRCH.seq)return null;
    if(strict)return (j||[]).map(function(o){return {t:'geo',n:(o.name||o.display_name.split(',')[0]),s:o.display_name,lat:+o.lat,lon:+o.lon};});
    return (j.features||[]).map(function(f){var p=f.properties,c=f.geometry.coordinates,addr=[p.housenumber&&p.street?p.street+' '+p.housenumber:p.street,p.district||p.locality,p.city||p.county,p.state,p.country].filter(Boolean).join(', ');
     return {t:'geo',n:p.name||(p.street?(p.street+(p.housenumber?' '+p.housenumber:'')):addr),s:addr,lat:c[1],lon:c[0]};});});}).catch(function(){return null;});}
-function srchRender(list,note){var box=document.getElementById('srchRes');if(!box)return;var zh=lang==='zh',ll=viewLL();SRCH.res=list||[];
+function srchRender(list,note){var box=document.getElementById('srchRes');if(!box)return;var zh=LZ(),ll=viewLL();SRCH.res=list||[];
  if(!list||!list.length){box.innerHTML=note?'<div class="sn">'+esc(note)+'</div>':'';box.hidden=!note;return;}box.hidden=false;
  box.innerHTML=list.map(function(r,i){var d=hav(ll.lat,ll.lon,r.lat,r.lon);return '<button data-i="'+i+'"><i class="'+r.t+'"></i><span><b>'+esc(r.n||'')+'</b><em>'+esc(r.s||'')+'</em></span><small>'+fmtKm(d)+'</small></button>';}).join('')+
-  '<div class="sn">'+(zh?'地址检索 © OpenStreetMap 贡献者 · Photon / Nominatim':'Geocoding © OpenStreetMap contributors · Photon / Nominatim')+'</div>';}
+  '<div class="sn">'+(I18T('geocoding_openstreetmap_contributors_pho'))+'</div>';}
 function srchGo(r){var box=document.getElementById('srchRes');if(box)box.hidden=true;var ll=viewLL(),d=hav(ll.lat,ll.lon,r.lat,r.lon);srchPin(r);
  if(DRV.on&&!r.id){drvSetDest({lat:r.lat,lon:r.lon,n:r.n});return;}
  if(r.id&&d>60){enterCity(r.id);return;}
@@ -2303,9 +2310,9 @@ function srchPinStep(){var el=document.getElementById('srchPin');if(!el)return;v
  el.style.transform='translate('+((v.x*.5+.5)*window.innerWidth).toFixed(0)+'px,'+((-v.y*.5+.5)*window.innerHeight).toFixed(0)+'px) translate(-50%,-100%)';el.querySelector('b').textContent=P.n;el.querySelector('em').textContent=fmtKm(dist/1000);}
 function wireSearch(){var inp=document.getElementById('srchIn');if(!inp||inp._w)return;inp._w=1;var box=document.getElementById('srchRes'),wrap=document.getElementById('srch');
  ['pointerdown','wheel','keydown'].forEach(function(t){wrap.addEventListener(t,function(e){e.stopPropagation();},{passive:t!=='keydown'});});
- function run(strict){var q=inp.value.trim();clearTimeout(SRCH.t);if(q.length<2){srchRender([]);return;}var loc=srchLocal(q);srchRender(loc,lang==='zh'?'搜索中…':'Searching…');
-  SRCH.t=setTimeout(function(){srchRemote(q,false).then(function(ph){if(ph==null)return;srchRender(srchMerge(loc,[],ph,q),lang==='zh'?'搜索中…':'Searching…');
-    return srchRemote(q,true).then(function(nm){if(nm==null)return;srchRender(srchMerge(loc,nm||[],ph,q),lang==='zh'?'没有找到':'No results');});});},strict?0:500);}
+ function run(strict){var q=inp.value.trim();clearTimeout(SRCH.t);if(q.length<2){srchRender([]);return;}var loc=srchLocal(q);srchRender(loc,I18T('searching'));
+  SRCH.t=setTimeout(function(){srchRemote(q,false).then(function(ph){if(ph==null)return;srchRender(srchMerge(loc,[],ph,q),I18T('searching'));
+    return srchRemote(q,true).then(function(nm){if(nm==null)return;srchRender(srchMerge(loc,nm||[],ph,q),I18T('no_results'));});});},strict?0:500);}
  function srchMerge(loc,nm,ph,q){var num=/\d/.test(q),A=num?nm.concat(ph):ph.concat(nm),out=[],seen={},ql=q.toLowerCase().replace(/[\s,，]+/g,'');function sc(r){var n=(r.n||'').toLowerCase().replace(/[\s,，]+/g,'');return n&&(ql.indexOf(n)>=0||n.indexOf(ql)>=0)?2:0;}A=A.map(function(r,i){return [r,i];}).sort(function(a,b){return (sc(b[0])-sc(a[0]))||(a[1]-b[1]);}).map(function(x){return x[0];});loc.concat(A).forEach(function(r){var k=(r.n||'').toLowerCase()+'|'+r.lat.toFixed(3)+'|'+r.lon.toFixed(3);if(seen[k])return;seen[k]=1;out.push(r);});return out.slice(0,10);}
  inp.addEventListener('input',function(){run(false);});
  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();if(SRCH.res.length&&!e.shiftKey)srchGo(SRCH.res[0]);else run(true);}else if(e.key==='Escape'){inp.value='';srchRender([]);inp.blur();}});
@@ -2329,37 +2336,37 @@ function obsLoad(){var ll={lat:ENV.lat,lon:ENV.lon};if(L2.live&&L2.target)ll=loc
    WIND.obs={id:id,name:f.properties.name,t:Date.parse(q.timestamp),ws:q.windSpeed&&q.windSpeed.value!=null?q.windSpeed.value/3.6:null,wg:q.windGust&&q.windGust.value!=null?q.windGust.value/3.6:null,wd:q.windDirection?q.windDirection.value:null,temp:q.temperature?q.temperature.value:null,d:hav(ll.lat,ll.lon,g[1],g[0])};});})
  .catch(function(){WIND.obs=null;}).then(function(){WIND.obsBusy=false;WIND.obsAt=Date.now();});}
 function windLine(zh){var L=ENV.wxLive,w=L&&L.wNow;if(!w)return '';var arr='↓↙←↖↑↗→↘'.charAt(Math.round(((w.wd+180)%360)/45)%8);
- var s=(zh?'此刻风 ':'Wind now ')+w.ws.toFixed(1)+' m/s '+arr+Math.round(w.wd)+'° · '+(zh?'阵风 ':'gust ')+Math.max(w.wg,w.ws).toFixed(1)+' · '+(zh?'45 分钟内最大 ':'max next 45 min ')+w.maxWs45.toFixed(1)+'/'+w.maxWg45.toFixed(1)+' m/s';
- s+=' · '+(zh?'15 分钟模型插值到 ':'15-min model interpolated to ')+fmtHM(Date.now());
- var O=WIND.obs;if(O&&O.ws!=null){var age=Math.round((Date.now()-O.t)/60000);s+=' · '+(zh?'实测 ':'observed ')+O.id+' '+O.ws.toFixed(1)+' m/s'+(O.wd!=null?' '+Math.round(O.wd)+'°':'')+'（'+(age+(zh?' 分钟前，':' min ago, '))+fmtKm(O.d)+'）';}
+ var s=(I18T('wind_now'))+w.ws.toFixed(1)+' m/s '+arr+Math.round(w.wd)+'° · '+(I18T('gust_2'))+Math.max(w.wg,w.ws).toFixed(1)+' · '+(I18T('max_next_45_min'))+w.maxWs45.toFixed(1)+'/'+w.maxWg45.toFixed(1)+' m/s';
+ s+=' · '+(I18T('s_15_min_model_interpolated'))+fmtHM(Date.now());
+ var O=WIND.obs;if(O&&O.ws!=null){var age=Math.round((Date.now()-O.t)/60000);s+=' · '+(I18T('observed'))+O.id+' '+O.ws.toFixed(1)+' m/s'+(O.wd!=null?' '+Math.round(O.wd)+'°':'')+'（'+(age+(I18T('min_ago_2')))+fmtKm(O.d)+'）';}
  return s;}
 
 // ---- full postal address + administrative jurisdiction for a clicked building (OSM Nominatim reverse,
 // on click only, cached, at most one request per second). Public map data only.
 var REV={c:{},last:0};
-function revAddr(lat,lon){var k=lat.toFixed(5)+','+lon.toFixed(5),zh=lang==='zh';if(REV.c[k+lang])return Promise.resolve(REV.c[k+lang]);
+function revAddr(lat,lon){var k=lat.toFixed(5)+','+lon.toFixed(5),zh=LZ();if(REV.c[k+lang])return Promise.resolve(REV.c[k+lang]);
  var wait=Math.max(0,1100-(Date.now()-Math.max(REV.last,SRCH.last||0)));
  return new Promise(function(r){setTimeout(r,wait);}).then(function(){REV.last=Date.now();
-  return fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&namedetails=0&accept-language='+(zh?'zh-CN,zh,en':'en')+'&lat='+lat.toFixed(6)+'&lon='+lon.toFixed(6));})
+  return fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&namedetails=0&accept-language='+(I18T('en_2'))+'&lat='+lat.toFixed(6)+'&lon='+lon.toFixed(6));})
  .then(function(r){return r.json();}).then(function(j){if(j&&j.address)for(var q in j.address){if(typeof j.address[q]==='string')j.address[q]=j.address[q].split(';')[0];}REV.c[k+lang]=j;return j;});}
-function addrFormat(a,cc){if(!a)return '';var zh=lang==='zh',east=/^(cn|jp|kr|tw|hk|mo)$/.test(cc||'');
+function addrFormat(a,cc){if(!a)return '';var zh=LZ(),east=/^(cn|jp|kr|tw|hk|mo)$/.test(cc||'');
  var road=a.road||a.pedestrian||a.footway||a.path||a.square||'',hn=a.house_number||'',sub=a.neighbourhood||a.quarter||a.suburb||a.city_district||'',city=a.city||a.town||a.village||a.municipality||a.hamlet||'',
   county=a.county||'',state=a.state||a.province||a.region||'',pc=a.postcode||'',ctry=a.country||'';
- if(east)return [ctry,state,city,a.city_district||a.suburb||'',road,hn&&(hn+(zh?'号':''))].filter(Boolean).join(zh?'':' ')+(pc?(zh?'（邮编 ':' (')+pc+')':'');
+ if(east)return [ctry,state,city,a.city_district||a.suburb||'',road,hn&&(hn+(I18T('s_2')))].filter(Boolean).join(I18T('s_3'))+(pc?(I18T('s_4'))+pc+')':'');
  return [[hn,road].filter(Boolean).join(' '),sub,[city,[state,pc].filter(Boolean).join(' ')].filter(Boolean).join(', '),ctry].filter(Boolean).join(', ');}
-function addrJuris(a,cc){if(!a)return '';var zh=lang==='zh',rows=[],iso=a['ISO3166-2-lvl4']||a['ISO3166-2-lvl6']||'';
+function addrJuris(a,cc){if(!a)return '';var zh=LZ(),rows=[],iso=a['ISO3166-2-lvl4']||a['ISO3166-2-lvl6']||'';
  function add(lbl,v){if(v)rows.push('<span><em>'+lbl+'</em>'+esc(v)+'</span>');}
- add(zh?'国家':'Country',a.country+(cc?' ('+cc.toUpperCase()+')':''));add(zh?'一级行政区':'State / province',(a.state||a.province||a.region||'')+(iso?' · '+iso:''));
- add(zh?'县 / 郡':'County',a.county||a.state_district||'');add(zh?'市 / 镇':'City / town',a.city||a.town||a.village||a.municipality||'');
- add(zh?'区 / 街道':'District',a.city_district||a.borough||a.suburb||'');add(zh?'社区 / 片区':'Neighbourhood',a.neighbourhood||a.quarter||'');
+ add(I18T('country'),a.country+(cc?' ('+cc.toUpperCase()+')':''));add(I18T('state_province'),(a.state||a.province||a.region||'')+(iso?' · '+iso:''));
+ add(I18T('county'),a.county||a.state_district||'');add(I18T('city_town'),a.city||a.town||a.village||a.municipality||'');
+ add(I18T('district'),a.city_district||a.borough||a.suburb||'');add(I18T('neighbourhood'),a.neighbourhood||a.quarter||'');
  return '<div class="juris">'+rows.join('')+'</div>';}
-function fillFullAddr(lat,lon){var el=document.getElementById('fullAddr'),jr=document.getElementById('jurisA');if(!el)return;var zh=lang==='zh';
- el.innerHTML='<span style="color:var(--faint)">'+(zh?'正在查询 OpenStreetMap…':'Looking up OpenStreetMap…')+'</span>';
+function fillFullAddr(lat,lon){var el=document.getElementById('fullAddr'),jr=document.getElementById('jurisA');if(!el)return;var zh=LZ();
+ el.innerHTML='<span style="color:var(--faint)">'+(I18T('looking_up_openstreetmap'))+'</span>';
  revAddr(lat,lon).then(function(j){if(!document.getElementById('fullAddr'))return;var a=j&&j.address,cc=a&&a.country_code;
-  if(!a){el.innerHTML='<span style="color:var(--faint)">'+(zh?'这里没有登记地址':'No address recorded here')+'</span>';return;}
-  var f=addrFormat(a,cc);el.innerHTML=esc(f||j.display_name)+'<div class="addrsub">'+(zh?'OSM 对象 ':'OSM object ')+esc((j.osm_type||'')+' '+(j.osm_id||''))+(j.name?' · '+esc(j.name):'')+'</div>';
+  if(!a){el.innerHTML='<span style="color:var(--faint)">'+(I18T('no_address_recorded_here'))+'</span>';return;}
+  var f=addrFormat(a,cc);el.innerHTML=esc(f||j.display_name)+'<div class="addrsub">'+(I18T('osm_object'))+esc((j.osm_type||'')+' '+(j.osm_id||''))+(j.name?' · '+esc(j.name):'')+'</div>';
   if(jr)jr.innerHTML=addrJuris(a,cc);if(j.name&&!bxPhotos.named){bxPhotos.named=1;bxPhotos({lat:lat,lon:lon},j.name);}})
- .catch(function(){el.innerHTML='<span style="color:var(--faint)">'+(zh?'地址服务暂时不可用':'Address service unavailable')+'</span>';});}
+ .catch(function(){el.innerHTML='<span style="color:var(--faint)">'+(I18T('address_service_unavailable'))+'</span>';});}
 
 // ---- category search (street level): places from the loaded map tiles + OSM Photon around the view, and a
 // "knowledge" chip that lists nearby Wikipedia articles ----
@@ -2373,17 +2380,17 @@ var SCAT=[{k:'food',zh:'餐厅',en:'Restaurants',ic:'🍴',cls:['restaurant','fa
  {k:'transit',zh:'公共交通',en:'Transit',ic:'🚉',cls:['railway','bus','ferry_terminal','aerialway'],ph:[['station','railway:station'],['station','public_transport:station'],['bus','highway:bus_stop']]},
  {k:'fuel',zh:'加油 / 充电',en:'Fuel / EV',ic:'⛽',cls:['fuel','charging_station'],ph:[['fuel','amenity:fuel'],['gas','amenity:fuel'],['charging','amenity:charging_station'],['ev','amenity:charging_station']]},
  {k:'wiki',zh:'知识',en:'Knowledge',ic:'📖',cls:[],ph:[]}];
-function catLocal(C){var out=[],ll=viewLL(),seen={};if(!L2.live||!C.cls.length)return out;for(var k in L2.live.tiles){var T=L2.live.tiles[k];if(!T.data)continue;T.data.po.forEach(function(p){if(C.cls.indexOf(p.cl)<0||!p.n||seen[p.n])return;seen[p.n]=1;var q=localToLL(p.x,p.z);out.push({t:'poi',n:lang==='zh'&&p.zh?p.zh:p.n,s:(p.sc||p.cl)+(lang==='zh'?' · 当前街区':' · in view'),lat:q.lat,lon:q.lon});});}
+function catLocal(C){var out=[],ll=viewLL(),seen={};if(!L2.live||!C.cls.length)return out;for(var k in L2.live.tiles){var T=L2.live.tiles[k];if(!T.data)continue;T.data.po.forEach(function(p){if(C.cls.indexOf(p.cl)<0||!p.n||seen[p.n])return;seen[p.n]=1;var q=localToLL(p.x,p.z);out.push({t:'poi',n:LZ()&&p.zh?p.zh:p.n,s:(p.sc||p.cl)+(I18T('in_view')),lat:q.lat,lon:q.lon});});}
  return out.sort(function(a,b){return hav(ll.lat,ll.lon,a.lat,a.lon)-hav(ll.lat,ll.lon,b.lat,b.lon);}).slice(0,12);}
 function catRemote(C){var ll=viewLL(),d=0.035,bb=[ll.lon-d/Math.cos(ll.lat*D2R),ll.lat-d,ll.lon+d/Math.cos(ll.lat*D2R),ll.lat+d].map(function(v){return v.toFixed(4);}).join(',');
  if(C.k==='wiki'){var wk=function(host){return fetch('https://'+host+'.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord='+ll.lat.toFixed(5)+'|'+ll.lon.toFixed(5)+'&gsradius=10000&gslimit=25&format=json&origin=*').then(function(r){return r.json();})
-  .then(function(j){return ((j.query&&j.query.geosearch)||[]).map(function(g){return {t:'wiki',n:g.title,s:'Wikipedia · '+host,lat:g.lat,lon:g.lon,url:'https://'+host+'.wikipedia.org/?curid='+g.pageid};});}).catch(function(){return [];});};return wk(lang==='zh'?'zh':'en').then(function(r){return r.length||lang!=='zh'?r:wk('en');});}
- return Promise.all(C.ph.map(function(p){return Promise.race([new Promise(function(r){setTimeout(function(){r({json:function(){return {features:[]};}});},8000);}),fetch('https://photon.komoot.io/api/?limit=15&q='+p[0]+'&osm_tag='+p[1]+'&lat='+ll.lat.toFixed(4)+'&lon='+ll.lon.toFixed(4)+'&bbox='+bb+'&lang='+(lang==='zh'?'default':'en'))]).then(function(r){return r.json();}).catch(function(){return {features:[]};});}))
+  .then(function(j){return ((j.query&&j.query.geosearch)||[]).map(function(g){return {t:'wiki',n:g.title,s:'Wikipedia · '+host,lat:g.lat,lon:g.lon,url:'https://'+host+'.wikipedia.org/?curid='+g.pageid};});}).catch(function(){return [];});};return wk((LZ()?'zh':'en')).then(function(r){return r.length||!LZ()?r:wk('en');});}
+ return Promise.all(C.ph.map(function(p){return Promise.race([new Promise(function(r){setTimeout(function(){r({json:function(){return {features:[]};}});},8000);}),fetch('https://photon.komoot.io/api/?limit=15&q='+p[0]+'&osm_tag='+p[1]+'&lat='+ll.lat.toFixed(4)+'&lon='+ll.lon.toFixed(4)+'&bbox='+bb+'&lang='+((LZ()?'default':'en')))]).then(function(r){return r.json();}).catch(function(){return {features:[]};});}))
   .then(function(js){var out=[];js.forEach(function(j){(j.features||[]).forEach(function(f){var pr=f.properties,c=f.geometry.coordinates;if(!pr.name)return;out.push({t:'geo',n:pr.name,s:[pr.street&&((pr.housenumber?pr.housenumber+' ':'')+pr.street),pr.district||pr.locality,pr.city].filter(Boolean).join(', '),lat:c[1],lon:c[0]});});});return out;});}
-function catRun(k){var C=SCAT.filter(function(c){return c.k===k;})[0];if(!C)return;SRCH.cat=k;catChips();var zh=lang==='zh',loc=catLocal(C);srchRender(loc,zh?'搜索中…':'Searching…');
+function catRun(k){var C=SCAT.filter(function(c){return c.k===k;})[0];if(!C)return;SRCH.cat=k;catChips();var zh=LZ(),loc=catLocal(C);srchRender(loc,I18T('searching'));
  catRemote(C).then(function(rem){if(SRCH.cat!==k)return;var ll=viewLL(),seen={},all=[];loc.concat(rem).forEach(function(r){var key=(r.n||'').toLowerCase();if(seen[key])return;seen[key]=1;all.push(r);});
-  all.sort(function(a,b){return hav(ll.lat,ll.lon,a.lat,a.lon)-hav(ll.lat,ll.lon,b.lat,b.lon);});srchRender(all.slice(0,14),zh?'附近没有找到':'Nothing found nearby');});}
-function catChips(){var el=document.getElementById('srchCats');if(!el)return;var zh=lang==='zh';el.innerHTML=SCAT.map(function(c){return '<button data-cat="'+c.k+'" class="'+(SRCH.cat===c.k?'on':'')+'"><i>'+c.ic+'</i>'+(zh?c.zh:c.en)+'</button>';}).join('');}
+  all.sort(function(a,b){return hav(ll.lat,ll.lon,a.lat,a.lon)-hav(ll.lat,ll.lon,b.lat,b.lon);});srchRender(all.slice(0,14),I18T('nothing_found_nearby'));});}
+function catChips(){var el=document.getElementById('srchCats');if(!el)return;var zh=LZ();el.innerHTML=SCAT.map(function(c){return '<button data-cat="'+c.k+'" class="'+(SRCH.cat===c.k?'on':'')+'"><i>'+c.ic+'</i>'+(I18P(c.zh,c.en))+'</button>';}).join('');}
 // ---- live 2D route map (street level): roads, water and parks from the loaded tiles, your track, heading and the
 // planned travel line; its own search box sends the camera on an auto-cruise to the address ----
 var MM={trail:[],at:0,last:null,scale:1.6};
@@ -2419,10 +2426,10 @@ function mmStep(now){var el=mmLayout();if(!el||!L2.live)return;if(now-MM.at<200)
  var na=-hdgR;g.save();g.translate(w-18,18);g.rotate(na);g.fillStyle='#ff6b7f';g.beginPath();g.moveTo(0,-10);g.lineTo(5,3);g.lineTo(-5,3);g.closePath();g.fill();g.fillStyle='#fff';g.font='8px monospace';g.textAlign='center';g.fillText('N',0,12);g.restore();
  var nice=[50,100,200,500,1000,2000,5000],tgtm=mpp*60,len=nice[0];nice.forEach(function(v){if(v<=tgtm)len=v;});var px=len/mpp;g.strokeStyle='#fff';g.lineWidth=1.5;g.beginPath();g.moveTo(10,h-12);g.lineTo(10+px,h-12);g.moveTo(10,h-16);g.lineTo(10,h-8);g.moveTo(10+px,h-16);g.lineTo(10+px,h-8);g.stroke();
  g.fillStyle='#fff';g.font='9px monospace';g.textAlign='left';g.fillText(len>=1000?len/1000+' km':len+' m',14+px,h-9);
- var zh=lang==='zh',inf=document.getElementById('mmInfo');if(inf){var ll2=localToLL(tg.x,tg.z),txt=fmtLL(ll2.lat,ll2.lon);if(TRV.on&&TRV.dest&&isFinite(TRV.x)){var rem=Math.hypot(TRV.x-tg.x,TRV.z-tg.z)/1000;txt=(zh?'▶ 续航至 ':'▶ Cruising to ')+(zh&&TRV.dest.zh?TRV.dest.zh:TRV.dest.name)+' · '+fmtKm(rem)+' · '+Math.round(TRV.v*3.6)+' km/h'+(TRV.v>1?' · ETA '+Math.max(1,Math.round(rem*1000/TRV.v/60))+(zh?' 分':' min'):'');}inf.textContent=txt;}}
-function mmGo(q){var zh=lang==='zh',res=document.getElementById('mmRes');if(!q){res.innerHTML='';return;}res.innerHTML='<div class="sn">'+(zh?'搜索中…':'Searching…')+'</div>';
+ var zh=LZ(),inf=document.getElementById('mmInfo');if(inf){var ll2=localToLL(tg.x,tg.z),txt=fmtLL(ll2.lat,ll2.lon);if(TRV.on&&TRV.dest&&isFinite(TRV.x)){var rem=Math.hypot(TRV.x-tg.x,TRV.z-tg.z)/1000;txt=(I18T('cruising_to'))+(zh&&TRV.dest.zh?TRV.dest.zh:TRV.dest.name)+' · '+fmtKm(rem)+' · '+Math.round(TRV.v*3.6)+' km/h'+(TRV.v>1?' · ETA '+Math.max(1,Math.round(rem*1000/TRV.v/60))+(I18T('min')):'');}inf.textContent=txt;}}
+function mmGo(q){var zh=LZ(),res=document.getElementById('mmRes');if(!q){res.innerHTML='';return;}res.innerHTML='<div class="sn">'+(I18T('searching'))+'</div>';
  srchRemote(q,/\d/.test(q)).then(function(list){if(list==null)return;list=(list||[]).slice(0,4);SRCH.mm=list;if(MM.auto&&list.length){MM.auto=0;MM.trail=[];srchGo(list[0]);res.innerHTML='';return;}MM.auto=0;
-  res.innerHTML=list.length?list.map(function(r,i){return '<button data-mi="'+i+'"><b>'+esc(r.n||'')+'</b><em>'+esc(r.s||'')+'</em></button>';}).join(''):'<div class="sn">'+(zh?'没有找到':'No results')+'</div>';});}
+  res.innerHTML=list.length?list.map(function(r,i){return '<button data-mi="'+i+'"><b>'+esc(r.n||'')+'</b><em>'+esc(r.s||'')+'</em></button>';}).join(''):'<div class="sn">'+(I18T('no_results'))+'</div>';});}
 function wireMM(){var inp=document.getElementById('mmIn');if(!inp||inp._w)return;inp._w=1;var box=document.getElementById('mmap');
  ['pointerdown','wheel','keydown'].forEach(function(t){box.addEventListener(t,function(e){e.stopPropagation();},{passive:t!=='keydown'});});var tm=0;
  inp.addEventListener('input',function(){clearTimeout(tm);SRCH.mm=[];var q=inp.value.trim();tm=setTimeout(function(){mmGo(q.length>=2?q:'');},600);});
@@ -2477,17 +2484,17 @@ function lzrStep(now){if(!LZR.grp)return;if(mode!=='street'||LZR.grp.parent!==L2
  var el=document.getElementById('lzrL');if(!el)return;var W=window.innerWidth,H=window.innerHeight,v=new T3.Vector3();
  LZR.lab.forEach(function(l,k){var s=el.children[k];if(!s)return;if(!l.p){s.style.display='none';return;}v.set(l.p[0],l.p[1],l.p[2]).project(camera);if(v.z>1||Math.abs(v.x)>1.1||Math.abs(v.y)>1.1){s.style.display='none';return;}
   s.style.display='';s.style.transform='translate('+((v.x*.5+.5)*W).toFixed(0)+'px,'+((-v.y*.5+.5)*H).toFixed(0)+'px) translate(-50%,-120%)';if(l.k==='r')s.textContent=l.t;});
- if(now-(LZR.pt||0)>250){LZR.pt=now;var lv=document.getElementById('lzrLive');if(lv){var zh=lang==='zh';lv.innerHTML=(zh?'无人机 → 最近屋角 斜距 ':'UAV → nearest roof corner, slant ')+'<b>'+best.toFixed(2)+' m</b> · '+(zh?'水平 ':'horiz ')+hz.toFixed(2)+' m · '+(zh?'俯角 ':'depression ')+dep.toFixed(1)+'°';}}}
-function lzrPanel(b){var h=Math.max(3,b[0]),mh=b[1]||0,P=[],i,zh=lang==='zh';for(i=2;i<b.length-1;i+=2)P.push([b[i],b[i+1]]);if(P.length>2&&P[0][0]===P[P.length-1][0]&&P[0][1]===P[P.length-1][1])P.pop();
+ if(now-(LZR.pt||0)>250){LZR.pt=now;var lv=document.getElementById('lzrLive');if(lv){var zh=LZ();lv.innerHTML=(I18T('uav_nearest_roof_corner'))+'<b>'+best.toFixed(2)+' m</b> · '+(I18T('horiz'))+hz.toFixed(2)+' m · '+(I18T('depression'))+dep.toFixed(1)+'°';}}}
+function lzrPanel(b){var h=Math.max(3,b[0]),mh=b[1]||0,P=[],i,zh=LZ();for(i=2;i<b.length-1;i+=2)P.push([b[i],b[i+1]]);if(P.length>2&&P[0][0]===P[P.length-1][0]&&P[0][1]===P[P.length-1][1])P.pop();
  var n=P.length,ed=[],dia=0;for(i=0;i<n;i++){var a=P[i],c=P[(i+1)%n];ed.push(Math.hypot(c[0]-a[0],c[1]-a[1]));for(var j=i+1;j<n;j++)dia=Math.max(dia,Math.hypot(P[j][0]-a[0],P[j][1]-a[1]));}
  var top=ed.map(function(L,k){return [L,k];}).sort(function(p,q){return q[0]-p[0];}).slice(0,6),sd=Math.hypot(dia,h-mh);
- return '<h3>'+(zh?'激光测距（几何计算）':'Laser survey (geometry)')+'</h3><div class="blk lzrb"><div id="lzrLive" class="lzrlive">…</div>'
-  +'<dl class="kv"><dt>'+(zh?'墙面边数':'Walls')+'</dt><dd>'+n+'</dd><dt>'+(zh?'最长墙面':'Longest walls')+'</dt><dd>'+top.map(function(e){return e[0].toFixed(2)+' m';}).join(' · ')+'</dd>'
-  +'<dt>'+(zh?'高度（地面→屋顶）':'Height (base→roof)')+'</dt><dd>'+(h-mh).toFixed(2)+' m</dd><dt>'+(zh?'平面最大对角线':'Plan diagonal')+'</dt><dd>'+dia.toFixed(2)+' m</dd><dt>'+(zh?'空间对角线':'Space diagonal')+'</dt><dd>'+sd.toFixed(2)+' m</dd></dl>'
-  +'<p class="lzrnote">'+(zh?'数值按建筑轮廓与高度做几何计算，楼上只显示数据标签；到最近屋角的斜距随无人机移动实时更新。精度取决于 OpenStreetMap 轮廓（通常 ±0.5–2 m）和高度标签，并非实测激光雷达。':'Values are computed from the footprint and height; only the data labels are drawn on the building, and the slant range to the nearest roof corner updates live. Accuracy follows the OpenStreetMap outline (typically ±0.5–2 m) and height tag — this is geometry, not a measured LiDAR scan.')+'</p></div>';}
+ return '<h3>'+(I18T('laser_survey_geometry'))+'</h3><div class="blk lzrb"><div id="lzrLive" class="lzrlive">…</div>'
+  +'<dl class="kv"><dt>'+(I18T('walls'))+'</dt><dd>'+n+'</dd><dt>'+(I18T('longest_walls'))+'</dt><dd>'+top.map(function(e){return e[0].toFixed(2)+' m';}).join(' · ')+'</dd>'
+  +'<dt>'+(I18T('height_base_roof'))+'</dt><dd>'+(h-mh).toFixed(2)+' m</dd><dt>'+(I18T('plan_diagonal'))+'</dt><dd>'+dia.toFixed(2)+' m</dd><dt>'+(I18T('space_diagonal'))+'</dt><dd>'+sd.toFixed(2)+' m</dd></dl>'
+  +'<p class="lzrnote">'+(I18T('values_are_computed_from'))+'</p></div>';}
 // Wikimedia Commons: geotagged photos around the building, plus interior shots when the place has a name
-function bxPhotos(ll,name){var el=document.getElementById('bxPhotos');if(!el)return;var zh=lang==='zh',my=(bxPhotos.seq=(bxPhotos.seq||0)+1);
- el.innerHTML='<h3>'+(zh?'实景照片 · 周边 300 m':'Real-world photos · within 300 m')+'</h3><div class="ph-grid"><span class="ph-note">'+(zh?'正在载入 Wikimedia Commons…':'Loading Wikimedia Commons…')+'</span></div>';
+function bxPhotos(ll,name){var el=document.getElementById('bxPhotos');if(!el)return;var zh=LZ(),my=(bxPhotos.seq=(bxPhotos.seq||0)+1);
+ el.innerHTML='<h3>'+(I18T('real_world_photos_within'))+'</h3><div class="ph-grid"><span class="ph-note">'+(I18T('loading_wikimedia_commons'))+'</span></div>';
  var base='https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=imageinfo|coordinates&iiprop=url|extmetadata&iiurlwidth=360&iiextmetadatafilter=Artist|LicenseShortName|ImageDescription';
  var q1=fetch(base+'&generator=geosearch&ggscoord='+ll.lat.toFixed(6)+'|'+ll.lon.toFixed(6)+'&ggsradius=300&ggslimit=18&ggsnamespace=6').then(function(r){return r.json();}).catch(function(){return {};});
  var q2=name?fetch(base+'&generator=search&gsrnamespace=6&gsrlimit=6&gsrsearch='+encodeURIComponent('"'+name+'" interior filetype:bitmap')).then(function(r){return r.json();}).catch(function(){return {};}):Promise.resolve({});
@@ -2496,9 +2503,9 @@ function bxPhotos(ll,name){var el=document.getElementById('bxPhotos');if(!el)ret
    var co=p.coordinates&&p.coordinates[0],d=co?hav(ll.lat,ll.lon,co.lat,co.lon)*1000:null,md=ii.extmetadata||{},strip=function(s){return (s||'').replace(/<[^>]*>/g,'').trim();};
    list.push({u:ii.thumburl,h:ii.descriptionurl,d:d,int:qi===1||/interior|inside|lobby|hall|室内|内部/i.test(p.title),a:strip(md.Artist&&md.Artist.value).slice(0,40),l:strip(md.LicenseShortName&&md.LicenseShortName.value),t:p.title.replace(/^File:/,'').replace(/\.[a-z]+$/i,'')});});});
   list.sort(function(a,b){return (b.int-a.int)||((a.d==null?1e9:a.d)-(b.d==null?1e9:b.d));});list=list.slice(0,12);
-  var g=el.querySelector('.ph-grid');if(!list.length){g.innerHTML='<span class="ph-note">'+(zh?'附近还没有带地理标记的公开照片':'No geotagged public photos nearby yet')+'</span>';return;}
-  g.innerHTML=list.map(function(p){return '<a class="ph" href="'+esc(p.h)+'" target="_blank" rel="noopener" title="'+esc(p.t+' — '+p.a+' · '+p.l)+'"><img loading="lazy" src="'+esc(p.u)+'" alt="'+esc(p.t)+'"><em>'+(p.int?(zh?'内景 · ':'Interior · '):'')+(p.d!=null?Math.round(p.d)+' m':'')+'</em></a>';}).join('');
-  el.insertAdjacentHTML('beforeend','<p class="ph-note">'+(zh?'照片来自 Wikimedia Commons 的游客/志愿者上传，点击查看作者与许可。室内图仅在有人公开上传时出现。':'Photos uploaded by visitors and volunteers to Wikimedia Commons — click for author and licence. Interiors appear only where someone has shared them.')+'</p>');});}
+  var g=el.querySelector('.ph-grid');if(!list.length){g.innerHTML='<span class="ph-note">'+(I18T('no_geotagged_public_photos'))+'</span>';return;}
+  g.innerHTML=list.map(function(p){return '<a class="ph" href="'+esc(p.h)+'" target="_blank" rel="noopener" title="'+esc(p.t+' — '+p.a+' · '+p.l)+'"><img loading="lazy" src="'+esc(p.u)+'" alt="'+esc(p.t)+'"><em>'+(p.int?(I18T('interior')):'')+(p.d!=null?Math.round(p.d)+' m':'')+'</em></a>';}).join('');
+  el.insertAdjacentHTML('beforeend','<p class="ph-note">'+(I18T('photos_uploaded_by_visitors'))+'</p>');});}
 // mobile network operators by country (public licence holders; coverage varies street by street)
 var MNO={US:[['AT&T','310 410'],['Verizon','311 480'],['T-Mobile','310 260']],CA:[['Rogers','302 720'],['Bell','302 610'],['Telus','302 220'],['Freedom','302 490']],MX:[['Telcel','334 020'],['AT&T México','334 050'],['Movistar','334 030']],
  BR:[['Vivo','724 06'],['Claro','724 05'],['TIM','724 04']],AR:[['Personal','722 34'],['Claro','722 310'],['Movistar','722 07']],CL:[['Entel','730 01'],['Movistar','730 02'],['Claro','730 03'],['WOM','730 09']],CO:[['Claro','732 101'],['Movistar','732 123'],['Tigo','732 103'],['WOM','732 360']],PE:[['Claro','716 10'],['Movistar','716 06'],['Entel','716 17'],['Bitel','716 15']],
@@ -2514,10 +2521,10 @@ var MNO={US:[['AT&T','310 410'],['Verizon','311 480'],['T-Mobile','310 260']],CA
  AU:[['Telstra','505 01'],['Optus','505 02'],['TPG Telecom (Vodafone)','505 03']],NZ:[['One NZ','530 01'],['Spark','530 05'],['2degrees','530 24']],AE:[['e& (Etisalat)','424 02'],['du','424 03']],SA:[['stc','420 01'],['Mobily','420 03'],['Zain','420 04']],IL:[['Cellcom','425 02'],['Partner','425 01'],['Pelephone','425 03'],['HOT Mobile','425 07']],
  EG:[['Vodafone','602 02'],['Orange','602 01'],['e& (Etisalat)','602 03'],['WE','602 04']],ZA:[['Vodacom','655 01'],['MTN','655 10'],['Cell C','655 07'],['Telkom','655 02']],NG:[['MTN','621 30'],['Airtel','621 20'],['Glo','621 50'],['9mobile','621 60']],KE:[['Safaricom','639 02'],['Airtel','639 03']],
  HU:[['Magyar Telekom','216 30'],['Yettel','216 01'],['One','216 70']],RO:[['Orange','226 10'],['Vodafone','226 01'],['Digi','226 05']]};
-function bxNet(iso,ll){var el=document.getElementById('bxNet');if(!el)return;var zh=lang==='zh',L=MNO[iso],cn=(L2.city&&(zh?L2.city.czh:L2.city.country))||iso||'—';
- el.innerHTML='<h3>'+(zh?'运营商网络':'Mobile networks')+'</h3><div class="blk">'+(L?'<div class="mno">'+L.map(function(o){return '<span><b>'+esc(o[0])+'</b><em>MCC/MNC '+esc(o[1])+'</em></span>';}).join('')+'</div>':'<p>'+(zh?'暂未收录这个国家/地区的运营商':'Operators for this country are not listed yet')+'</p>')
-  +'<p class="lzrnote">'+(zh?'这是 '+esc(cn)+' 持有全国移动牌照的运营商，这栋楼的实际信号和制式（4G/5G）以各家覆盖图为准：':'National mobile licence holders in '+esc(cn)+'; actual signal and 4G/5G at this building depend on each operator’s coverage map: ')
-  +'<a href="https://www.nperf.com/'+(zh?'zh':'en')+'/map/'+esc(iso||'')+'/-/-/signal/?ll='+ll.lat.toFixed(5)+'&lg='+ll.lon.toFixed(5)+'&zoom=15" target="_blank" rel="noopener">nPerf ↗</a>'+(iso==='US'?' · <a href="https://broadbandmap.fcc.gov/home" target="_blank" rel="noopener">FCC Broadband Map ↗</a>':'')+'</p></div>';}
+function bxNet(iso,ll){var el=document.getElementById('bxNet');if(!el)return;var zh=LZ(),L=MNO[iso],cn=(L2.city&&(I18P(L2.city.czh,L2.city.country)))||iso||'—';
+ el.innerHTML='<h3>'+(I18T('mobile_networks'))+'</h3><div class="blk">'+(L?'<div class="mno">'+L.map(function(o){return '<span><b>'+esc(o[0])+'</b><em>MCC/MNC '+esc(o[1])+'</em></span>';}).join('')+'</div>':'<p>'+(I18T('operators_for_this_country'))+'</p>')
+  +'<p class="lzrnote">'+(I18P('这是 '+esc(cn)+' 持有全国移动牌照的运营商，这栋楼的实际信号和制式（4G/5G）以各家覆盖图为准：','National mobile licence holders in '+esc(cn)+'; actual signal and 4G/5G at this building depend on each operator’s coverage map: '))
+  +'<a href="https://www.nperf.com/'+((LZ()?'zh':'en'))+'/map/'+esc(iso||'')+'/-/-/signal/?ll='+ll.lat.toFixed(5)+'&lg='+ll.lon.toFixed(5)+'&zoom=15" target="_blank" rel="noopener">nPerf ↗</a>'+(iso==='US'?' · <a href="https://broadbandmap.fcc.gov/home" target="_blank" rel="noopener">FCC Broadband Map ↗</a>':'')+'</p></div>';}
 function bxFill(b){var bf=buildingFacts(b),el=document.getElementById('bxLaser');if(el)el.innerHTML=lzrPanel(b);var nm=bf.places&&bf.places[0]?bf.places[0].n:'';bxPhotos.named=!!nm;bxPhotos(bf.ll,nm);bxNet(L2.city&&L2.city.iso,bf.ll);}
 
 // ---- drone spatial mapping (drone mode only): everything the drone flies past is scanned into an abstract data
@@ -2651,39 +2658,39 @@ function smapStep(dt,now){var on=smapActive(),pn=document.getElementById('smapP'
   smapLabels(now);if(now-SMAP.lt>600){SMAP.lt=now;smapPanel();}}else{var el9=document.getElementById('smapL');if(el9&&el9.innerHTML)el9.innerHTML='';}}
 function smapLabels(now){var el=document.getElementById('smapL');if(!el)return;if(!SMAP.L.dist&&!SMAP.L.tall){if(el.innerHTML)el.innerHTML='';return;}if(now-(SMAP.lb||0)<140)return;SMAP.lb=now;
  var tg=L2.target,Rc0=smapRc(),near=SMAP.pairs.filter(function(p){return p.g>=.3;}).map(function(p){return [Math.hypot(p.m[0]-tg.x,p.m[2]-tg.z),p];}).filter(function(q){return q[0]<Rc0;}).sort(function(a,b){return a[0]-b[0];}).slice(0,8),W=window.innerWidth,H=window.innerHeight,v=new T3.Vector3(),html='';
- if(!SMAP.L.dist)near=[];if(SMAP.L.tall){var alt=camera.position.y,zh=lang==='zh';SMAP.list.filter(function(o){return Math.hypot(o.cx-tg.x,o.cz-tg.z)<Rc0;}).sort(function(a,b){return b.h-a.h;}).slice(0,5).forEach(function(o){v.set(o.cx,o.h+4,o.cz).project(camera);if(v.z>1||Math.abs(v.x)>1||Math.abs(v.y)>1)return;var dz=alt-o.h,cl=dz<0?' c':dz<30?' m':'';html+='<span class="st'+cl+'" style="transform:translate('+((v.x*.5+.5)*W).toFixed(0)+'px,'+((-v.y*.5+.5)*H).toFixed(0)+'px) translate(-50%,-100%)">▲ '+Math.round(o.h)+' m · '+Math.max(1,Math.round(o.h/3.5))+(zh?' 层':'F')+'<em>'+(dz<0?(zh?'高于本机 ':'above UAV ')+Math.round(-dz)+' m':(zh?'净空 ':'clear ')+Math.round(dz)+' m')+'</em></span>';});}
- near.forEach(function(q){var p=q[1];v.set(p.m[0],p.m[1],p.m[2]).project(camera);if(v.z>1||Math.abs(v.x)>1||Math.abs(v.y)>1)return;html+='<span class="sl'+(p.g<6?' c':p.g<15?' m':'')+'" style="transform:translate('+((v.x*.5+.5)*W).toFixed(0)+'px,'+((-v.y*.5+.5)*H).toFixed(0)+'px) translate(-50%,-50%)">'+(p.g<0.3?(lang==='zh'?'相连':'joined'):p.g.toFixed(1)+' m')+'</span>';});
+ if(!SMAP.L.dist)near=[];if(SMAP.L.tall){var alt=camera.position.y,zh=LZ();SMAP.list.filter(function(o){return Math.hypot(o.cx-tg.x,o.cz-tg.z)<Rc0;}).sort(function(a,b){return b.h-a.h;}).slice(0,5).forEach(function(o){v.set(o.cx,o.h+4,o.cz).project(camera);if(v.z>1||Math.abs(v.x)>1||Math.abs(v.y)>1)return;var dz=alt-o.h,cl=dz<0?' c':dz<30?' m':'';html+='<span class="st'+cl+'" style="transform:translate('+((v.x*.5+.5)*W).toFixed(0)+'px,'+((-v.y*.5+.5)*H).toFixed(0)+'px) translate(-50%,-100%)">▲ '+Math.round(o.h)+' m · '+Math.max(1,Math.round(o.h/3.5))+(I18T('f'))+'<em>'+(dz<0?(I18T('above_uav'))+Math.round(-dz)+' m':(I18T('clear_2'))+Math.round(dz)+' m')+'</em></span>';});}
+ near.forEach(function(q){var p=q[1];v.set(p.m[0],p.m[1],p.m[2]).project(camera);if(v.z>1||Math.abs(v.x)>1||Math.abs(v.y)>1)return;html+='<span class="sl'+(p.g<6?' c':p.g<15?' m':'')+'" style="transform:translate('+((v.x*.5+.5)*W).toFixed(0)+'px,'+((-v.y*.5+.5)*H).toFixed(0)+'px) translate(-50%,-50%)">'+(p.g<0.3?(I18T('joined')):p.g.toFixed(1)+' m')+'</span>';});
  [Math.round(Rc0),Math.round(SMAP.R)].forEach(function(r){v.set(tg.x+r*.707,1,tg.z+r*.707).project(camera);if(v.z<1&&Math.abs(v.x)<1&&Math.abs(v.y)<1)html+='<span class="sr" style="transform:translate('+((v.x*.5+.5)*W).toFixed(0)+'px,'+((-v.y*.5+.5)*H).toFixed(0)+'px) translate(-50%,-50%)">'+r+' m</span>';});
  el.innerHTML=html;}
-function smapPanel(){var p=document.getElementById('smapP');if(!p)return;var zh=lang==='zh';
+function smapPanel(){var p=document.getElementById('smapP');if(!p)return;var zh=LZ();
  if(!SMAP.panelBuilt||SMAP.panelLang!==lang){SMAP.panelBuilt=1;SMAP.panelLang=lang;
-  p.innerHTML='<div class="smH"><b>'+(zh?'空间映射':'SPATIAL MAP')+'</b><span>'+(zh?'焦点 / 外环 ':'Core / outer ')+'<b id="smR"></b></span><button id="smOn" aria-pressed="true">'+(zh?'开':'On')+'</button></div>'
-   +'<div class="smSec"><em>'+(zh?'飞行遥测 · 无人机':'Flight telemetry · UAV')+'</em><div class="smTel" id="smTel"></div></div><div class="smSec"><em>'+(zh?'颜色映射':'Colour mapping')+'</em><div class="smChips">'+SMAP_MODES.map(function(m){return '<button data-sm="'+m[0]+'">'+(zh?m[1]:m[2])+'</button>';}).join('')+'</div><div class="smRamp" id="smRamp"></div></div>'
-   +'<div class="smSec"><em>'+(zh?'图层':'Layers')+'</em><div class="smLay">'+SMAP_LAYERS.map(function(l,i){return '<label><input type="checkbox" data-sl="'+l[0]+'"'+(SMAP.L[l[0]]?' checked':'')+'><i>'+(i+1)+'</i>'+(zh?l[1]:l[2])+'</label>';}).join('')+'</div></div>'
-   +'<div class="smSec"><em>'+(zh?'激光雷达 LiDAR · 光束逐条按真实楼体求交':'LiDAR · every beam traced against real buildings')+'</em><div id="smLid"></div><div class="lidS" id="smLidS"></div></div>'
-   +'<div class="smSec"><em>'+(zh?'扫描统计':'Survey')+'</em><div class="smStats" id="smStats"></div></div>'
-   +'<div class="smBtns"><button id="smClr">'+(zh?'重新扫描':'Rescan')+'</button><button id="smCsv">'+(zh?'导出 CSV':'Export CSV')+'</button></div>';
+  p.innerHTML='<div class="smH"><b>'+(I18T('spatial_map'))+'</b><span>'+(I18T('core_outer'))+'<b id="smR"></b></span><button id="smOn" aria-pressed="true">'+(I18T('on'))+'</button></div>'
+   +'<div class="smSec"><em>'+(I18T('flight_telemetry_uav'))+'</em><div class="smTel" id="smTel"></div></div><div class="smSec"><em>'+(I18T('colour_mapping'))+'</em><div class="smChips">'+SMAP_MODES.map(function(m){return '<button data-sm="'+m[0]+'">'+(I18P(m[1],m[2]))+'</button>';}).join('')+'</div><div class="smRamp" id="smRamp"></div></div>'
+   +'<div class="smSec"><em>'+(I18T('layers'))+'</em><div class="smLay">'+SMAP_LAYERS.map(function(l,i){return '<label><input type="checkbox" data-sl="'+l[0]+'"'+(SMAP.L[l[0]]?' checked':'')+'><i>'+(i+1)+'</i>'+(I18P(l[1],l[2]))+'</label>';}).join('')+'</div></div>'
+   +'<div class="smSec"><em>'+(I18T('lidar_every_beam_traced'))+'</em><div id="smLid"></div><div class="lidS" id="smLidS"></div></div>'
+   +'<div class="smSec"><em>'+(I18T('survey_2'))+'</em><div class="smStats" id="smStats"></div></div>'
+   +'<div class="smBtns"><button id="smClr">'+(I18T('rescan'))+'</button><button id="smCsv">'+(I18T('export_csv'))+'</button></div>';
   ['pointerdown','wheel'].forEach(function(t){p.addEventListener(t,function(e){e.stopPropagation();},{passive:true});});
   p.querySelectorAll('[data-sm]').forEach(function(b){b.onclick=function(){SMAP.mode=b.getAttribute('data-sm');smapPanel();};});
   p.querySelectorAll('[data-sl]').forEach(function(c){c.onchange=function(){SMAP.L[c.getAttribute('data-sl')]=c.checked;};});
-  document.getElementById('smOn').onclick=function(){SMAP.on=false;toast(zh?'空间映射已关闭——在无人机按钮旁重新打开':'Spatial map off — turn it back on next to the drone button');var b=document.getElementById('bSmap');if(b)b.setAttribute('aria-pressed','false');};
+  document.getElementById('smOn').onclick=function(){SMAP.on=false;toast(I18T('spatial_map_off_turn'));var b=document.getElementById('bSmap');if(b)b.setAttribute('aria-pressed','false');};
   document.getElementById('smClr').onclick=function(){smapReset();};document.getElementById('smCsv').onclick=smapCsv;lidUI();}
  p.querySelectorAll('[data-sm]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-sm')===SMAP.mode);});
- var rmp={h:[zh?'低':'low','≈160 m '+(zh?'高':'high')],g:['≥30 m '+(zh?'宽松':'open'),zh?'0 m 紧贴':'0 m tight'],d:[Math.round(SMAP.R*1.6)+' m',zh?'无人机正下方':'below drone']}[SMAP.mode];var alt=Math.round(camera.position.y);
- document.getElementById('smRamp').innerHTML=SMAP.mode==='c'?'<div class="smCat smClr"><span><i style="background:#ff2938"></i>'+(zh?'高于无人机 ':'above UAV ')+alt+' m</span><span><i style="background:#ff8520"></i>'+(zh?'净空 < 30 m':'< 30 m clear')+'</span><span><i style="background:#ffdb33"></i>30–60 m</span><span><i style="background:#38ff94"></i>'+(zh?'> 60 m 安全':'> 60 m safe')+'</span></div>':SMAP.mode==='g'?'<div class="bar"></div><div class="lbl"><span>'+rmp[0]+'</span><span>'+rmp[1]+'</span></div><div class="smNote">'+(zh?'间距以粒子与楼间连线着色，实体楼保持中性色':'Spacing is carried by the particles and gap lines; solids stay neutral')+'</div>':SMAP.mode==='k'?'<div class="smCat">'+TAX.map(function(M,i){return '<span><i style="background:'+M.col+'"></i>'+(i+1)+' '+esc(zh?M.zh.replace('建筑',''):M.en)+'</span>';}).join('')+'</div>':'<div class="bar"></div><div class="lbl"><span>'+rmp[0]+'</span><span>'+rmp[1]+'</span></div>';
+ var rmp={h:[I18T('low'),'≈160 m '+(I18T('high'))],g:['≥30 m '+(I18T('open_2')),I18T('s_0_m_tight')],d:[Math.round(SMAP.R*1.6)+' m',I18T('below_drone')]}[SMAP.mode];var alt=Math.round(camera.position.y);
+ document.getElementById('smRamp').innerHTML=SMAP.mode==='c'?'<div class="smCat smClr"><span><i style="background:#ff2938"></i>'+(I18T('above_uav_2'))+alt+' m</span><span><i style="background:#ff8520"></i>'+(I18T('s_30_m_clear'))+'</span><span><i style="background:#ffdb33"></i>30–60 m</span><span><i style="background:#38ff94"></i>'+(I18T('s_60_m_safe'))+'</span></div>':SMAP.mode==='g'?'<div class="bar"></div><div class="lbl"><span>'+rmp[0]+'</span><span>'+rmp[1]+'</span></div><div class="smNote">'+(I18T('spacing_is_carried_by'))+'</div>':SMAP.mode==='k'?'<div class="smCat">'+TAX.map(function(M,i){return '<span><i style="background:'+M.col+'"></i>'+(i+1)+' '+esc(I18P(M.zh.replace('建筑',''),M.en))+'</span>';}).join('')+'</div>':'<div class="bar"></div><div class="lbl"><span>'+rmp[0]+'</span><span>'+rmp[1]+'</span></div>';
  var L=SMAP.list,n=L.length,area=SMAP.cellN*1600,gaps=L.map(function(o){return o.gap;}).filter(function(g){return g<60;}),E=SMAP.elev,eh=smapElevAt(L2.target.x,L2.target.z),cp=camera.position;
  var sep=gaps.filter(function(g){return g>=.3;}),joined=gaps.length-sep.length,avgG=sep.length?sep.reduce(function(a,b){return a+b;},0)/sep.length:0,minG=sep.length?Math.min.apply(0,sep):0;
  function row(k,v){return '<div><em>'+k+'</em><b>'+v+'</b></div>';}
- document.getElementById('smStats').innerHTML=row(zh?'已扫描建筑':'Buildings',n.toLocaleString()+(SMAP.pend.length?' <small>+'+SMAP.pend.length+'</small>':''))+row(zh?'扫描面积':'Area',(area/1e6).toFixed(2)+' km²')
-  +row(zh?'平均楼高':'Avg height',n?(SMAP.sum.h/n).toFixed(1)+' m':'—')+row(zh?'平均楼间距':'Avg spacing',sep.length?avgG.toFixed(1)+' m':'—')+row(zh?'最小楼间距':'Min spacing',sep.length?minG.toFixed(1)+' m':'—')+row(zh?'相连建筑':'Joined',joined+' / '+gaps.length)
-  +row(zh?'建筑密度':'Coverage',area?(SMAP.sum.foot/area*100).toFixed(1)+' %':'—')+row(zh?'容积率':'FAR',area?(SMAP.sum.gfa/area).toFixed(2):'—')
-  +row(zh?'地形高程':'Terrain',E?Math.round(E.mn)+'–'+Math.round(E.mx)+' m':(zh?'载入中…':'loading…'))+row(zh?'无人机海拔':'UAV altitude',eh!=null?Math.round(eh+cp.y)+' m':Math.round(cp.y)+' m AGL');}
+ document.getElementById('smStats').innerHTML=row(I18T('buildings'),n.toLocaleString()+(SMAP.pend.length?' <small>+'+SMAP.pend.length+'</small>':''))+row(I18T('area_2'),(area/1e6).toFixed(2)+' km²')
+  +row(I18T('avg_height'),n?(SMAP.sum.h/n).toFixed(1)+' m':'—')+row(I18T('avg_spacing'),sep.length?avgG.toFixed(1)+' m':'—')+row(I18T('min_spacing'),sep.length?minG.toFixed(1)+' m':'—')+row(I18T('joined_2'),joined+' / '+gaps.length)
+  +row(I18T('coverage'),area?(SMAP.sum.foot/area*100).toFixed(1)+' %':'—')+row(I18T('far_2'),area?(SMAP.sum.gfa/area).toFixed(2):'—')
+  +row(I18T('terrain'),E?Math.round(E.mn)+'–'+Math.round(E.mx)+' m':(I18T('loading')))+row(I18T('uav_altitude'),eh!=null?Math.round(eh+cp.y)+' m':Math.round(cp.y)+' m AGL');}
 function wireSmap(){var b=document.getElementById('bSmap');if(!b||b._w)return;b._w=1;b.onclick=function(){SMAP.on=!SMAP.on;b.setAttribute('aria-pressed',SMAP.on);if(SMAP.on&&!(L2.drone&&L2.drone.on)){var bd=document.getElementById('bDrone');if(bd)bd.click();}};}
 function smapTel(tl,ac,home,agl,zh){var el=document.getElementById('smTel');if(!el)return;var vs=DHUD.vs,gs=DHUD.hs*3.6;
  function c(k,v,w){return '<div'+(w?' class="w"':'')+'><em>'+k+'</em><b>'+v+'</b></div>';}
- el.innerHTML=c('UTC',tl[0][1])+c(zh?'高度':'ELEV',tl[1][1])+c(zh?'航向':'HDG',tl[2][1])+c(zh?'云台':'GMB',tl[3][1])
-  +c(zh?'本机坐标':'UAV position',fmtLL6(ac.lat,ac.lon),1)+c(zh?'离起点':'From origin',fmtKm(home/1000))+c(zh?'地速':'GS',Math.round(gs)+' km/h')+c(zh?'垂直速度':'V.S',vs.toFixed(1)+' m/s');}
-function smapCsv(){var zh=lang==='zh',rows=[['id','lat','lon','class','sub_class','height_m','footprint_m2','nearest_gap_m']];SMAP.list.forEach(function(o,i){var ll=localToLL(o.cx,o.cz),t=txOf(o.pl),M=TAX[t.m];rows.push([i+1,ll.lat.toFixed(6),ll.lon.toFixed(6),'"'+M.en+'"','"'+(M.s[t.s]?M.s[t.s][1]:t.s)+'"',o.h.toFixed(1),Math.round(o.foot),o.gap<60?o.gap.toFixed(2):'']);});
+ el.innerHTML=c('UTC',tl[0][1])+c(I18T('elev'),tl[1][1])+c(I18T('hdg'),tl[2][1])+c(I18T('gmb'),tl[3][1])
+  +c(I18T('uav_position'),fmtLL6(ac.lat,ac.lon),1)+c(I18T('from_origin'),fmtKm(home/1000))+c(I18T('gs'),Math.round(gs)+' km/h')+c(I18T('v_s'),vs.toFixed(1)+' m/s');}
+function smapCsv(){var zh=LZ(),rows=[['id','lat','lon','class','sub_class','height_m','footprint_m2','nearest_gap_m']];SMAP.list.forEach(function(o,i){var ll=localToLL(o.cx,o.cz),t=txOf(o.pl),M=TAX[t.m];rows.push([i+1,ll.lat.toFixed(6),ll.lon.toFixed(6),'"'+M.en+'"','"'+(M.s[t.s]?M.s[t.s][1]:t.s)+'"',o.h.toFixed(1),Math.round(o.foot),o.gap<60?o.gap.toFixed(2):'']);});
  var csv=rows.map(function(r){return r.join(',');}).join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='sentinel-spatial-scan.csv';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);}
 
 // ---- building taxonomy: 9 major classes → sub-classes, each with its own colour and general (not building-specific)
@@ -2754,21 +2761,21 @@ function txClassify(x,zoneRaw,pois,cat){var r=null,why='form',n='';
  return {m:r[0],s:r[1],why:why,n:n};}
 function pipFlat(x,z,c){var ins=false,n=c.length/2,j=n-1;for(var i=0;i<n;i++){var xi=c[2*i],zi=c[2*i+1],xj=c[2*j],zj=c[2*j+1];if(((zi>z)!==(zj>z))&&(x<(xj-xi)*(z-zi)/((zj-zi)||1e-9)+xi))ins=!ins;j=i;}return ins;}
 function txOf(b){if(b._tx)return b._tx;var c=b[b.length-1];return {m:c===0?0:c===3?5:1,s:c===0?'res':c===2?'retail':c===3?'fac':'mixed',why:'form',n:''};}
-function txSub(t){var M=TAX[t.m],s=M&&M.s[t.s];return s?(lang==='zh'?s[0]:s[1]):'';}
-function txWhy(w){var zh=lang==='zh';return {poi:zh?'楼内地图标注（OSM POI）':'Map POI inside the footprint (OSM)',ovt:zh?'Overture 建筑属性':'Overture building class',lu:zh?'OSM 用地性质':'OSM land use',name:zh?'名称关键词推断':'Inferred from the name',form:zh?'建筑体量推断（无标注）':'Inferred from building form (no tags)'}[w]||w;}
+function txSub(t){var M=TAX[t.m],s=M&&M.s[t.s];return s?(I18P(s[0],s[1])):'';}
+function txWhy(w){var zh=LZ();return {poi:I18T('map_poi_inside_the'),ovt:I18T('overture_building_class'),lu:I18T('osm_land_use'),name:I18T('inferred_from_the_name'),form:I18T('inferred_from_building_form')}[w]||w;}
 function txProfile(t){var M=TAX[t.m];if(!M)return 4;if(t.m===1&&/retail|mall|market|food/.test(t.s))return 2;return M.p;}
 function txCounts(){var n={},s={};(L2.picks||[]).forEach(function(b){var t=txOf(b);n[t.m]=(n[t.m]||0)+1;var k=t.m+':'+t.s;s[k]=(s[k]||0)+1;});return {n:n,s:s};}
-function txSecHTML(m){var M=TAX[m],zh=lang==='zh';return '<div class="txsec"><b>'+(zh?'安全考量（该类建筑的通用知识，不针对具体建筑）':'Safety considerations (general to this class, not to any specific building)')+'</b><ul>'+M.sec[lang].map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>';}
-function renderTax(m){var M=TAX[m],zh=lang==='zh';if(!M)return;var C=txCounts();
- pHead.innerHTML=headHTML(zh?'建筑大类':'Building class',(m+1)+' · '+(zh?M.zh:M.en),'<span class="chip" style="color:'+M.col+'">■ '+(zh?M.en:M.zh)+'</span><span class="chip">'+(C.n[m]||0)+' '+T('buildings')+'</span>',true);
- var subs=Object.keys(M.s).map(function(k){var c=C.s[m+':'+k]||0;return '<div class="txs'+(c?'':' z')+'"><i style="background:'+M.col+'"></i><span>'+esc(zh?M.s[k][0]:M.s[k][1])+'</span><em>'+c+'</em></div>';}).join('');
- var p=M.p,ape=D.CATAPE[p][lang];
- pBody.innerHTML='<p class="ctrl" style="margin:0">'+esc(M.d[lang])+'</p><div class="sec"><h3>'+(zh?'子分类（当前已加载街区）':'Sub-classes (loaded streets)')+'</h3><div class="txsubs">'+subs+'</div></div>'
+function txSecHTML(m){var M=TAX[m],zh=LZ();return '<div class="txsec"><b>'+(I18T('safety_considerations_general_to'))+'</b><ul>'+LX(M.sec).map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>';}
+function renderTax(m){var M=TAX[m],zh=LZ();if(!M)return;var C=txCounts();
+ pHead.innerHTML=headHTML(I18T('building_class_2'),(m+1)+' · '+(I18P(M.zh,M.en)),'<span class="chip" style="color:'+M.col+'">■ '+(I18P(M.en,M.zh))+'</span><span class="chip">'+(C.n[m]||0)+' '+T('buildings')+'</span>',true);
+ var subs=Object.keys(M.s).map(function(k){var c=C.s[m+':'+k]||0;return '<div class="txs'+(c?'':' z')+'"><i style="background:'+M.col+'"></i><span>'+esc(I18P(M.s[k][0],M.s[k][1]))+'</span><em>'+c+'</em></div>';}).join('');
+ var p=M.p,ape=LX(D.CATAPE[p]);
+ pBody.innerHTML='<p class="ctrl" style="margin:0">'+esc(LX(M.d))+'</p><div class="sec"><h3>'+(I18T('sub_classes_loaded_streets'))+'</h3><div class="txsubs">'+subs+'</div></div>'
   +'<div class="sec">'+txSecHTML(m)+'</div>'
-  +'<div class="sec"><h3>'+T('net')+' · '+esc(D.CATS[p][lang].n)+'</h3><div class="blk"><p>'+esc(D.CATS[p][lang].net)+'</p></div></div><div class="sec">'+triHTML(ape.a,ape.p,ape.e)+'</div>'
+  +'<div class="sec"><h3>'+T('net')+' · '+esc(LX(D.CATS[p]).n)+'</h3><div class="blk"><p>'+esc(LX(D.CATS[p]).net)+'</p></div></div><div class="sec">'+triHTML(ape.a,ape.p,ape.e)+'</div>'
   +'<div class="btns"><button class="btn" data-back="city">← '+esc(cityName(L2.city))+'</button></div>';
  wire();pBody.scrollTop=0;state={type:'tax',m:m};}
-function txLegendHTML(counts,btn){var zh=lang==='zh';return TAX.map(function(M,i){var on=U.uFocus.value===i;return '<button class="lgb" data-tx="'+i+'" aria-pressed="'+on+'" title="'+esc(M.d[lang])+'"><i style="background:'+M.col+'"></i>'+(i+1)+' '+esc(zh?M.zh.replace('建筑',''):M.en)+'<em>'+(counts[i]||0)+'</em></button>';}).join('');}
+function txLegendHTML(counts,btn){var zh=LZ();return TAX.map(function(M,i){var on=U.uFocus.value===i;return '<button class="lgb" data-tx="'+i+'" aria-pressed="'+on+'" title="'+esc(LX(M.d))+'"><i style="background:'+M.col+'"></i>'+(i+1)+' '+esc(I18P(M.zh.replace('建筑',''),M.en))+'<em>'+(counts[i]||0)+'</em></button>';}).join('');}
 
 
 // ---- drone-view layout blueprint (only while the drone view is on): top = heading compass; left / right edges =
@@ -2842,7 +2849,7 @@ function droneStep(dt,now){var D=L2.drone;var hud=document.getElementById('drone
 // and a holographic model of your own aircraft. Every number comes from the actual camera.
 var DHUD={pt:null,py:null,at:0,hs:0,vs:0,t0:0,sens:'eo',holo:null};
 function dhRect(id){var e=document.getElementById(id);if(!e)return null;var r=e.getBoundingClientRect();return r.width?r:null;}
-function droneHudDraw(active,now){var hud=document.getElementById('droneHud');if(!hud)return;var zh=lang==='zh';
+function droneHudDraw(active,now){var hud=document.getElementById('droneHud');if(!hud)return;var zh=LZ();
  var W=window.innerWidth,H=window.innerHeight,tg=L2.target,cp=camera.position;if(!DHUD.t0)DHUD.t0=now;
  var dt=DHUD.at?(now-DHUD.at)/1000:0;if(dt>0&&DHUD.pt){var sh=Math.hypot(tg.x-DHUD.pt.x,tg.z-DHUD.pt.z)/dt,sv=(cp.y-DHUD.py)/dt;DHUD.hs+=(sh-DHUD.hs)*.35;DHUD.vs+=(sv-DHUD.vs)*.35;}
  DHUD.pt={x:tg.x,z:tg.z};DHUD.py=cp.y;DHUD.at=now;
@@ -2863,8 +2870,8 @@ function droneHudDraw(active,now){var hud=document.getElementById('droneHud');if
   for(var v=Math.floor((val-(ym-y0)/ppu)/step)*step;v<=val+(y1-ym)/ppu;v+=step){if(v<0)continue;var y=ym-(v-val)*ppu;if(y<y0||y>y1)continue;var major=Math.round(v/step)%5===0;
    o+='<line x1="'+x+'" y1="'+y.toFixed(1)+'" x2="'+(x+dir*(major?12:6))+'" y2="'+y.toFixed(1)+'"/>';if(major)o+='<text x="'+(x+dir*16)+'" y="'+(y+3).toFixed(1)+'"'+(right?'':' class="r"')+'>'+v+'</text>';}
   var bw=58,bx=right?x+4:x-4-bw;return o+'<path d="M'+(right?x+2:x-2)+' '+ym+'l'+(dir*8)+' -8v16z" class="ptr"/><rect x="'+bx+'" y="'+(ym-9)+'" width="'+bw+'" height="18" rx="2" class="bx"/><text x="'+(bx+bw/2)+'" y="'+(ym+4)+'" class="val">'+Math.round(val)+'</text><text x="'+(bx+bw/2)+'" y="'+(y0-8)+'" class="lab">'+label+'</text></g>';}
- if(yR1-yR0>120)s+=vscale(xR,yR0,yR1,agl,agl>1500?50:agl>400?10:5,zh?'高度 m':'ALT m',false);
- if(yL1-yL0>120)s+=vscale(xL,yL0,yL1,DHUD.hs*3.6,10,zh?'地速 km/h':'GS km/h',true);
+ if(yR1-yR0>120)s+=vscale(xR,yR0,yR1,agl,agl>1500?50:agl>400?10:5,I18T('alt_m'),false);
+ if(yL1-yL0>120)s+=vscale(xL,yL0,yL1,DHUD.hs*3.6,10,I18T('gs_km_h'),true);
  // crosshair: long gapped arms with ticks, inner brackets, centre circle
  var arm=Math.max(150,Math.min(300,H*0.26)),gap=16;s+='<g class="xh"><path d="M'+(cx-arm)+' '+cy+'H'+(cx-gap)+'M'+(cx+gap)+' '+cy+'H'+(cx+arm)+'M'+cx+' '+(cy-arm*.62)+'V'+(cy-gap)+'M'+cx+' '+(cy+gap)+'V'+(cy+arm*.62)+'"/>';
  for(var t=1;t<=4;t++){var dx=arm*t/4.6;s+='<path d="M'+(cx-dx)+' '+(cy-5)+'v10M'+(cx+dx)+' '+(cy-5)+'v10M'+(cx-5)+' '+(cy-dx*.62)+'h10M'+(cx-5)+' '+(cy+dx*.62)+'h10" class="tk"/>';}
@@ -2874,16 +2881,16 @@ function droneHudDraw(active,now){var hud=document.getElementById('droneHud');if
  s+='</g>';
  // corner data blocks
  var t=new Date(envNow()),utc=t.toISOString().slice(11,19),run=Math.floor((now-DHUD.t0)/1000),rc=('0'+Math.floor(run/3600)).slice(-2)+':'+('0'+Math.floor(run/60)%60).slice(-2)+':'+('0'+run%60).slice(-2);
- var tl=[['UTC',utc+'Z'],[zh?'高度':'ELEV',Math.round(agl)+' m · '+Math.round(agl*3.281)+' ft'],[zh?'航向':'HDG',hdg.toFixed(1)+'° T'],[zh?'云台':'GMB','−'+elDeg.toFixed(1)+'°']];
- var tr=[[zh?'模式':'MODE',active?(zh?'自动环绕':'AUTO ORBIT'):(zh?'手动':'MANUAL')],[zh?'传感器':'SENSOR',{eo:'EO',nv:'NV',ir:'IR'}[DHUD.sens]],['FOV',camera.fov.toFixed(0)+'°'],['REC',rc]];
+ var tl=[['UTC',utc+'Z'],[I18T('elev'),Math.round(agl)+' m · '+Math.round(agl*3.281)+' ft'],[I18T('hdg'),hdg.toFixed(1)+'° T'],[I18T('gmb'),'−'+elDeg.toFixed(1)+'°']];
+ var tr=[[I18T('mode'),active?(I18T('auto_orbit')):(I18T('manual'))],[I18T('sensor'),{eo:'EO',nv:'NV',ir:'IR'}[DHUD.sens]],['FOV',camera.fov.toFixed(0)+'°'],['REC',rc]];
  function blk(rows,x,y,right){var o='';rows.forEach(function(r,i){o+='<text x="'+x+'" y="'+(y+i*15)+'" class="dk'+(right?' r':'')+'">'+esc(r[0])+'</text><text x="'+(right?x-58:x+58)+'" y="'+(y+i*15)+'" class="dv'+(right?' r':'')+'">'+esc(r[1])+'</text>';});return o;}
  var hb=dhRect('dhHolo'),mmR=DL.on?null:dhRect('mmap');if(DL.on){s+=blk(tr,DL.R0-34,yR0-70,true);smapTel(tl,ac,home,agl,zh);}else s+=blk(tl,mg?Math.max(20,mg.left-40):20,(mg?mg.bottom:200)+48,false)+blk(tr,mmR?mmR.left-12:(gz?gz.right:x1),(mmR?Math.max(mmR.top+14,(hb&&hb.height?hb.bottom:0)+26):(hb&&hb.height?hb.bottom:(gz?gz.bottom:200))+26),true);
  if(DL.on){x1=DL.R0-34;yR1=DL.li-62;yL1=236;x0=DL.L0+2;}
- var br='<text x="'+(mmR?mmR.left-12:x1)+'" y="'+(yR1+2)+'" class="dk r">'+(zh?'焦点':'FOCUS')+'</text><text x="'+(mmR?mmR.left-12:x1)+'" y="'+(yR1+17)+'" class="dv r">'+fmtLL6(fo.lat,fo.lon)+'</text><text x="'+(mmR?mmR.left-12:x1)+'" y="'+(yR1+32)+'" class="dv r">MGRS '+mgrs(fo.lat,fo.lon)+' · '+(zh?'斜距 ':'SLANT ')+fmtKm(slant/1000)+'</text>';
- var bl='<text x="'+x0+'" y="'+(yL1+2)+'" class="dk">'+(zh?'本机':'UAV')+'</text><text x="'+x0+'" y="'+(yL1+17)+'" class="dv">'+fmtLL6(ac.lat,ac.lon)+'</text><text x="'+x0+'" y="'+(yL1+32)+'" class="dv">D '+fmtKm(home/1000)+' · V.S '+DHUD.vs.toFixed(1)+' m/s</text>';
+ var br='<text x="'+(mmR?mmR.left-12:x1)+'" y="'+(yR1+2)+'" class="dk r">'+(I18T('focus'))+'</text><text x="'+(mmR?mmR.left-12:x1)+'" y="'+(yR1+17)+'" class="dv r">'+fmtLL6(fo.lat,fo.lon)+'</text><text x="'+(mmR?mmR.left-12:x1)+'" y="'+(yR1+32)+'" class="dv r">MGRS '+mgrs(fo.lat,fo.lon)+' · '+(I18T('slant'))+fmtKm(slant/1000)+'</text>';
+ var bl='<text x="'+x0+'" y="'+(yL1+2)+'" class="dk">'+(I18T('uav'))+'</text><text x="'+x0+'" y="'+(yL1+17)+'" class="dv">'+fmtLL6(ac.lat,ac.lon)+'</text><text x="'+x0+'" y="'+(yL1+32)+'" class="dv">D '+fmtKm(home/1000)+' · V.S '+DHUD.vs.toFixed(1)+' m/s</text>';
  s+=br+(DL.on?'':bl);
  var svg=document.getElementById('dhSvg');svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.innerHTML=s;
- var ch=document.getElementById('dhSens');if(ch){var L=[['eo',zh?'可见光 EO':'EO'],['nv',zh?'夜视 NV':'NV'],['ir',zh?'热像 IR·模拟':'IR (sim.)']];ch.innerHTML=L.map(function(c){return '<button data-ds="'+c[0]+'" class="'+(DHUD.sens===c[0]?'on':'')+'">'+c[1]+'</button>';}).join('');ch.style.left=mid+'px';ch.style.top=(yT+52)+'px';}
+ var ch=document.getElementById('dhSens');if(ch){var L=[['eo',I18T('eo')],['nv',I18T('nv')],['ir',I18T('ir_sim')]];ch.innerHTML=L.map(function(c){return '<button data-ds="'+c[0]+'" class="'+(DHUD.sens===c[0]?'on':'')+'">'+c[1]+'</button>';}).join('');ch.style.left=mid+'px';ch.style.top=(yT+52)+'px';}
  holoStep(now,hdg,elDeg,agl,gz);}
 function droneSensor(){var on=L2.drone&&L2.drone.on&&mode==='street'&&!(typeof SKYV!=='undefined'&&SKYV.on);if(!on)return;var f='';
  if(DHUD.sens==='nv')f='grayscale(1) brightness(1.05) contrast(1.35) sepia(1) hue-rotate(58deg) saturate(2.2)';else if(DHUD.sens==='ir')f='url(#seThermal) contrast(1.1)';canvas.style.filter=f;}
@@ -2950,15 +2957,15 @@ function holoStep(now,hdg,elDeg,agl,gz){var box=document.getElementById('dhHolo'
  Hh.plasmas.forEach(function(P,pi){var fl=Math.random()<.2?.3:0;P.fil.material.opacity=Math.min(.9,.35+.2*Math.sin(now/80+pi*2)+fl);P.core.material.opacity=.6+.25*Math.sin(now/110+pi);P.flare.material.rotation=now/9000*(pi%2?1:-1);P.flare.material.opacity=.4+.15*Math.sin(now/300+pi);P.halo.material.opacity=.18+.1*Math.sin(now/170+pi*1.3);});
  Hh.rip.forEach(function(R){var ph=(now/2600+R.ph)%1;R.m.scale.setScalar(R.r0*(1+ph*1.1));R.m.material.opacity=.38*(1-ph)*(ph<.08?ph/.08:1);});
  if(Hh.hub)Hh.hub.material.opacity=.5+.3*Math.sin(now/140);
- Hh.r.render(Hh.sc,Hh.cam);var zh=lang==='zh';var hdS=box.querySelector('.dhHd span');if(hdS){var hdt2=zh?'我的无人机':'MY UAV';if(hdS.textContent!==hdt2)hdS.textContent=hdt2;}
- document.getElementById('dhHoloT').innerHTML='<span>'+(zh?'高度 ':'ALT ')+Math.round(agl)+' m</span><span>'+(zh?'航向 ':'HDG ')+('00'+Math.round(hdg)%360).slice(-3)+'°</span><span>'+(zh?'云台 ':'GMB ')+'−'+Math.round(elDeg)+'°</span><span>'+(zh?'地速 ':'GS ')+Math.round(DHUD.hs*3.6)+' km/h</span>';}
+ Hh.r.render(Hh.sc,Hh.cam);var zh=LZ();var hdS=box.querySelector('.dhHd span');if(hdS){var hdt2=I18T('my_uav');if(hdS.textContent!==hdt2)hdS.textContent=hdt2;}
+ document.getElementById('dhHoloT').innerHTML='<span>'+(I18T('alt'))+Math.round(agl)+' m</span><span>'+(I18T('hdg_2'))+('00'+Math.round(hdg)%360).slice(-3)+'°</span><span>'+(I18T('gmb_2'))+'−'+Math.round(elDeg)+'°</span><span>'+(I18T('gs_2'))+Math.round(DHUD.hs*3.6)+' km/h</span>';}
 
 function fmtLL6(lat,lon){return Math.abs(lat).toFixed(5)+'°'+(lat>=0?'N':'S')+' '+Math.abs(lon).toFixed(5)+'°'+(lon>=0?'E':'W');}
 // sky-eye reticle label: focus coordinates + ring radius from the current ground resolution
-function skyRetStep(){var lb=document.getElementById('skyRetL');if(!lb||!SKYV.on)return;var ll=viewLL(),mpp=skyMpp(),r=Math.round(44*mpp),zh=lang==='zh';
+function skyRetStep(){var lb=document.getElementById('skyRetL');if(!lb||!SKYV.on)return;var ll=viewLL(),mpp=skyMpp(),r=Math.round(44*mpp),zh=LZ();
  var nice=[5,10,20,25,50,100,200,250,500,1000,2000,2500,5000,10000,20000],rr=nice[0];nice.forEach(function(v){if(v<=r)rr=v;});var px=rr/mpp;
  var ring=document.getElementById('skyRing');if(ring){ring.setAttribute('r',px.toFixed(1));}var rl=document.getElementById('skyRingL');if(rl){rl.setAttribute('x',(px*0.71+5).toFixed(1));rl.setAttribute('y',(-px*0.71-5).toFixed(1));rl.textContent=rr>=1000?rr/1000+' km':rr+' m';}
- lb.innerHTML='<b>'+(zh?'焦点 ':'FOCUS ')+fmtLL6(ll.lat,ll.lon)+'</b><span>MGRS '+mgrs(ll.lat,ll.lon)+'</span>';}
+ lb.innerHTML='<b>'+(I18T('focus_2'))+fmtLL6(ll.lat,ll.lon)+'</b><span>MGRS '+mgrs(ll.lat,ll.lon)+'</span>';}
 
 
 // ====================================================================
@@ -3065,7 +3072,7 @@ function drvNearSeg(x,z,maxD){var best=null,bd=(maxD||30)*(maxD||30),cx=Math.flo
 function drvLaneSeg(x,z,yaw){var best=null,bd=144,cx=Math.floor(x/DRV_CELL),cz=Math.floor(z/DRV_CELL),fx=Math.sin(yaw),fz=Math.cos(yaw);drvTiles().forEach(function(T){var X=drvIndexTile(T);if(!X)return;
  for(var a=cx-1;a<=cx+1;a++)for(var b=cz-1;b<=cz+1;b++){var L=X.G[a+','+b];if(!L)continue;for(var i=0;i<L.length;i++){var s=L[i];if(s[4]>6&&s[4]!==10)continue;var dx=s[2]-s[0],dz=s[3]-s[1],dl=Math.hypot(dx,dz);if(dl<.5||Math.abs((dx*fx+dz*fz)/dl)<.8)continue;var e=segD2(x,z,s[0],s[1],s[2],s[3]);if(e<bd){bd=e;best=s;}}}});return best;}
 function drvNearName(x,z){var best=null,bd=900,cx=Math.floor(x/DRV_CELL),cz=Math.floor(z/DRV_CELL);drvTiles().forEach(function(T){var X=drvIndexTile(T);if(!X)return;
- for(var a=cx-1;a<=cx+1;a++)for(var b=cz-1;b<=cz+1;b++){var L=X.NG[a+','+b];if(!L)continue;for(var i=0;i<L.length;i++){var s=L[i],e=segD2(x,z,s[0],s[1],s[2],s[3]);if(e<bd){bd=e;best=s[4];}}}});return best?(lang==='zh'&&best.zh?best.zh:best.n):'';}
+ for(var a=cx-1;a<=cx+1;a++)for(var b=cz-1;b<=cz+1;b++){var L=X.NG[a+','+b];if(!L)continue;for(var i=0;i<L.length;i++){var s=L[i],e=segD2(x,z,s[0],s[1],s[2],s[3]);if(e<bd){bd=e;best=s[4];}}}});return best?(LZ()&&best.zh?best.zh:best.n):'';}
 function drvNearJunction(x,z,r){var best=null,bd=r*r,cx=Math.floor(x/DRV_CELL),cz=Math.floor(z/DRV_CELL);drvTiles().forEach(function(T){var X=drvIndexTile(T);if(!X)return;
  for(var a=cx-1;a<=cx+1;a++)for(var b=cz-1;b<=cz+1;b++){var L=X.JG[a+','+b];if(!L)continue;for(var i=0;i<L.length;i++){var j=L[i],e=(j.x-x)*(j.x-x)+(j.z-z)*(j.z-z);if(e<bd){bd=e;best=j;}}}});return best;}
 // ---------- route (stored in lat/lon so it survives frame rebases) ----------
@@ -3188,28 +3195,28 @@ function drvProps(){var P=drvPool(),si=0,so=0,p={},side=DRV.lht?-1:1;
   else if((c.t==='stop'||c.t==='yield'||c.t==='zeb')&&so<P.stop.length){var s=P.stop[so++];s.visible=true;s.position.set(px,0,pz);s.rotation.y=p.yaw+Math.PI;s.children[1].material.color.setHex(c.t==='stop'?0xd8202a:c.t==='zeb'?0x1d63c9:0xff8c1a);s.scale.setScalar(c.t==='stop'?1:.8);}});
  for(;si<P.sig.length;si++)P.sig[si].visible=false;for(;so<P.stop.length;so++)P.stop[so].visible=false;}
 // ---------- start / stop ----------
-function drvStart(){if(DRV.on||mode!=='street'||!L2.active)return;if(!L2.live){toast(lang==='zh'?'驾驶需要实时街区（连上地图服务器后可用）':'Driving needs the live street map');return;}
+function drvStart(){if(DRV.on||mode!=='street'||!L2.active)return;if(!L2.live){toast(I18T('driving_needs_the_live'));return;}
  if(L2.drone&&L2.drone.on){var bd=document.getElementById('bDrone');if(bd)bd.click();}if(typeof SKYV!=='undefined'&&SKYV.on)setSky(false);if(TRV.on)travelStop(false);
  var iso=(L2.city&&L2.city.iso)||'US';DRV.us=(iso==='US'||iso==='PR'||iso==='GU'||iso==='GB'&&false);DRV.lht=!!DRV_LHT[iso];
  if(!DRV.car){DRV.car=drvBuildCar();}streetScene.add(DRV.car);DRV.on=true;try{lifeInit();drvPool();if(renderer.compileAsync)renderer.compileAsync(streetScene,camera).catch(function(){});}catch(_e){}DRV.state='idle';DRV.route=null;DRV.ctl=[];DRV.v=0;DRV.fly=false;DRV.alt=0;DRV.flyPh=0;DRV.camInit=false;
  var tg=L2.target,seg=drvNearSeg(tg.x,tg.z,120);if(seg){var t=Math.max(0,Math.min(1,((tg.x-seg[0])*(seg[2]-seg[0])+(tg.z-seg[1])*(seg[3]-seg[1]))/(((seg[2]-seg[0])*(seg[2]-seg[0])+(seg[3]-seg[1])*(seg[3]-seg[1]))||1)));DRV.pos.set(seg[0]+(seg[2]-seg[0])*t,0,seg[1]+(seg[3]-seg[1])*t);DRV.yaw=Math.atan2(seg[2]-seg[0],seg[3]-seg[1]);}
  else{DRV.pos.set(tg.x,0,tg.z);DRV.yaw=0;}DRV.geo=localToLL(DRV.pos.x,DRV.pos.z);DRV.gen=L2.live.gen;L2.camWant.d=Math.max(160,Math.min(400,L2.camWant.d));
- if(DRV.parts)DRV.parts.yoke.position.x=DRV.lht?-.36:.36;DRV.panelOpen=!panel.classList.contains('min');if(window.innerWidth>=900)setPanel(false);var mi=document.getElementById('mmIn');if(mi){mi._ph=mi.placeholder;mi.placeholder=lang==='zh'?'输入地址 → 驾驶导航（真实路线）':'address → drive there';}document.body.classList.add('driving');var b=document.getElementById('bDrive');if(b)b.setAttribute('aria-pressed','true');drvUI();
- toast(lang==='zh'?'驾驶模式：在左侧输入目的地，或点「地图选点」后点一下地面':'Drive mode: enter a destination, or tap “Pick on map” then tap the street');}
+ if(DRV.parts)DRV.parts.yoke.position.x=DRV.lht?-.36:.36;DRV.panelOpen=!panel.classList.contains('min');if(window.innerWidth>=900)setPanel(false);var mi=document.getElementById('mmIn');if(mi){mi._ph=mi.placeholder;mi.placeholder=I18T('address_drive_there');}document.body.classList.add('driving');var b=document.getElementById('bDrive');if(b)b.setAttribute('aria-pressed','true');drvUI();
+ toast(I18T('drive_mode_enter_a'));}
 function drvEnd(){if(!DRV.on)return;DRV.on=false;DRV.route=null;DRV.ctl=[];if(DRV.car)streetScene.remove(DRV.car);if(DRV.pool){DRV.pool.sig.concat(DRV.pool.stop).forEach(function(g){g.visible=false;});}
  if(DRV.panelOpen)setPanel(true);var mi=document.getElementById('mmIn');if(mi&&mi._ph)mi.placeholder=mi._ph;document.body.classList.remove('driving');var b=document.getElementById('bDrive');if(b)b.setAttribute('aria-pressed','false');L2.camWant.d=Math.max(L2.camWant.d,600);L2.camWant.el=.62;DRV.pick=false;drvUI();}
 function drvSetDest(dest){if(!DRV.on)return;DRV.dest=dest;DRV.planning=true;DRV.state='plan';DRV.ctl=[];DRV.passS=null;DRV.ovp=null;drvUI();
  var a=DRV.geo||localToLL(DRV.pos.x,DRV.pos.z);if(DRV.fly){DRV.planning=false;DRV.state='fly';drvUI();return;}
  drvOSRM(a,dest).then(function(R){if(!DRV.on||DRV.dest!==dest)return;var lv=L2.live;
   if(!R){var bx=(dest.lon-lv.lon0)*lv.mLon,bz=(dest.lat-lv.lat0)*lv.mLat;return drvRestrictions(a,dest).then(function(RX){if(!DRV.on||DRV.dest!==dest)return null;DRV.rx=RX;return drvLocalRoute(DRV.pos.x,DRV.pos.z,bx,bz,RX||[]);});}return R;}).then(function(R){if(!DRV.on||DRV.dest!==dest)return;var lv=L2.live;
-  DRV.planning=false;if(!R||R.ll.length<2){DRV.state='idle';toast(lang==='zh'?'没能规划出路线（换个目的地，或用飞行模式直飞）':'No route found — try another destination or fly');drvUI();return;}
+  DRV.planning=false;if(!R||R.ll.length<2){DRV.state='idle';toast(I18T('no_route_found_try'));drvUI();return;}
   R.ll.unshift([a.lat,a.lon]);DRV.route=R;DRV.s=0;DRV.state='drive';drvRouteLocal();
   // turn steps → route distance
   var RL=DRV.route,j=0;(R.steps||[]).forEach(function(st){var x=(st.lon-lv.lon0)*lv.mLon,z=(st.lat-lv.lat0)*lv.mLat,bi=j,bd=1e18;for(var i=j;i<RL.P.length/2;i++){var e=(RL.P[i*2]-x)*(RL.P[i*2]-x)+(RL.P[i*2+1]-z)*(RL.P[i*2+1]-z);if(e<bd){bd=e;bi=i;}if(e>bd*4&&i>bi+40)break;}j=bi;st.s=RL.S[bi];});
   // prefetch the tiles the route passes through (first ~8 km)
   var seen={},k=0;for(var i=0;i<R.ll.length&&k<40;i+=3){var cx=Math.floor(tlx(R.ll[i][1])),cy=Math.floor(tly(R.ll[i][0])),key=cx+','+cy;if(seen[key])continue;seen[key]=1;k++;fetchTile(cx,cy);}
   drvOverpass(R).then(function(O){if(!DRV.on||DRV.route!==R)return;if(O){O.gen=-1;DRV.ovp=O;DRV.ctl=[];}drvUI();});
-  drvScan();drvUI();toast((lang==='zh'?'路线已规划 · ':'Route ready · ')+fmtKm(RL.len/1000)+(R.src==='osrm'?' · OSRM':(lang==='zh'?' · 本地路网':' · local roads'))+(R.partial?(lang==='zh'?'（先开到已加载区域的边缘，再继续规划）':' (to the edge of the loaded area first)'):''));});}
+  drvScan();drvUI();toast((I18T('route_ready'))+fmtKm(RL.len/1000)+(R.src==='osrm'?' · OSRM':(I18T('local_roads')))+(R.partial?(I18T('to_the_edge_of')):''));});}
 function drvSetFly(on){if(!DRV.on||DRV.fly===on)return;DRV.fly=on;if(on){DRV.state=DRV.dest?'fly':'hover';DRV.geo=localToLL(DRV.pos.x,DRV.pos.z);DRV.v=Math.max(DRV.v,4);}
  else{DRV.state='land';}drvUI();}
 // ---------- per-frame step ----------
@@ -3263,7 +3270,7 @@ function drvSim(dt){DRV.simT+=dt;var p={},R=DRV.route;
    // red / arrow-only: stop at the line. Yellow: stop only if a comfortable stop (≤3 m/s²) is possible, otherwise clear the junction.
    // Turn on red (US/Canada, right turn; mirrored for left-hand traffic is not allowed): full stop ≥2 s, then go.
    var mustStop=S.st==='R'||(S.st==='Y'&&dist>DRV.v*DRV.v/(2*3.0)+.5);if(c.passed||(DRV.passS!=null&&c.s-DRV.passS<38&&c.s>DRV.passS))mustStop=false;
-   if(!mustStop&&S.left&&S.st==='G'&&!c.goL&&dist>-1){if(dist<6&&lifeOncoming({x:c.jx,z:c.jz},Math.sin(p.yaw),Math.cos(p.yaw),null)){mustStop=true;c.yieldL=true;}else if(dist<1.5)c.goL=true;}else c.yieldL=false;
+   if(!mustStop&&S.left&&S.st==='G'&&!c.goL&&dist>-1){if(dist<12&&lifeOncoming({x:c.jx,z:c.jz},Math.sin(p.yaw),Math.cos(p.yaw),null)){mustStop=true;c.yieldL=true;}else if(dist<1.5)c.goL=true;}else c.yieldL=false;
    var tor=(DRV.us||(L2.city&&L2.city.iso==='CA'))&&!DRV.lht&&c.turn==='R'&&S.st==='R';
    if(dist>-1.5&&mustStop){if(tor&&c.torOk){}else{DRV.hold=stopAt;vt=Math.min(vt,Math.sqrt(2*3.0*Math.max(0,dist)));if(dist<.6){vt=0;if(tor&&DRV.v<.2){DRV.stopT+=dt;if(DRV.stopT>2.2){c.torOk=true;DRV.stopT=0;}}}}}
    if(dist<-.5&&!c.passed){c.passed=true;c.passSt=S.st;DRV.passS=c.s;}break;}
@@ -3279,9 +3286,9 @@ function drvSim(dt){DRV.simT+=dt;var p={},R=DRV.route;
  DRV.s+=DRV.v*dt;if(DRV.hold!=null&&DRV.s>DRV.hold){DRV.s=Math.max(DRV.s-DRV.v*dt,DRV.hold);DRV.v=0;}drvAt(DRV.s,p);var lane=0;var yd=((p.yaw-DRV.yaw+Math.PI*3)%(Math.PI*2))-Math.PI;DRV.yaw+=yd*Math.min(1,dt*6);
  DRV.pos.x=p.x-Math.cos(DRV.yaw)*lane;DRV.pos.z=p.z+Math.sin(DRV.yaw)*lane;
  drvEnergy(DRV.v,dt,false,v0);DRV.odo+=DRV.v*dt;DRV.stillT=DRV.v<.2?(DRV.stillT||0)+dt:0;
- if(rem<1.5&&DRV.v<.2){if(Rl.partial&&DRV.dest){drvSetDest(DRV.dest);}else{DRV.state='arrived';toast(lang==='zh'?'已到达目的地':'Arrived');DRV.route=null;DRV.ctl=[];drvUI();}}}
+ if(rem<1.5&&DRV.v<.2){if(Rl.partial&&DRV.dest){drvSetDest(DRV.dest);}else{DRV.state='arrived';toast(I18T('arrived_2'));DRV.route=null;DRV.ctl=[];drvUI();}}}
 function drvAfterLanding(){var tg=DRV.pos,seg=drvNearSeg(tg.x,tg.z,80);if(seg){var t=Math.max(0,Math.min(1,((tg.x-seg[0])*(seg[2]-seg[0])+(tg.z-seg[1])*(seg[3]-seg[1]))/(((seg[2]-seg[0])*(seg[2]-seg[0])+(seg[3]-seg[1])*(seg[3]-seg[1]))||1)));DRV.pos.x=seg[0]+(seg[2]-seg[0])*t;DRV.pos.z=seg[1]+(seg[3]-seg[1])*t;}
- DRV.geo=localToLL(DRV.pos.x,DRV.pos.z);if(DRV.dest&&DRV.msg!=='arrived')drvSetDest(DRV.dest);else{DRV.state=DRV.msg==='arrived'?'arrived':'idle';if(DRV.msg==='arrived')toast(lang==='zh'?'已降落在目的地':'Landed at the destination');DRV.msg='';drvUI();}}
+ DRV.geo=localToLL(DRV.pos.x,DRV.pos.z);if(DRV.dest&&DRV.msg!=='arrived')drvSetDest(DRV.dest);else{DRV.state=DRV.msg==='arrived'?'arrived':'idle';if(DRV.msg==='arrived')toast(I18T('landed_at_the_destination'));DRV.msg='';drvUI();}}
 function drvRoofAhead(){var mx=0,x=DRV.pos.x+Math.sin(DRV.yaw)*80,z=DRV.pos.z+Math.cos(DRV.yaw)*80,P=L2.picks||[];if(!DRV._rt||performance.now()-DRV._rt>600){DRV._rt=performance.now();
   for(var i=0;i<P.length;i++){var b=P[i],bb=b._bb;if(!bb||b[0]<60)continue;if(bb[2]<x-150||bb[0]>x+150||bb[3]<z-150||bb[1]>z+150)continue;if(b[0]>mx)mx=b[0];}DRV._roof=mx;}return DRV._roof||0;}
 // energy: 210 kWh pack; ground ≈ 110 Wh/km + aero, flight ≈ 550 Wh/km + 45 kW hover; 65 % regen on braking
@@ -3308,7 +3315,7 @@ function drvAlongPath(){var g=DRV.geo;if(!g)return null;var pts=[[g.lat,g.lon]];
  if(DRV.fly||!DRV.route){if(DRV.dest){for(var i=1;i<=24;i++){var t=i/24;pts.push([g.lat+(DRV.dest.lat-g.lat)*t,g.lon+(DRV.dest.lon-g.lon)*t]);}}
   else{var R=200,b=DRV.yaw;for(var k=1;k<=10;k++){var d=R*k/10/111.2;pts.push([g.lat+Math.cos(b)*d,g.lon+Math.sin(b)*d/Math.cos(g.lat*D2R)]);}}return pts;}
  var Rl=drvRouteLocal(),ll=DRV.route.ll,i0=Rl?drvAt(DRV.s,{}).i:0,last=pts[0];for(var j=i0+1;j<ll.length;j++){var q=ll[j];if(hav(last[0],last[1],q[0],q[1])>=.4||j===ll.length-1){pts.push(q);last=q;}}return pts;}
-function drvAlong(){var el=document.getElementById('dvAlong');if(!el||!NODES)return;var zh=lang==='zh',z2=iso2zh(),P=drvAlongPath();if(!P||P.length<2){el.innerHTML='';return;}
+function drvAlong(){var el=document.getElementById('dvAlong');if(!el||!NODES)return;var zh=LZ(),z2=iso2zh(),P=drvAlongPath();if(!P||P.length<2){el.innerHTML='';return;}
  // cumulative km + bbox
  var cum=[0],la0=1e9,la1=-1e9,lo0=1e9,lo1=-1e9;for(var i=0;i<P.length;i++){if(i)cum.push(cum[i-1]+hav(P[i-1][0],P[i-1][1],P[i][0],P[i][1]));la0=Math.min(la0,P[i][0]);la1=Math.max(la1,P[i][0]);lo0=Math.min(lo0,P[i][1]);lo1=Math.max(lo1,P[i][1]);}
  var tot=cum[cum.length-1],band=Math.max(12,Math.min(60,tot*.08)),mlat=band/111.2,mlon=band/(111.2*Math.max(.2,Math.cos((la0+la1)/2*D2R)));
@@ -3323,64 +3330,64 @@ function drvAlong(){var el=document.getElementById('dvAlong');if(!el||!NODES)ret
  if(DRV.dest){var dn=null,dd=1e9;for(var r2=0;r2<rows.length;r2++){var e2=hav(DRV.dest.lat,DRV.dest.lon,rows[r2][5],rows[r2][6]);if(e2<dd){dd=e2;dn=rows[r2];}}if(dn&&!seen[dn[4]]){ctry.push(dn[4]);}}
  function cn(iso,fb){return (zh&&z2[iso])?z2[iso]:(fb||iso);}
  function nm(R){return zh&&R[1]?R[1]:R[0];}
- var h='<div class="dvAh"><b>'+(zh?'沿途城市与国家':'Along the route')+'</b><span>'+(DRV.fly||!DRV.route?(zh?'飞行航线':'flight line'):(zh?'真实路线':'road route'))+' · '+(zh?'两侧 ':'±')+Math.round(band)+' km</span></div>';
- if(here)h+='<div class="dvHere">'+(zh?'位于 ':'Near ')+esc(nm(here))+' · '+esc(cn(here[4],here[3]))+(hd>1?' <em>'+fmtKm(hd)+'</em>':'')+'</div>';
- if(ctry.length)h+='<div class="dvCt">'+(zh?'途经国家：':'Countries: ')+ctry.map(function(c){var R=null;for(var q=0;q<hits.length;q++)if(hits[q].R[4]===c){R=hits[q].R;break;}return esc(cn(c,R?R[3]:(here&&here[4]===c?here[3]:c)));}).join(' → ')+'</div>';
- var L=hits.slice(0,8);if(!L.length)h+='<div class="sn">'+(zh?'路线两侧暂无已登记的城镇':'No listed places along this stretch')+'</div>';
- L.forEach(function(x){var pass=x.at<3;h+='<div class="dvTown'+(pass?' now':'')+'"><span>'+esc(nm(x.R))+'<em>'+esc(cn(x.R[4],x.R[3]))+'</em></span><b>'+(pass?(zh?'正在经过':'passing'):(zh?'前方 ':'in ')+fmtKm(x.at))+'</b><i>'+(zh?'距路线 ':'off ')+fmtKm(x.off)+'</i></div>';});
+ var h='<div class="dvAh"><b>'+(I18T('along_the_route'))+'</b><span>'+(DRV.fly||!DRV.route?(I18T('flight_line')):(I18T('road_route')))+' · '+(I18T('s_5'))+Math.round(band)+' km</span></div>';
+ if(here)h+='<div class="dvHere">'+(I18T('near'))+esc(nm(here))+' · '+esc(cn(here[4],here[3]))+(hd>1?' <em>'+fmtKm(hd)+'</em>':'')+'</div>';
+ if(ctry.length)h+='<div class="dvCt">'+(I18T('countries'))+ctry.map(function(c){var R=null;for(var q=0;q<hits.length;q++)if(hits[q].R[4]===c){R=hits[q].R;break;}return esc(cn(c,R?R[3]:(here&&here[4]===c?here[3]:c)));}).join(' → ')+'</div>';
+ var L=hits.slice(0,8);if(!L.length)h+='<div class="sn">'+(I18T('no_listed_places_along'))+'</div>';
+ L.forEach(function(x){var pass=x.at<3;h+='<div class="dvTown'+(pass?' now':'')+'"><span>'+esc(nm(x.R))+'<em>'+esc(cn(x.R[4],x.R[3]))+'</em></span><b>'+(pass?(I18T('passing')):(I18T('in'))+fmtKm(x.at))+'</b><i>'+(I18T('off'))+fmtKm(x.off)+'</i></div>';});
  el.innerHTML=h;}
 // ---------- HUD + centre screen ----------
 function drvTurnGeo(st){var y1=drvAt(st.s-14,{}).yaw,y2=drvAt(st.s+14,{}).yaw,d=((y2-y1+Math.PI*3)%(Math.PI*2))-Math.PI,a=Math.abs(d)*R2D,side=d<0?'right':'left';
  return a<18?'straight':a<55?'slight '+side:a<150?side:'uturn';}
-function drvTurnText(st){var zh=lang==='zh',m=st.mod||'',t=st.type||'';if(t==='arrive')return zh?'到达':'Arrive';if(t==='roundabout'||t==='rotary')return zh?'进入环岛':'Roundabout';
- var M={left:zh?'左转':'Turn left','slight left':zh?'向左前方':'Bear left','sharp left':zh?'急左转':'Sharp left',right:zh?'右转':'Turn right','slight right':zh?'向右前方':'Bear right','sharp right':zh?'急右转':'Sharp right',straight:zh?'直行':'Continue',uturn:zh?'掉头':'U-turn'};return M[m]||(zh?'继续':'Continue');}
+function drvTurnText(st){var zh=LZ(),m=st.mod||'',t=st.type||'';if(t==='arrive')return I18T('arrive');if(t==='roundabout'||t==='rotary')return I18T('roundabout');
+ var M={left:I18T('turn_left'),'slight left':I18T('bear_left'),'sharp left':I18T('sharp_left'),right:I18T('turn_right'),'slight right':I18T('bear_right'),'sharp right':I18T('sharp_right'),straight:I18T('continue'),uturn:I18T('u_turn')};return M[m]||(I18T('continue_2'));}
 function drvTurnIcon(m){return /uturn/.test(m)?'⤺':/sharp left|^left/.test(m)?'↰':/slight left/.test(m)?'↖':/sharp right|^right/.test(m)?'↱':/slight right/.test(m)?'↗':'↑';}
 function drvNextStep(){var R=DRV.route;if(!R||!R.steps)return null;for(var i=0;i<R.steps.length;i++){var st=R.steps[i];if(st.s!=null&&st.s>DRV.s+2&&st.type!=='depart')return st;}return null;}
-function drvHud(){var el=document.getElementById('drvHud');if(!el)return;var zh=lang==='zh',R=DRV.route&&drvRouteLocal(),rem=R?Math.max(0,R.len-DRV.s):0,v=DRV.v;
+function drvHud(){var el=document.getElementById('drvHud');if(!el)return;var zh=LZ(),R=DRV.route&&drvRouteLocal(),rem=R?Math.max(0,R.len-DRV.s):0,v=DRV.v;
  var lv=L2.live,dd=0;if(DRV.fly&&DRV.dest&&lv)dd=Math.hypot((DRV.dest.lon-lv.lon0)*lv.mLon-DRV.pos.x,(DRV.dest.lat-lv.lat0)*lv.mLat-DRV.pos.z);
  var st=drvNextStep(),nx=DRV.next,sig='';if(st&&st.type!=='arrive'&&st.type!=='roundabout'&&st.type!=='rotary')st.mod=drvTurnGeo(st);
- if(!DRV.fly&&nx){var c=nx.c,dm=Math.max(0,Math.round(nx.d))+' m',src=c.real?(zh?'实测':'OSM'):(zh?'推断':'inferred');
-  if(c.t==='sig'){var S=c.st||{st:'G',rem:0},col=S.st==='R'?'r':S.st==='Y'?'y':'g',ph=S.st==='GA'?(zh?'左转箭头':'left arrow'):S.st==='G'?(zh?(S.left?'绿灯·让对向':'绿灯 通行'):'green'):S.st==='Y'?(zh?'黄灯 '+S.yel.toFixed(1)+'s':'yellow '+S.yel.toFixed(1)+'s'):(c.torOk?(zh?'红灯·停后右转':'red · turn after stop'):(zh?'红灯 停':'red · stop'));
-   sig='<div class="dvSig '+col+'"><i></i><i></i><i></i><b>'+(S.st==='GA'?'⬅ ':'')+Math.ceil(S.rem)+'s</b><em>'+esc(ph)+' · '+dm+' · '+src+(c.wave?(zh?' · 绿波':' · green wave'):'')+'</em><em>'+(zh?'周期 ':'cycle ')+Math.round(c.C)+'s · '+(zh?'绿 ':'G ')+Math.round(c.GA)+'/'+Math.round(c.GB)+'s</em></div>';}
-  else if(c.t==='pb'){var pS=c.pbs||'G',pc=pS==='R'?'r':pS==='Y'?'y':'g',pt=pS==='R'?(zh?'行人过街中 停':'pedestrians crossing · stop'):pS==='Y'?(zh?'行人按了按钮':'button pressed'):(zh?'行人按钮灯 · 无人按':'ped button · no call');
-   sig='<div class="dvSig '+pc+'"><i></i><i></i><i></i><b>🚶</b><em>'+esc(pt)+' · '+dm+'</em><em>'+(zh?'人行横道按钮信号':'push-button crossing')+'</em></div>';}
-  else sig='<div class="dvSign '+c.t+'"><b>'+(c.t==='stop'?'STOP':c.t==='zeb'?'🚶':(zh?'让':'YIELD'))+'</b><em>'+(c.t==='zeb'?(zh?(c.zw?'有人过街 · 停车让行':c.gap===false?'等待主路车流':'斑马线 · 让行'):(c.zw?'people waiting · stop':c.gap===false?'waiting for a gap':'zebra · give way')):'')+(c.t==='zeb'?' · ':'')+dm+' · '+src+'</em></div>';}
+ if(!DRV.fly&&nx){var c=nx.c,dm=Math.max(0,Math.round(nx.d))+' m',src=c.real?(I18T('osm')):(I18T('inferred'));
+  if(c.t==='sig'){var S=c.st||{st:'G',rem:0},col=S.st==='R'?'r':S.st==='Y'?'y':'g',ph=S.st==='GA'?(I18T('left_arrow')):S.st==='G'?(I18P(S.left?'绿灯·让对向':'绿灯 通行','green')):S.st==='Y'?(I18P('黄灯 '+S.yel.toFixed(1)+'s','yellow '+S.yel.toFixed(1)+'s')):(c.torOk?(I18T('red_turn_after_stop')):(I18T('red_stop')));
+   sig='<div class="dvSig '+col+'"><i></i><i></i><i></i><b>'+(S.st==='GA'?'⬅ ':'')+Math.ceil(S.rem)+'s</b><em>'+esc(ph)+' · '+dm+' · '+src+(c.wave?(I18T('green_wave')):'')+'</em><em>'+(I18T('cycle'))+Math.round(c.C)+'s · '+(I18T('g'))+Math.round(c.GA)+'/'+Math.round(c.GB)+'s</em></div>';}
+  else if(c.t==='pb'){var pS=c.pbs||'G',pc=pS==='R'?'r':pS==='Y'?'y':'g',pt=pS==='R'?(I18T('pedestrians_crossing_stop')):pS==='Y'?(I18T('button_pressed')):(I18T('ped_button_no_call'));
+   sig='<div class="dvSig '+pc+'"><i></i><i></i><i></i><b>🚶</b><em>'+esc(pt)+' · '+dm+'</em><em>'+(I18T('push_button_crossing'))+'</em></div>';}
+  else sig='<div class="dvSign '+c.t+'"><b>'+(c.t==='stop'?'STOP':c.t==='zeb'?'🚶':(I18T('yield')))+'</b><em>'+(c.t==='zeb'?(I18P(c.zw?'有人过街 · 停车让行':c.gap===false?'等待主路车流':'斑马线 · 让行',c.zw?'people waiting · stop':c.gap===false?'waiting for a gap':'zebra · give way')):'')+(c.t==='zeb'?' · ':'')+dm+' · '+src+'</em></div>';}
  var etaS=DRV.fly?(dd/Math.max(8,v||40)):(R&&R.dur&&R.len?R.dur*rem/R.len:rem/Math.max(6,DRV.lim*.75));
- var rng=DRV.soc*DRV.cap*1000/(DRV.fly?560:150),mode=DRV.fly?(zh?'✈ 飞行':'✈ FLIGHT'):(zh?'⛭ 地面自动驾驶':'⛭ AUTOPILOT'),stTxt={idle:zh?'待命 · 设置目的地':'Parked · set a destination',plan:zh?'规划路线中…':'Planning…',drive:'',arrived:zh?'已到达':'Arrived',fly:'',hover:zh?'悬停 · 设置目的地':'Hovering · set a destination',land:zh?'降落中…':'Landing…'}[DRV.state]||'';
- el.innerHTML='<div class="dvL"><div class="dvSp"><b>'+drvFmtV(v)+'</b><span>'+drvUnit()+'</span></div>'+(!DRV.fly?'<div class="dvLim"><b>'+drvFmtV(DRV.lim)+'</b><span>'+(zh?'限速':'LIMIT')+'</span></div>':'<div class="dvLim fl"><b>'+Math.round(DRV.alt)+'</b><span>m AGL</span></div>')+sig+'</div>'+
-  '<div class="dvC"><div class="dvMode">'+mode+(stTxt?' · '+stTxt:'')+(DRV.blink?' <span class="dvBl'+(Math.floor(performance.now()/333)%2?' on':'')+'">'+(DRV.blink==='L'?(zh?'⬅ 左转灯':'⬅ indicator'):(zh?'右转灯 ➡':'indicator ➡'))+'</span>':'')+'</div>'+(st&&!DRV.fly?'<div class="dvTurn"><i>'+drvTurnIcon(st.mod)+'</i><b>'+esc(drvTurnText(st))+'</b><span>'+fmtKm(Math.max(0,st.s-DRV.s)/1000)+(st.name?' · '+esc(st.name):'')+'</span></div>':'')+
-  '<div class="dvRoad">'+esc(DRV.road||'')+(DRV.road?' · ':'')+(zh?['高速','快速路','主干道','次干道','支路','街巷','服务道路','小路','步道','','公交道','码头'][DRV.rcls]||'':['Motorway','Trunk','Primary','Secondary','Tertiary','Street','Service','Track','Path','','Busway','Pier'][DRV.rcls]||'')+' · '+(DRV.lht?(zh?'靠左行驶':'keep left'):(zh?'靠右行驶':'keep right'))+'</div></div>'+
-  '<div class="dvR"><div class="dvEta">'+((DRV.state==='drive'||DRV.state==='fly')?(fmtKm((DRV.fly?dd:rem)/1000)+' · '+Math.max(1,Math.round(etaS/60))+' min'):'—')+'</div><div class="dvBat"><i style="width:'+Math.round(DRV.soc*100)+'%"></i></div><div class="dvBatT">'+(DRV.soc*100).toFixed(1)+'% · '+(zh?'续航 ':'range ')+fmtKm(rng)+'</div>'+
-  '<div class="dvSrc">'+(DRV.route?(DRV.route.src==='osrm'?(zh?'OSRM · 遵守 OSM 单行/禁转/通行限制':'OSRM · OSM one-way/turn/access rules'):(zh?'本地路网 · 单行✓ 私人路✗ 掉头✗ 禁转 '+(DRV.route.rx||0):'local · one-way✓ private✗ U-turn✗ restrictions '+(DRV.route.rx||0))):'')+(DRV.ovp?(zh?' · 信号 OSM 实测 ':' · OSM controls ')+DRV.ovp.n.length:(DRV.route?(zh?' · 信号推断':' · inferred controls'):''))+'</div></div>';}
-function drvScreen(){var P=DRV.parts,c=P.scC,x=c.getContext('2d'),W=c.width,H=c.height,R=drvRouteLocal(),zh=lang==='zh';x.fillStyle='#04070d';x.fillRect(0,0,W,H);
+ var rng=DRV.soc*DRV.cap*1000/(DRV.fly?560:150),mode=DRV.fly?(I18T('flight')):(I18T('autopilot')),stTxt={idle:I18T('parked_set_a_destination'),plan:I18T('planning'),drive:'',arrived:I18T('arrived_3'),fly:'',hover:I18T('hovering_set_a_destination'),land:I18T('landing')}[DRV.state]||'';
+ el.innerHTML='<div class="dvL"><div class="dvSp"><b>'+drvFmtV(v)+'</b><span>'+drvUnit()+'</span></div>'+(!DRV.fly?'<div class="dvLim"><b>'+drvFmtV(DRV.lim)+'</b><span>'+(I18T('limit'))+'</span></div>':'<div class="dvLim fl"><b>'+Math.round(DRV.alt)+'</b><span>m AGL</span></div>')+sig+'</div>'+
+  '<div class="dvC"><div class="dvMode">'+mode+(stTxt?' · '+stTxt:'')+(DRV.blink?' <span class="dvBl'+(Math.floor(performance.now()/333)%2?' on':'')+'">'+(DRV.blink==='L'?(I18T('indicator')):(I18T('indicator_2')))+'</span>':'')+'</div>'+(st&&!DRV.fly?'<div class="dvTurn"><i>'+drvTurnIcon(st.mod)+'</i><b>'+esc(drvTurnText(st))+'</b><span>'+fmtKm(Math.max(0,st.s-DRV.s)/1000)+(st.name?' · '+esc(st.name):'')+'</span></div>':'')+
+  '<div class="dvRoad">'+esc(DRV.road||'')+(DRV.road?' · ':'')+(I18P(['高速','快速路','主干道','次干道','支路','街巷','服务道路','小路','步道','','公交道','码头'][DRV.rcls]||'',['Motorway','Trunk','Primary','Secondary','Tertiary','Street','Service','Track','Path','','Busway','Pier'][DRV.rcls]||''))+' · '+(DRV.lht?(I18T('keep_left')):(I18T('keep_right')))+'</div></div>'+
+  '<div class="dvR"><div class="dvEta">'+((DRV.state==='drive'||DRV.state==='fly')?(fmtKm((DRV.fly?dd:rem)/1000)+' · '+Math.max(1,Math.round(etaS/60))+' min'):'—')+'</div><div class="dvBat"><i style="width:'+Math.round(DRV.soc*100)+'%"></i></div><div class="dvBatT">'+(DRV.soc*100).toFixed(1)+'% · '+(I18T('range'))+fmtKm(rng)+'</div>'+
+  '<div class="dvSrc">'+(DRV.route?(DRV.route.src==='osrm'?(I18T('osrm_osm_one_way')):(I18P('本地路网 · 单行✓ 私人路✗ 掉头✗ 禁转 '+(DRV.route.rx||0),'local · one-way✓ private✗ U-turn✗ restrictions '+(DRV.route.rx||0)))):'')+(DRV.ovp?(I18T('osm_controls'))+DRV.ovp.n.length:(DRV.route?(I18T('inferred_controls')):''))+'</div></div>';}
+function drvScreen(){var P=DRV.parts,c=P.scC,x=c.getContext('2d'),W=c.width,H=c.height,R=drvRouteLocal(),zh=LZ();x.fillStyle='#04070d';x.fillRect(0,0,W,H);
  x.save();x.translate(W*.38,H*.72);x.rotate(DRV.yaw+Math.PI);var sc=.45;x.strokeStyle='rgba(90,140,200,.35)';x.lineWidth=2;
  var cx=Math.floor(DRV.pos.x/DRV_CELL),cz=Math.floor(DRV.pos.z/DRV_CELL);drvTiles().forEach(function(T){var X=drvIndexTile(T);if(!X)return;for(var a=cx-6;a<=cx+6;a++)for(var b=cz-6;b<=cz+6;b++){var L=X.G[a+','+b];if(!L)continue;x.beginPath();L.forEach(function(s){x.moveTo((s[0]-DRV.pos.x)*sc,(s[1]-DRV.pos.z)*sc);x.lineTo((s[2]-DRV.pos.x)*sc,(s[3]-DRV.pos.z)*sc);});x.stroke();}});
  if(R){x.strokeStyle='#38c8ff';x.lineWidth=6;x.beginPath();for(var i=0;i<R.P.length/2;i++){var px=(R.P[i*2]-DRV.pos.x)*sc,pz=(R.P[i*2+1]-DRV.pos.z)*sc;if(i)x.lineTo(px,pz);else x.moveTo(px,pz);}x.stroke();}
  DRV.ctl.forEach(function(k){if(k.s<DRV.s||k.s>DRV.s+500)return;var q=drvAt(k.s,{});x.fillStyle=k.t==='sig'?(k.st&&k.st.st==='R'?'#ff3b3b':k.st&&k.st.st==='Y'?'#ffc21a':'#2bff88'):'#ff5a5a';x.beginPath();x.arc((q.x-DRV.pos.x)*sc,(q.z-DRV.pos.z)*sc,6,0,7);x.fill();});
  x.restore();x.fillStyle='#e8f6ff';x.beginPath();x.moveTo(W*.38,H*.72-14);x.lineTo(W*.38-9,H*.72+9);x.lineTo(W*.38+9,H*.72+9);x.fill();
  x.fillStyle='rgba(4,7,13,.85)';x.fillRect(W*.7,0,W*.3,H);x.fillStyle='#bfe8ff';x.font='600 64px monospace';x.textAlign='center';x.fillText(String(drvFmtV(DRV.v)),W*.85,H*.36);x.font='20px monospace';x.fillText(drvUnit(),W*.85,H*.46);
- x.fillStyle='#38c8ff';x.fillRect(W*.74,H*.62,W*.22*DRV.soc,14);x.strokeStyle='#38c8ff';x.strokeRect(W*.74,H*.62,W*.22,14);x.fillStyle='#bfe8ff';x.font='18px monospace';x.fillText((DRV.soc*100).toFixed(0)+'%',W*.85,H*.78);x.fillText(DRV.fly?(zh?'飞行':'FLY'):(zh?'自动驾驶':'AUTO'),W*.85,H*.9);
+ x.fillStyle='#38c8ff';x.fillRect(W*.74,H*.62,W*.22*DRV.soc,14);x.strokeStyle='#38c8ff';x.strokeRect(W*.74,H*.62,W*.22,14);x.fillStyle='#bfe8ff';x.font='18px monospace';x.fillText((DRV.soc*100).toFixed(0)+'%',W*.85,H*.78);x.fillText(DRV.fly?(I18T('fly')):(I18T('auto')),W*.85,H*.9);
  P.scT.needsUpdate=true;}
 function drvUI(){var p=document.getElementById('drvP');if(!p)return;lidUI();p.hidden=!DRV.on;var hud=document.getElementById('drvHud');if(hud)hud.hidden=!DRV.on;if(!DRV.on)return;
  p.querySelectorAll('[data-dv]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-dv')===DRV.view);});p.querySelectorAll('[data-dx]').forEach(function(b){b.setAttribute('aria-pressed',+b.getAttribute('data-dx')===DRV.speedX);});
  var f=document.getElementById('dvFly');if(f)f.setAttribute('aria-pressed',DRV.fly);var pk=document.getElementById('dvPick');if(pk)pk.setAttribute('aria-pressed',DRV.pick);
- var s=document.getElementById('dvState');if(s){var zh=lang==='zh';s.textContent=DRV.dest?((zh?'目的地：':'To: ')+(DRV.dest.n||'')):(zh?'未设置目的地':'No destination');}}
+ var s=document.getElementById('dvState');if(s){var zh=LZ();s.textContent=DRV.dest?((I18T('to'))+(DRV.dest.n||'')):(I18T('no_destination'));}}
 function wireDrive(){var b=document.getElementById('bDrive');if(!b||b._w||!document.getElementById('drvP'))return;b._w=1;b.onclick=function(){if(DRV.on)drvEnd();else drvStart();};
  var p=document.getElementById('drvP');['pointerdown','wheel','keydown'].forEach(function(t){p.addEventListener(t,function(e){e.stopPropagation();},{passive:t!=='keydown'});});
  p.addEventListener('click',function(e){var t=e.target.closest('button');if(!t)return;var v=t.getAttribute('data-dv'),x=t.getAttribute('data-dx');
-  if(v){DRV.view=v;DRV.camInit=false;}else if(x){DRV.speedX=+x;}else if(t.id==='dvFly'){drvSetFly(!DRV.fly);}else if(t.id==='dvPick'){DRV.pick=!DRV.pick;if(DRV.pick)toast(lang==='zh'?'点一下街道，设为目的地':'Tap the street to set the destination');}
+  if(v){DRV.view=v;DRV.camInit=false;}else if(x){DRV.speedX=+x;}else if(t.id==='dvFly'){drvSetFly(!DRV.fly);}else if(t.id==='dvPick'){DRV.pick=!DRV.pick;if(DRV.pick)toast(I18T('tap_the_street_to'));}
   else if(t.id==='dvStop'){DRV.route=null;DRV.dest=null;DRV.ctl=[];DRV.state=DRV.fly?'hover':'idle';}else if(t.id==='dvEnd'){drvEnd();return;}
   else if(t.hasAttribute('data-ri')){var r=(DRV.res||[])[+t.getAttribute('data-ri')];if(r){document.getElementById('dvRes').innerHTML='';drvSetDest({lat:r.lat,lon:r.lon,n:r.n});}}drvUI();});
- var inp=document.getElementById('dvIn'),tm=0;function go(q,auto){var res=document.getElementById('dvRes'),zh=lang==='zh';if(!q){res.innerHTML='';return;}res.innerHTML='<div class="sn">'+(zh?'搜索中…':'Searching…')+'</div>';
+ var inp=document.getElementById('dvIn'),tm=0;function go(q,auto){var res=document.getElementById('dvRes'),zh=LZ();if(!q){res.innerHTML='';return;}res.innerHTML='<div class="sn">'+(I18T('searching'))+'</div>';
   srchRemote(q,/\d/.test(q)).then(function(list){if(list==null)return;list=(list||[]).slice(0,4);DRV.res=list;if(auto&&list.length){res.innerHTML='';drvSetDest({lat:list[0].lat,lon:list[0].lon,n:list[0].n});return;}
-   res.innerHTML=list.length?list.map(function(r,i){return '<button type="button" data-ri="'+i+'"><b>'+esc(r.n||'')+'</b><em>'+esc(r.s||'')+'</em></button>';}).join(''):'<div class="sn">'+(zh?'没有找到':'No results')+'</div>';});}
+   res.innerHTML=list.length?list.map(function(r,i){return '<button type="button" data-ri="'+i+'"><b>'+esc(r.n||'')+'</b><em>'+esc(r.s||'')+'</em></button>';}).join(''):'<div class="sn">'+(I18T('no_results'))+'</div>';});}
  inp.addEventListener('input',function(){clearTimeout(tm);var q=inp.value.trim();tm=setTimeout(function(){go(q.length>=2?q:'');},600);});
  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();clearTimeout(tm);var L=DRV.res||[];if(L.length){document.getElementById('dvRes').innerHTML='';drvSetDest({lat:L[0].lat,lon:L[0].lon,n:L[0].n});inp.blur();}else go(inp.value.trim(),true);}});
  // tap-to-set destination (capture phase, so the building picker does not also fire)
  var dn=null;canvas.addEventListener('pointerdown',function(e){if(DRV.on&&DRV.pick)dn={x:e.clientX,y:e.clientY,t:performance.now()};},true);
  canvas.addEventListener('pointerup',function(e){if(!(DRV.on&&DRV.pick&&dn))return;var tap=Math.hypot(e.clientX-dn.x,e.clientY-dn.y)<8&&performance.now()-dn.t<600;dn=null;if(!tap)return;
   e.stopImmediatePropagation();var r=canvas.getBoundingClientRect(),v=new T3.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),rc=new T3.Raycaster();rc.setFromCamera(v,camera);
-  var pl=new T3.Plane(new T3.Vector3(0,1,0),0),hit=new T3.Vector3();if(!rc.ray.intersectPlane(pl,hit))return;var ll=localToLL(hit.x,hit.z);DRV.pick=false;drvSetDest({lat:ll.lat,lon:ll.lon,n:(drvNearName(hit.x,hit.z)||(lang==='zh'?'地图选点':'Picked point'))});drvUI();},true);
+  var pl=new T3.Plane(new T3.Vector3(0,1,0),0),hit=new T3.Vector3();if(!rc.ray.intersectPlane(pl,hit))return;var ll=localToLL(hit.x,hit.z);DRV.pick=false;drvSetDest({lat:ll.lat,lon:ll.lon,n:(drvNearName(hit.x,hit.z)||(I18T('picked_point')))});drvUI();},true);
  window.addEventListener('keydown',function(e){if(!DRV.on||/INPUT|TEXTAREA|SELECT/.test((e.target||{}).tagName||''))return;var k=e.key.toLowerCase();if(k==='f'){drvSetFly(!DRV.fly);drvUI();}else if(k==='c'){var L=['fp','tp','top'];DRV.view=L[(L.indexOf(DRV.view)+1)%3];DRV.camInit=false;drvUI();}});}
 
 
@@ -3596,8 +3603,8 @@ function lifePedJ(w){var L=w.L,JSs=L.js;if(!JSs)return null;var p={};lifeAt(L,w.
   var X=lifeXSt(q0,L),hx=p.dx*w.dir,hz=p.dz*w.dir;
   // a side street that only joins on the far side of the road: nothing to cross on this pavement
   if(X&&X.one&&(X.ax*-hz+X.az*hx)*w.side<-.3&&(w.dir>0?L.len-q0[0]:q0[0])>q0[3]+2)continue;
-  var f=X?X.f:(q0[4]===2?2:(q0[4]===1&&q0[5]<=4)?3:1),o={J:lifeStJ(q0,L),t:f===2?'sig':f===3?'pb':'zeb',sig:f===2,sv:q0[0],kerb:q0[3]+.9,zoff:X?X.r+1.8:0,end:(w.dir>0?L.len-q0[0]:q0[0])<q0[3]+2,yaw:(function(){var ps={};lifeAt(L,q0[0]-w.dir*(q0[3]+1),ps);return Math.atan2(ps.dx*w.dir,ps.dz*w.dir);})()};
-  if(w.jc&&w.jc.sv===o.sv&&w.jc.J===o.J){o.go=w.jc.go;o.goT=w.jc.goT;o.dec=w.jc.dec;}return o;}return null;}
+  var f=X?X.f:(q0[4]===2?2:(q0[4]===1&&q0[5]<=4)?3:1),o={J:lifeStJ(q0,L),t:f===2?'sig':f===3?'pb':'zeb',sig:f===2,sv:q0[0],kerb:q0[3]+.9,zoff:X?Math.max(X.r+1.8,lifeLN(L).wc+1):0,end:(w.dir>0?L.len-q0[0]:q0[0])<q0[3]+2,yaw:(function(){var ps={};lifeAt(L,q0[0]-w.dir*(q0[3]+1),ps);return Math.atan2(ps.dx*w.dir,ps.dz*w.dir);})()};
+  if(w.jc&&w.jc.sv===o.sv&&w.jc.J===o.J&&w.jc.t===o.t){o.go=w.jc.go;o.goT=w.jc.goT;o.goS=w.jc.goS;o.gd=w.jc.gd;o.dec=w.jc.dec;}return o;}return null;}
 function lifePedOK(L){return L.cl>=2&&L.cl<=5&&!L.br&&L.len>=22;}
 // leave a line end onto another pavement: straight on (across the side road at the crossing) or round the corner — never through the carriageway
 function lifePedXfer(w,mode,probe){var L=w.L,atEnd=w.dir>0,key=atEnd?Math.round(L.x1)+','+Math.round(L.z1):Math.round(L.x0)+','+Math.round(L.z0),e0={},a={};lifeAt(L,atEnd?L.len:0,e0);lifeAt(L,Math.max(0,Math.min(L.len,w.s)),a);
@@ -3606,7 +3613,7 @@ function lifePedXfer(w,mode,probe){var L=w.L,atEnd=w.dir>0,key=atEnd?Math.round(
  var st=sc.filter(function(q){return q.dot>.85;}),cn=sc.filter(function(q){return Math.abs(q.dot)<.6&&q.pj>.8;}),pick=null;
  if(mode==='turn')pick=cn.length?cn[(Math.random()*cn.length)|0]:null;else if(mode==='straight')pick=st.length?st[0]:null;else pick=st.length?st[0]:cn.length?cn[(Math.random()*cn.length)|0]:null;
  if(!pick)return false;if(probe)return true;var o=pick.o,NL=o[0],sn=Math.max(.3,pick.pj);w.L=NL;w.dir=pick.d1;w.s=pick.d1>0?Math.min(NL.len,sn):Math.max(0,NL.len-sn);var b={};lifeAt(NL,w.s,b);
- var rx=-b.dz*w.dir,rz=b.dx*w.dir,lat=(Px-b.x)*rx+(Pz-b.z)*rz;w.side=lat>=0?1:-1;w.oc=Math.abs(lat);w.off=lifePedOff(NL,w.offr);w.jc=null;w.jcAt=0;return true;}
+ var rx=-b.dz*w.dir,rz=b.dx*w.dir,lat=(Px-b.x)*rx+(Pz-b.z)*rz;w.side=lat>=0?1:-1;w.oc=Math.max(Math.abs(lat),lifeLN(NL).wc+.8);w.off=lifePedOff(NL,w.offr);w.jc=null;w.jcAt=0;return true;}
 function lifePedOff(L,r){return lifeLN(L).wc+.8+(r==null?Math.random():r)*1.8;}
 function lifeSpawnPed(F,lines){lines=LIFE.near||lines;var L=null;for(var tr=0;tr<12;tr++){var c=lines[(Math.random()*lines.length)|0];if(!lifePedOK(c))continue;var mx=(c.x0+c.x1)/2,mz=(c.z0+c.z1)/2;if(Math.hypot(mx-F.x,mz-F.z)<LIFE.R*.7){L=c;break;}}if(!L)return null;
  var sk=[0xf1c9a5,0xe0ac69,0xc68642,0x8d5524,0xffdbac][(Math.random()*5)|0],cl=new T3.Color().setHSL(Math.random(),.45+Math.random()*.4,.35+Math.random()*.35);
@@ -3643,7 +3650,8 @@ function lifeStep(dt,now){var on=mode==='street'&&L2.active&&!!L2.live;if(!on){i
    var endS0=Math.abs(sv-(c.dir>0?L.len:0))<q0[3]+4;if(!endS0&&dd<75&&c.tjk!==key){c.tjk=key;c.tj=(Math.random()<.3)?lifeTurnPick(c,L,q0):null;if(c.tj)c.tj.key=key;}
    if(isSig){var PJs=lifePlan(J),endSt=Math.abs(sv-(c.dir>0?L.len:0))<q0[3]+4,tX=(endSt&&c.nx&&c.nx!=='none'&&c.nx[2]==='X')||(!!c.tj&&c.tj.key===key&&c.tj.t==='X'),tsv=PJs.turn;PJs.turn=tX?(DRV.lht?'R':'L'):'S';var S=drvSig(PJs,Math.atan2(hx,hz));PJs.turn=tsv;if(S.st==='G'||S.st==='GA')c.goY=false;
     var mustStop=(S.st==='R'&&!c.goY)||(S.st==='Y'&&!c.goY&&stopD>c.v*c.v/6+1);if(S.st==='Y'&&!mustStop)c.goY=true;// committed on amber → clear the box
-    if(!mustStop&&tX&&S.st==='G'&&c.goL!==key&&stopD>-1){if(stopD<6&&lifeOncoming(J,hx,hz,c)){mustStop=true;if(c.v<.3&&stopD<1)LIFE.dbg.yL=(LIFE.dbg.yL||0)+dt;}else if(stopD<1.5)c.goL=key;}// permissive turn across traffic: wait at the line in the turn lane
+    var turning=(endSt&&c.nx&&c.nx!=='none'&&c.nx[2]!=='S')||(!!c.tj&&c.tj.key===key);if(turning&&stopD>-1&&stopD<45)vt=Math.min(vt,5+Math.max(0,stopD)*.3);// slow down for the turn
+    if(!mustStop&&tX&&S.st==='G'&&c.goL!==key&&stopD>-1){if(stopD<12&&lifeOncoming(J,hx,hz,c)){mustStop=true;LIFE.dbg.yL=(LIFE.dbg.yL||0)+dt;}else if(stopD<1.5)c.goL=key;}// permissive turn across traffic: wait at the line in the turn lane
     if(mustStop&&stopD>-1){vt=Math.min(vt,Math.sqrt(2*3*Math.max(0,stopD)));if(stopD<.8)vt=0;hold=sLine;}sigSt=S.st;}
    else if(f4===3){var PPb=lifePlan(J),pbs=lifePB(PPb);if(pbs==='G')c.goY=false;var mS=(pbs==='R'&&!c.goY)||(pbs==='Y'&&!c.goY&&stopD>c.v*c.v/6+1);if(pbs==='Y'&&!mS)c.goY=true;
     if(mS&&stopD>-1){vt=Math.min(vt,Math.sqrt(2*3*Math.max(0,stopD)));if(stopD<.8)vt=0;hold=sLine;}sigSt=pbs;}
@@ -3677,7 +3685,7 @@ function lifeStep(dt,now){var on=mode==='street'&&L2.active&&!!L2.live;if(!on){i
    var nl=lifeLN(o[0]).n;if(c.lane>=nl)c.lane=nl-1;continue;}
   lifeAt(c.L,c.s,p);var rx=-p.dz*c.dir,rz=p.dx*c.dir,LNo=lifeLN(c.L);if(c.lane>=LNo.n)c.lane=LNo.n-1;var loT=laneU(LNo,c.lane,side),swv=1.3;
   if(me&&me.pk&&(me.fx*p.dx+me.fz*p.dz)*c.dir>.5){var mf=(me.x-p.x)*p.dx*c.dir+(me.z-p.z)*p.dz*c.dir,ml=(me.x-p.x)*rx+(me.z-p.z)*rz;if(mf>-9&&mf<22&&Math.abs(ml-loT)<2.3){loT=ml-2.35*(ml>=0?1:-1);swv=2.4;}}// pass a parked car
-  if(c.lo==null)c.lo=loT;c.lo+=Math.max(-swv*dt,Math.min(swv*dt,loT-c.lo));var lo=c.lo;
+  if(c.lo==null||(LNo.two&&c.lo*loT<0&&!me))c.lo=loT;else if(LNo.two&&c.lo*loT<0&&!(me&&me.pk))c.lo=loT;c.lo+=Math.max(-swv*dt,Math.min(swv*dt,loT-c.lo));var lo=c.lo;
   if(!c.p)c.p={x:0,z:0};c.p.x=p.x+rx*lo;c.p.z=p.z+rz*lo;c.hx=p.dx*c.dir;c.hz=p.dz*c.dir;var K=M.kinds[c.kind];if(K.n>=K.k.cap)continue;pos.set(c.p.x,.95+p.y,c.p.z);q.setFromAxisAngle(up,Math.atan2(p.dx*c.dir,p.dz*c.dir));m.compose(pos,q,scl);K.body.setMatrixAt(K.n,m);K.lights.setMatrixAt(K.n,m);K.body.setColorAt(K.n,c.col);K.n++;}
  M.kinds.forEach(function(K){K.body.count=K.lights.count=K.n;K.body.instanceMatrix.needsUpdate=K.lights.instanceMatrix.needsUpdate=true;if(K.body.instanceColor)K.body.instanceColor.needsUpdate=true;K.lights.material.color.setScalar(.35+.65*(1-day*.7));});
  var _p3=performance.now();// ---- pedestrians + dogs ----
@@ -3685,18 +3693,18 @@ function lifeStep(dt,now){var on=mode==='street'&&L2.active&&!!L2.live;if(!on){i
  for(i=0;i<LIFE.peds.length;i++){var w=LIFE.peds[i];w.wasHold=w.hold;w.hold=false;
   if(w.pause>0){w.pause-=dt;}else{if(!w.jcAt||now-w.jcAt>600){w.jcAt=now;w.jc=lifePedJ(w);}
    if(w.jc){var jd=(w.jc.sv-w.s)*w.dir,kb=w.jc.kerb;
-    if(jd>kb-.5&&jd<kb+1.6&&!(w.jc.go&&LIFE.clock-w.jc.goT<2.5)){var JC=w.jc,PPd=lifePlan(JC.J),ok=false;
+    if(jd>kb-.5&&jd<kb+1.6&&!(w.jc.go&&LIFE.clock-w.jc.goT<2.5&&Math.abs(DRV.simT-(w.jc.goS||0))<3)){var JC=w.jc,PPd=lifePlan(JC.J),ok=false;
      // at a junction where this pavement ends: go straight over (if it continues) or turn the corner
      if(JC.end&&!JC.dec){JC.dec=true;var hasS=lifePedXfer(w,'straight',true);if((!hasS||Math.random()<.5)&&lifePedXfer(w,'turn')){LIFE.dbg.corner=(LIFE.dbg.corner||0)+1;JC=null;}else if(!hasS){w.dir=-w.dir;w.side=-w.side;w.jc=null;w.jcAt=0;JC=null;}}
      if(JC){
-      if(JC.t==='sig'){var PS=drvSig(PPd,JC.yaw);ok=PS.st==='G'&&PS.rem>Math.max(5,(kb*2)/w.v);}
+      if(JC.t==='sig'){var PS=drvSig(PPd,JC.yaw);ok=PS.st==='G'&&PS.rem>Math.max(5,(kb*2)/w.v);if(ok)JC.gd=[PS.st,+PS.rem.toFixed(1),+DRV.simT.toFixed(1),PPd.key,+JC.yaw.toFixed(3),+LIFE.clock.toFixed(1)];}
       else if(JC.t==='pb'){var pbs=lifePB(PPd);if(pbs==='R'&&(LIFE.clock-PPd.pbT)<PPd.pbW-(kb*2)/w.v)ok=true;else{PPd.pbReq=1;PPd.pbW=Math.max(PPd.pbW||9,Math.min(20,kb*2/1.05+3));LIFE.dbg.press=(LIFE.dbg.press||0)+1;}}
       else{PPd.zw=LIFE.clock;ok=!lifeCarComing(w);}
       if(ok&&lifeCarNear(w,7))ok=false;
-      if(ok){JC.go=true;JC.goT=LIFE.clock;}else{if(!w.wasHold)LIFE.dbg.wait++;w.hold=true;}}}
+      if(ok){JC.go=true;JC.goT=LIFE.clock;JC.goS=DRV.simT;}else{if(!w.wasHold)LIFE.dbg.wait++;w.hold=true;}}}
     else if(w.jc&&jd<-kb-1)w.jc=null;}
    if(!w.hold){var ps0=w.s;w.s+=w.v*dt*w.dir;if(Math.random()<.0008&&(!w.jc||Math.abs((w.jc.sv-w.s)*w.dir)>w.jc.kerb+4))w.pause=2+Math.random()*4;
-    if(w.jc){var a0=(w.jc.sv-ps0)*w.dir,a1=(w.jc.sv-w.s)*w.dir,kb2=w.jc.kerb-.5;if(a0>kb2&&a1<=kb2){LIFE.dbg.cross++;if(w.jc.t==='sig'){var PS2=drvSig(lifePlan(w.jc.J),w.jc.yaw);if(PS2.st!=='G'){LIFE.dbg.pr++;LIFE.dbg.prx=[PS2.st,+PS2.rem.toFixed(1),w.jc.go,w.jc.goT!=null?+(LIFE.clock-w.jc.goT).toFixed(1):null,+w.v.toFixed(2),w.jc.kerb];}}else if(w.jc.t==='pb'){if(lifePB(lifePlan(w.jc.J))!=='R')LIFE.dbg.pr++;LIFE.dbg.pbX=(LIFE.dbg.pbX||0)+1;}else LIFE.dbg.zebX=(LIFE.dbg.zebX||0)+1;}}}}
+    if(w.jc){var a0=(w.jc.sv-ps0)*w.dir,a1=(w.jc.sv-w.s)*w.dir,kb2=w.jc.kerb-.5;if(a0>kb2&&a1<=kb2){LIFE.dbg.cross++;if(w.jc.t==='sig'){var PS2=drvSig(lifePlan(w.jc.J),w.jc.yaw);if(PS2.st!=='G'){LIFE.dbg.pr++;LIFE.dbg.prx=[PS2.st,+PS2.rem.toFixed(1),w.jc.go,w.jc.goT!=null?+(LIFE.clock-w.jc.goT).toFixed(1):null,+w.v.toFixed(2),w.jc.kerb,w.jc.gd,+DRV.simT.toFixed(1),lifePlan(w.jc.J).key,+w.jc.yaw.toFixed(3),+LIFE.clock.toFixed(1)];}}else if(w.jc.t==='pb'){if(lifePB(lifePlan(w.jc.J))!=='R')LIFE.dbg.pr++;LIFE.dbg.pbX=(LIFE.dbg.pbX||0)+1;}else LIFE.dbg.zebX=(LIFE.dbg.zebX||0)+1;}}}}
   if(w.s<0||w.s>w.L.len){if(!lifePedXfer(w,'any')){w.dir=-w.dir;w.side=-w.side;w.s=Math.max(0,Math.min(w.L.len,w.s));w.jc=null;w.jcAt=0;}}
   if(!w.off)w.off=lifePedOff(w.L,w.offr);var tgo=w.off;if(w.jc&&w.jc.zoff){var jdz=(w.jc.sv-w.s)*w.dir;if(jdz<w.jc.kerb+4&&jdz>-w.jc.kerb-3)tgo=w.jc.zoff;}if(w.oc==null)w.oc=tgo;w.oc+=Math.max(-.9*dt,Math.min(.9*dt,tgo-w.oc));
   lifeAt(w.L,w.s,p);var hx2=p.dx*w.dir,hz2=p.dz*w.dir,rx2=-hz2,rz2=hx2,px=p.x+rx2*w.oc*w.side,pz=p.z+rz2*w.oc*w.side;if(!w.p)w.p={x:0,z:0};w.p.x=px;w.p.z=pz;w.hx=hx2;w.hz=hz2;if(np>=LIFE.maxPed)continue;
@@ -3806,17 +3814,17 @@ function lidStep(dt,now){var active=LID.on&&mode==='street'&&L2.active&&!!L2.liv
  LID.bgeo.setDrawRange(0,bi*2);LID.bgeo.attributes.position.needsUpdate=LID.bgeo.attributes.color.needsUpdate=true;
  var s=LID.st;s.rays+=shot;s.hits+=hit;if(now-s.t0>1000){s.rate=Math.round(s.hits*1000/(now-s.t0||1));s.t0=now;s.rays=0;s.hits=0;}
  if(now-LID.hud>300){LID.hud=now;lidHud(pat,sp,R);}}
-function lidHud(pat,sp,R){var zh=lang==='zh',txt='<b>'+(zh?sp.zh:sp.en)+'</b><span>'+sp.nm+' nm · '+(zh?'1 类人眼安全':'Class 1 eye-safe')+' · '+sp.hz+' Hz · '+(zh?'量程 ':'range ')+Math.round(R)+' m · '+sp.acc+'</span><span>'+(LID.st.rate/1000).toFixed(1)+(zh?' 千点/秒 · 累计 ':' k pts/s · cloud ')+LID.n.toLocaleString()+(zh?' 点 · 最近回波 ':' pts · last return ')+LID.st.rng.toFixed(1)+' m</span>';
+function lidHud(pat,sp,R){var zh=LZ(),txt='<b>'+(I18P(sp.zh,sp.en))+'</b><span>'+sp.nm+' nm · '+(I18T('class_1_eye_safe'))+' · '+sp.hz+' Hz · '+(I18T('range_2'))+Math.round(R)+' m · '+sp.acc+'</span><span>'+(LID.st.rate/1000).toFixed(1)+(I18T('k_pts_s_cloud'))+LID.n.toLocaleString()+(I18T('pts_last_return'))+LID.st.rng.toFixed(1)+' m</span>';
  ['smLidS','dvLidS'].forEach(function(id){var e=document.getElementById(id);if(e)e.innerHTML=txt;});}
-function lidExport(){if(!LID.n||!L2.live){toast(lang==='zh'?'还没有点云——先开启激光雷达扫一会儿':'No points yet — run the LiDAR for a bit first');return;}var g=LID.geo,P=g.attributes.position.array,C=g.attributes.color.array,A=g.attributes.aT.array,lv=L2.live,out=['# Sentinel Earth simulated LiDAR point cloud','# local ENU metres; origin lat '+lv.lat0.toFixed(6)+' lon '+lv.lon0.toFixed(6)+' (x=east, y=up, z=north)','# x y z r g b'];
+function lidExport(){if(!LID.n||!L2.live){toast(I18T('no_points_yet_run'));return;}var g=LID.geo,P=g.attributes.position.array,C=g.attributes.color.array,A=g.attributes.aT.array,lv=L2.live,out=['# Sentinel Earth simulated LiDAR point cloud','# local ENU metres; origin lat '+lv.lat0.toFixed(6)+' lon '+lv.lon0.toFixed(6)+' (x=east, y=up, z=north)','# x y z r g b'];
  for(var i=0;i<LID.n;i++){if(A[i]<-1e5)continue;out.push(P[i*3].toFixed(2)+' '+P[i*3+1].toFixed(2)+' '+(-P[i*3+2]).toFixed(2)+' '+Math.round(C[i*3]*255)+' '+Math.round(C[i*3+1]*255)+' '+Math.round(C[i*3+2]*255));}
  try{var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.join('\n')],{type:'text/plain'}));a.download='sentinel-lidar-'+Date.now()+'.xyz';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},2000);}catch(e){toast('export failed');}}
-function lidControlsHTML(where){var zh=lang==='zh',on=where==='dv'?(LID.on&&LID.car):LID.on;
- return '<div class="lidC"><button type="button" data-lid="on" aria-pressed="'+on+'">'+(on?(zh?'● 激光雷达 开':'● LiDAR on'):(zh?'○ 激光雷达 关':'○ LiDAR off'))+'</button>'+
-  '<button type="button" data-lid="p:auto" aria-pressed="'+(LID.pat==='auto')+'">'+(zh?'自动':'Auto')+'</button><button type="button" data-lid="p:spin" aria-pressed="'+(LID.pat==='spin')+'">'+(zh?'旋转32线':'Spin 32')+'</button><button type="button" data-lid="p:rosette" aria-pressed="'+(LID.pat==='rosette')+'">'+(zh?'花瓣固态':'Rosette')+'</button></div>'+
-  '<div class="lidC"><button type="button" data-lid="c:range" aria-pressed="'+(LID.col==='range')+'">'+(zh?'距离':'Range')+'</button><button type="button" data-lid="c:height" aria-pressed="'+(LID.col==='height')+'">'+(zh?'高度':'Height')+'</button><button type="button" data-lid="c:refl" aria-pressed="'+(LID.col==='refl')+'">'+(zh?'反射率':'Reflectivity')+'</button><button type="button" data-lid="clr">'+(zh?'清空':'Clear')+'</button><button type="button" data-lid="xyz">'+(zh?'导出 .xyz':'Export .xyz')+'</button></div>';}
+function lidControlsHTML(where){var zh=LZ(),on=where==='dv'?(LID.on&&LID.car):LID.on;
+ return '<div class="lidC"><button type="button" data-lid="on" aria-pressed="'+on+'">'+(on?(I18T('lidar_on')):(I18T('lidar_off')))+'</button>'+
+  '<button type="button" data-lid="p:auto" aria-pressed="'+(LID.pat==='auto')+'">'+(I18T('auto_2'))+'</button><button type="button" data-lid="p:spin" aria-pressed="'+(LID.pat==='spin')+'">'+(I18T('spin_32'))+'</button><button type="button" data-lid="p:rosette" aria-pressed="'+(LID.pat==='rosette')+'">'+(I18T('rosette'))+'</button></div>'+
+  '<div class="lidC"><button type="button" data-lid="c:range" aria-pressed="'+(LID.col==='range')+'">'+(I18T('range_3'))+'</button><button type="button" data-lid="c:height" aria-pressed="'+(LID.col==='height')+'">'+(I18T('height'))+'</button><button type="button" data-lid="c:refl" aria-pressed="'+(LID.col==='refl')+'">'+(I18T('reflectivity'))+'</button><button type="button" data-lid="clr">'+(I18T('clear_3'))+'</button><button type="button" data-lid="xyz">'+(I18T('export_xyz'))+'</button></div>';}
 function lidWire(el,where){if(!el||el._lw)return;el._lw=1;el.addEventListener('click',function(e){var b=e.target.closest('[data-lid]');if(!b)return;e.stopPropagation();var v=b.getAttribute('data-lid');
- if(v==='on'){if(where==='dv'){LID.car=!(LID.on&&LID.car);LID.on=LID.car;}else LID.on=!LID.on;if(LID.on)toast(lang==='zh'?'激光雷达开始扫描：每条光束都按真实楼体轮廓和高度计算回波':'LiDAR scanning: every beam is traced against real footprints and heights');}
+ if(v==='on'){if(where==='dv'){LID.car=!(LID.on&&LID.car);LID.on=LID.car;}else LID.on=!LID.on;if(LID.on)toast(I18T('lidar_scanning_every_beam'));}
  else if(v.indexOf('p:')===0)LID.pat=v.slice(2);else if(v.indexOf('c:')===0)LID.col=v.slice(2);else if(v==='clr')lidClear();else if(v==='xyz')lidExport();
  lidUI();});}
 function lidUI(){[['smLid','sm'],['dvLid','dv']].forEach(function(p){var e=document.getElementById(p[0]);if(!e)return;e.innerHTML=lidControlsHTML(p[1]);lidWire(e,p[1]);});}
@@ -3829,7 +3837,7 @@ function winTr(el){var cl=el._clp,x=(el._tx||0)+(cl?0:(el._ux||0)),y=(el._ty||0)
 function winSave(el){try{if(el._ux||el._uy)localStorage.setItem('se.win.'+el.id,JSON.stringify([Math.round(el._ux),Math.round(el._uy)]));else localStorage.removeItem('se.win.'+el.id);}catch(e){}}
 function winInit(){if(WIN.lay)return;var L=document.createElement('div');L.id='winGrips';document.body.appendChild(L);WIN.lay=L;
  WIN.ids.forEach(function(id){var el=document.getElementById(id);if(!el)return;try{var v=JSON.parse(localStorage.getItem('se.win.'+id)||'null');if(v&&v.length===2){el._ux=v[0];el._uy=v[1];winTr(el);}}catch(e){}
-  var g=document.createElement('button');g.type='button';g.className='winGrip';g.title=lang==='zh'?'拖动移动窗口 · 双击复位':'Drag to move · double-click to reset';g.setAttribute('aria-label','move window');L.appendChild(g);el._grip=g;
+  var g=document.createElement('button');g.type='button';g.className='winGrip';g.title=I18T('drag_to_move_double');g.setAttribute('aria-label','move window');L.appendChild(g);el._grip=g;
   g.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();try{g.setPointerCapture(e.pointerId);}catch(_e){}WIN.drag={el:el,x:e.clientX,y:e.clientY,ux:el._ux||0,uy:el._uy||0,tr:el.style.transition};el.style.transition='none';g.classList.add('on');document.body.classList.add('winDrag');});
   g.addEventListener('pointermove',function(e){var D=WIN.drag;if(!D||D.el!==el)return;var W=window.innerWidth,H=window.innerHeight,r=el.getBoundingClientRect(),nx=D.ux+e.clientX-D.x,ny=D.uy+e.clientY-D.y,
    bx=r.left-((el._ux||0)),by=r.top-((el._uy||0));nx=Math.max(-bx-r.width+60,Math.min(W-bx-60,nx));ny=Math.max(-by,Math.min(H-by-30,ny));el._ux=nx;el._uy=ny;winTr(el);winPlace(1);});
@@ -3851,18 +3859,18 @@ function perfSnap(){var now=performance.now();PERF.long=PERF.long.filter(functio
  var cv=renderer.domElement,mem=performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null;
  return {gpu:perfGpu(),webgl2:!!(renderer.capabilities&&renderer.capabilities.isWebGL2),webgpu:!!navigator.gpu,fps:PERF.fps,avg:+avg.toFixed(1),max:Math.round(mx),long10:PERF.long.length,calls:PERF.calls,tris:PERF.tris,
   pr:+pr.toFixed(2),prMax:+PR_MAX.toFixed(2),px:cv.width+'×'+cv.height,tiles:rd,queue:q,worker:!!TW.w,wk:TSTAT.wk,mainDec:TSTAT.main,mem:TSTAT.mem,hit:TSTAT.hit,net:TSTAT.net,pf:TSTAT.pf,fail:TSTAT.fail,lod:LODC.stats,heap:mem,still:Math.round((now-MV.still)/100)/10};}
-function perfDraw(){if(!PERF.on||!PERF.el)return;var now=performance.now();PERF.fps=Math.round(PERF.f*1000/Math.max(1,now-PERF.t0));PERF.f=0;PERF.t0=now;var S=perfSnap(),zh=lang==='zh';
+function perfDraw(){if(!PERF.on||!PERF.el)return;var now=performance.now();PERF.fps=Math.round(PERF.f*1000/Math.max(1,now-PERF.t0));PERF.f=0;PERF.t0=now;var S=perfSnap(),zh=LZ();
  var igpu=/intel/i.test(S.gpu)&&!/arc/i.test(S.gpu),sw=/swiftshader|llvmpipe|software|basic render/i.test(S.gpu);
  function row(a,b,c){return '<tr><td>'+a+'</td><td'+(c?' class="'+c+'"':'')+'>'+b+'</td></tr>';}
  var fc=S.fps>=50?'ok':S.fps>=30?'mid':'bad';
- PERF.el.innerHTML='<div class="pfH" title="'+(zh?'拖动移动 · 双击复位':'Drag to move · double-click to reset')+'"><span>⠿ ⏱ '+(zh?'性能面板':'PERFORMANCE')+'</span><button type="button" aria-label="close">×</button></div><table>'+
-  row(zh?'显卡':'GPU',esc(S.gpu),igpu||sw?'bad':'')+(igpu?row('⚠',zh?'浏览器在用核显，请切到 AMD 独显':'Browser is on the integrated GPU — switch to the AMD card','bad'):'')+(sw?row('⚠',zh?'软件渲染：硬件加速未开启':'Software rendering — hardware acceleration is off','bad'):'')+
+ PERF.el.innerHTML='<div class="pfH" title="'+(I18T('drag_to_move_double_2'))+'"><span>⠿ ⏱ '+(I18T('performance'))+'</span><button type="button" aria-label="close">×</button></div><table>'+
+  row(I18T('gpu'),esc(S.gpu),igpu||sw?'bad':'')+(igpu?row('⚠',I18T('browser_is_on_the'),'bad'):'')+(sw?row('⚠',I18T('software_rendering_hardware_acceleration'),'bad'):'')+
   row('API','WebGL'+(S.webgl2?'2':'1')+(S.webgpu?' · WebGPU ✓':''))+
-  row(zh?'帧率':'FPS',S.fps+' fps',fc)+row(zh?'帧时 均/峰':'Frame avg/max',S.avg+' / '+S.max+' ms',S.max>50?'mid':'')+row(zh?'卡顿帧 >50ms（10 秒内）':'Hitches >50 ms (10 s)',S.long10,S.long10>3?'bad':S.long10?'mid':'ok')+
-  row(zh?'绘制调用 / 三角形':'Draw calls / tris',S.calls+' / '+(S.tris/1000).toFixed(0)+'k')+row(zh?'像素比（当前/原生）':'Pixel ratio (now/native)',S.pr+' / '+S.prMax+' · '+S.px,S.pr<S.prMax?'mid':'ok')+
-  row(zh?'静止':'Still',S.still+' s '+(S.still>0.35?(zh?'· 原生画质':'· native'):(zh?'· 运动中':'· moving')))+
-  row(zh?'街区 就绪/排队':'Tiles ready/queued',S.tiles+' / '+S.queue)+row(zh?'分块 精细/简化/隐藏':'Chunks full/box/off',LODC.stats.f+' / '+LODC.stats.b+' / '+LODC.stats.x)+row(zh?'后台线程':'Worker',S.worker?(zh?'开 · 已处理 ':'on · done ')+S.wk:(zh?'关（主线程 ':'off (main ')+S.mainDec+')',S.worker?'ok':'mid')+
-  row(zh?'瓦片 内存/缓存/网络':'Tiles mem/cache/net',S.mem+' / '+S.hit+' / '+S.net+(S.fail?' · ✗'+S.fail:''))+row(zh?'航线预取':'Prefetched',S.pf)+(S.heap!=null?row(zh?'JS 内存':'JS heap',S.heap+' MB'):'')+'</table>';
+  row(I18T('fps'),S.fps+' fps',fc)+row(I18T('frame_avg_max'),S.avg+' / '+S.max+' ms',S.max>50?'mid':'')+row(I18T('hitches_50_ms_10'),S.long10,S.long10>3?'bad':S.long10?'mid':'ok')+
+  row(I18T('draw_calls_tris'),S.calls+' / '+(S.tris/1000).toFixed(0)+'k')+row(I18T('pixel_ratio_now_native'),S.pr+' / '+S.prMax+' · '+S.px,S.pr<S.prMax?'mid':'ok')+
+  row(I18T('still'),S.still+' s '+(S.still>0.35?(I18T('native')):(I18T('moving'))))+
+  row(I18T('tiles_ready_queued'),S.tiles+' / '+S.queue)+row(I18T('chunks_full_box_off'),LODC.stats.f+' / '+LODC.stats.b+' / '+LODC.stats.x)+row(I18T('worker'),S.worker?(I18T('on_done'))+S.wk:(I18T('off_main'))+S.mainDec+')',S.worker?'ok':'mid')+
+  row(I18T('tiles_mem_cache_net'),S.mem+' / '+S.hit+' / '+S.net+(S.fail?' · ✗'+S.fail:''))+row(I18T('prefetched'),S.pf)+(S.heap!=null?row(I18T('js_heap'),S.heap+' MB'):'')+'</table>';
  var b=PERF.el.querySelector('button');if(b)b.onclick=function(){perfToggle(false);};}
 // drag the panel by its header; the spot is remembered for this browser
 function perfPlace(x,y){var el=PERF.el,w=el.offsetWidth||360,h=el.offsetHeight||300;x=Math.max(4,Math.min(window.innerWidth-w-4,x));y=Math.max(4,Math.min(window.innerHeight-Math.min(h,60)-4,y));el.style.left=x+'px';el.style.top=y+'px';el.style.transform='none';PERF.pos=[x,y];}
@@ -3886,7 +3894,7 @@ if(/bench|selftest/.test(location.hash)){window.__SElife=LIFE;window.__SEdrvDbg=
  return {pedHits:PH,ex2:EX2,cat:CAT,samples:samples,overlapPairs:ev,stoppedVsMoving:evSM,examples:ex,cars:LIFE.cars.length};};window.__SEra=function(x,z,R){var out=[],rows=[];drvTiles().forEach(function(T){var d=T.data,dbg=[];roadArrays(d.rd,roadCols(),d.ly,d.ow,dbg);dbg.forEach(function(q){if(Math.hypot(q[3]-x,q[4]-z)<R)out.push(q);});d.rd.forEach(function(r,ri){for(var i=2;i<r.length;i+=2)if(Math.hypot(r[i]-x,r[i+1]-z)<R){rows.push([ri,r[0],r[1],(i-2)/2,(r.length-2)/2,r[i],r[i+1]]);}});});return {J:out,V:rows};};window.__SElifeBench=function(n){var t=performance.now(),f=t;for(var k=0;k<n;k++){f+=16;lifeStep(.016,f);}return {ms:(performance.now()-t)/n,cars:LIFE.cars.length,peds:LIFE.peds.length};};window.__SEbrY=function(x,z,y,c){return [lifeBridgeY(x,z,y,c),DRV.brY,DRV.pos.x,DRV.pos.z,DRV.yaw,DRV.state];};window.__SElifeRun=function(sec,withCar){var t=performance.now(),s0=DRV.s,st0=0,mx=0,lastS=DRV.s,stuck=0;for(var k=0;k<sec*10;k++){t+=100;if(withCar&&DRV.on){for(var j=0;j<2;j++)drvSim(.05);drvLaneStep(.1,t);var c=DRV.car;if(c){c.position.x=DRV.pos.x-Math.cos(DRV.yaw)*(DRV.lane||0);c.position.z=DRV.pos.z+Math.sin(DRV.yaw)*(DRV.lane||0);}if(DRV.s-lastS<.01&&DRV.state==='drive'){stuck++;mx=Math.max(mx,stuck);}else stuck=0;lastS=DRV.s;}lifeStep(.1,t);}return {dbg:LIFE.dbg,st:LIFE.stats,ds:DRV.s-s0,maxStuck:mx/10,state:DRV.state};};window.__SEdrvY=function(){return DRV.car?DRV.car.position.y:-1;};window.__SEsig=function(P,t){var o=DRV.simT;DRV.simT=t-P.off;var a=drvSig(P,P.ax).st,b=drvSig(P,P.ax+Math.PI/2).st;DRV.simT=o;return [a,b];};window.__SEgeo={ll:function(x,z){return localToLL(x,z);},hdg:function(){return camHeading();},azB:function(b){return azForBearing(b);},proj:function(x,y,z){streetCamPos();camera.updateMatrixWorld();var v=new T3.Vector3(x,y,z).project(camera);return [v.x,v.y,v.z];},cam:function(){return [camera.position.x,camera.position.y,camera.position.z];},tgt:function(){return [L2.target.x,L2.target.z,L2.cam.az,L2.cam.el,L2.cam.d,!!(L2.drone&&L2.drone.on)];},picksAll:function(){return (L2.picks||[]).map(function(b){var x=0,z=0,n=0;for(var i=2;i<b.length-1;i+=2){x+=b[i];z+=b[i+1];n++;}return [x/n,z/n];});},picks:function(){var P=L2.picks||[],neg=0,pos=0;P.forEach(function(b){var a=polyArea(b.slice(2,b.length-1),0);if(a<0)neg++;else if(a>0)pos++;});return {n:P.length,neg:neg,pos:pos,live:!!L2.live};}};window.__SEtp=function(x,z,yaw,deck){DRV.cz=null;DRV.pos.set(x,0,z);DRV.yaw=yaw;DRV.brY=deck?lifeBridgeY(x,z,yaw,null):0;DRV.route=null;DRV.state='idle';DRV.v=0;DRV.camInit=false;};window.__SElook=function(x,z,d,el,az){L2.target.set(x,0,z);L2.camWant.d=L2.cam.d=d;L2.camWant.el=L2.cam.el=el;L2.camWant.az=L2.cam.az=az;L2.drone.touch=performance.now()+1e9;};}
 if(/bench|selftest/.test(location.hash))window.__SEdrv={plan:function(){return DRV.ctl.filter(function(c){return c.t==='sig';}).map(function(c){return {s:Math.round(c.s),cA:c.cA,cB:c.cB,C:c.C,GA:+c.GA.toFixed(1),GB:+c.GB.toFixed(1),YA:+c.YA.toFixed(1),YB:+c.YB.toFixed(1),RA:+c.RA.toFixed(1),LA:c.LA,turn:c.turn,stop:+c.stopOff.toFixed(1)};});},sim:function(sec){var log=[],t=0,last='';DRV.scanAt=0;while(t<sec){drvSim(.05);t+=.05;if(Math.round(t*20)%20===0){drvScan();var n=DRV.next,k=(n?n.c.t+(n.c.st?':'+n.c.st.st:''):'-');log.push(Math.round(t)+'s v'+DRV.v.toFixed(1)+' s'+Math.round(DRV.s)+' '+k+(n?'@'+Math.round(n.d):''));}if(DRV.state!=='drive')break;}return log;},start:drvStart,end:drvEnd,dest:function(dx,dz){var ll=localToLL(DRV.pos.x+dx,DRV.pos.z+dz);drvSetDest({lat:ll.lat,lon:ll.lon,n:'T'});},fly:drvSetFly,view:function(v){DRV.view=v;DRV.camInit=false;},x:function(k){DRV.speedX=k;},st:function(){var R=DRV.route;return {on:DRV.on,state:DRV.state,v:+DRV.v.toFixed(2),s:Math.round(DRV.s),len:R&&R.len?Math.round(R.len):0,src:R?R.src:'',ctl:DRV.ctl.map(function(c){return c.t+(c.real?'*':'')+'@'+Math.round(c.s)+(c.st?':'+c.st.st:'');}).slice(0,12),soc:+(DRV.soc*100).toFixed(3),alt:+DRV.alt.toFixed(1),fly:DRV.fly,lim:+DRV.lim.toFixed(1),road:DRV.road,next:DRV.next?Math.round(DRV.next.d)+DRV.next.c.t:'',simT:+DRV.simT.toFixed(2),sf:+DRV.s.toFixed(2),lead:+Math.min(99,lifeLeadGap(DRV.pos.x,DRV.pos.z,DRV.yaw,DRV.v)).toFixed(2),hold:DRV.hold!=null};}};
 // ---------- boot ----------
-applyLang();buildStars();probeLive().then(function(ok){if(!ok)reprobe();else ovtInit();});wireEnv();wireCov();wireTod();wireSearch();wireDroneHud();wireMM();wireSmap();wireSky();wireDrive();winInit();(function(){var b=document.getElementById('bWinReset');if(b)b.onclick=function(){winReset();toast(lang==='zh'?'所有窗口已复位':'All windows reset');};})();(function(){var b=document.getElementById('bQual');if(!b)return;b.setAttribute('aria-pressed',QUAL.m==='hq');qualLabel(b);b.onclick=function(){setQual(QUAL.m==='hq'?'bal':'hq');toast(QUAL.m==='hq'?(lang==='zh'?'最高画质：全部精细建筑 + 始终原生分辨率（更吃显卡）':'Max quality: full detail everywhere, always native resolution'):(lang==='zh'?'均衡：远处简化 + 移动时自动降分辨率（更流畅）':'Balanced: simplified distance + adaptive resolution while moving'));};})();
+applyLang();buildStars();probeLive().then(function(ok){if(!ok)reprobe();else ovtInit();});wireEnv();wireCov();wireTod();wireSearch();wireDroneHud();wireMM();wireSmap();wireSky();wireDrive();winInit();(function(){var b=document.getElementById('bWinReset');if(b)b.onclick=function(){winReset();toast(I18T('all_windows_reset'));};})();(function(){var b=document.getElementById('bQual');if(!b)return;b.setAttribute('aria-pressed',QUAL.m==='hq');qualLabel(b);b.onclick=function(){setQual(QUAL.m==='hq'?'bal':'hq');toast(QUAL.m==='hq'?(I18T('max_quality_full_detail')):(I18T('balanced_simplified_distance_adaptive')));};})();
 Promise.all([
  loadJSON('data/earth/vector.json').then(function(d){V=d;prog(.15,'LOADING VECTORS…');}),
  loadJSON('data/nodes.json').then(function(d){NODES=d;prog(.25,'LOADING NODES…');}),
