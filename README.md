@@ -2,6 +2,8 @@
 
 CSE635 security-education globe · 安全教育三维地球 · 보안 교육용 3D 지구본 · 3D-Globus für die Sicherheitslehre
 
+**文档 · Docs:** [中文](README.zh.md) · [English](README.en.md) · [中英对照](README.zh-en.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [日本語](README.ja.md) · [Русский](README.ru.md) · [Español](README.es.md)
+
 ```
  Globe (static overview)  ──click a city──▶  Street level (dynamic)
  ├─ 7,342 places, clusters                 ├─ live OpenStreetMap tiles, 3×3 streamed while you move
