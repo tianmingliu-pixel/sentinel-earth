@@ -27,6 +27,34 @@ flowchart LR
 
 > The local server `srv.py` turns off browser caching, so a refresh always shows the latest code.
 
+### Run it on your own computer (step by step)
+
+**Step 1 · Prepare**
+- Browser: a recent Chrome, Edge, Firefox or Safari with WebGL2 support and hardware acceleration turned on.
+- Python 3.8 or later: on Windows, install it from python.org and tick "Add python.exe to PATH"; macOS and Linux usually ship `python3`.
+- About 1 GB of disk space (the project itself is about 420 MB including the offline city bundles). A dedicated graphics card makes it smoother.
+
+**Step 2 · Get the code** (either way)
+- Download in the browser: open https://github.com/tianmingliu-pixel/sentinel-earth , click the green "Code" button → "Download ZIP", and unzip it into any folder.
+- With Git: `git clone --depth 1 https://github.com/tianmingliu-pixel/sentinel-earth.git`
+
+**Step 3 · Start**
+- Windows: open the unzipped folder and double-click `start-sentinel-earth.bat`. A black window appears and the browser opens by itself.
+- macOS / Linux: in a terminal run `cd sentinel-earth` and `python3 srv.py 8000`, then open http://localhost:8000 in the browser.
+- Keep that server window open while you use the site; closing it or pressing Ctrl+C stops the server.
+
+**Troubleshooting**
+
+| Problem | Fix |
+|---|---|
+| Double-clicking `index.html` does not work | Browsers block pages from reading local data files directly; open it through the local server as in step 3 |
+| Port 8000 is already in use | Use another port, e.g. `python srv.py 8080`, then open http://localhost:8080 |
+| Blank page or very slow | Turn on hardware acceleration in the browser settings; lower "Quality" at the bottom of the page |
+| Others cannot reach my computer | `srv.py` only accepts connections from this computer; to share the site, deploy it to Vercel or Netlify |
+| Update to the latest version | With Git run `git pull`; with the ZIP, download it again |
+
+> Network: the 3D engine Three.js loads from a CDN, so opening the site needs an internet connection. Live streets, routes, weather and satellite imagery also need the internet; if the map server cannot be reached, cities with an offline bundle can still be browsed.
+
 ---
 
 ## 3. Features

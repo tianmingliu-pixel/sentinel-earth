@@ -27,6 +27,34 @@ flowchart LR
 
 > 로컬 서버 `srv.py`는 브라우저 캐시를 끄므로, 새로고침하면 항상 최신 코드가 보입니다.
 
+### 내 컴퓨터에서 실행하기 (단계별)
+
+**1단계 · 준비**
+- 브라우저: 최신 Chrome, Edge, Firefox 또는 Safari. WebGL2를 지원하고 하드웨어 가속이 켜져 있어야 합니다.
+- Python 3.8 이상: Windows는 python.org에서 설치하고 "Add python.exe to PATH"를 체크합니다. macOS와 Linux에는 보통 `python3`가 들어 있습니다.
+- 디스크 공간 약 1 GB(프로젝트 자체는 오프라인 도시 데이터를 포함해 약 420 MB). 외장 그래픽카드가 있으면 더 부드럽습니다.
+
+**2단계 · 코드 받기** (둘 중 하나)
+- 브라우저로 내려받기: https://github.com/tianmingliu-pixel/sentinel-earth 에서 초록색 "Code" → "Download ZIP"을 누르고 아무 폴더에나 압축을 풉니다.
+- Git 사용: `git clone --depth 1 https://github.com/tianmingliu-pixel/sentinel-earth.git`
+
+**3단계 · 실행**
+- Windows: 압축을 푼 폴더에서 `start-sentinel-earth.bat`를 더블클릭합니다. 검은 창이 뜨고 브라우저가 자동으로 열립니다.
+- macOS / Linux: 터미널에서 `cd sentinel-earth`와 `python3 srv.py 8000`을 실행한 뒤 브라우저에서 http://localhost:8000 을 엽니다.
+- 사용하는 동안 서버 창을 닫지 마세요. 창을 닫거나 Ctrl+C를 누르면 서버가 멈춥니다.
+
+**문제 해결**
+
+| 문제 | 해결 방법 |
+|---|---|
+| `index.html`을 더블클릭하면 열리지 않음 | 브라우저는 페이지가 로컬 데이터 파일을 직접 읽지 못하게 막습니다. 3단계처럼 로컬 서버로 여세요 |
+| 8000번 포트가 이미 사용 중 | 다른 포트를 씁니다. 예: `python srv.py 8080` 후 http://localhost:8080 열기 |
+| 화면이 비어 있거나 매우 느림 | 브라우저 설정에서 하드웨어 가속을 켜고, 페이지 아래의 "화질"을 낮춥니다 |
+| 다른 사람이 내 컴퓨터에 접속하지 못함 | `srv.py`는 이 컴퓨터의 접속만 받습니다. 공유하려면 Vercel이나 Netlify에 배포하세요 |
+| 최신 버전으로 업데이트 | Git은 `git pull`, ZIP은 다시 내려받습니다 |
+
+> 네트워크: 3D 엔진 Three.js를 CDN에서 불러오므로 사이트를 열려면 인터넷 연결이 필요합니다. 실시간 거리, 경로, 날씨, 위성 영상도 인터넷이 필요하며, 지도 서버에 연결되지 않으면 오프라인 데이터가 있는 도시는 계속 둘러볼 수 있습니다.
+
 ---
 
 ## 3. 기능

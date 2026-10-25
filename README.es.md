@@ -27,6 +27,34 @@ flowchart LR
 
 > El servidor local `srv.py` desactiva la caché del navegador, así que al recargar siempre se ve el código más reciente.
 
+### Ejecutarlo en su propio ordenador (paso a paso)
+
+**Paso 1 · Preparar**
+- Navegador: Chrome, Edge, Firefox o Safari recientes, con compatibilidad con WebGL2 y la aceleración por hardware activada.
+- Python 3.8 o posterior: en Windows, instálelo desde python.org y marque «Add python.exe to PATH»; macOS y Linux suelen traer `python3`.
+- Alrededor de 1 GB de espacio en disco (el proyecto ocupa unos 420 MB con los datos de ciudades sin conexión). Con una tarjeta gráfica dedicada va más fluido.
+
+**Paso 2 · Obtener el código** (de cualquiera de las dos formas)
+- Descargar en el navegador: abra https://github.com/tianmingliu-pixel/sentinel-earth , pulse el botón verde «Code» → «Download ZIP» y descomprímalo en cualquier carpeta.
+- Con Git: `git clone --depth 1 https://github.com/tianmingliu-pixel/sentinel-earth.git`
+
+**Paso 3 · Arrancar**
+- Windows: abra la carpeta descomprimida y haga doble clic en `start-sentinel-earth.bat`. Aparece una ventana negra y el navegador se abre solo.
+- macOS / Linux: en una terminal ejecute `cd sentinel-earth` y `python3 srv.py 8000`, y luego abra http://localhost:8000 en el navegador.
+- No cierre la ventana del servidor mientras use el sitio; al cerrarla o pulsar Ctrl+C el servidor se detiene.
+
+**Problemas frecuentes**
+
+| Problema | Solución |
+|---|---|
+| Hacer doble clic en `index.html` no funciona | Los navegadores impiden que una página lea directamente archivos de datos locales; ábrala con el servidor local como en el paso 3 |
+| El puerto 8000 ya está en uso | Use otro puerto, por ejemplo `python srv.py 8080`, y abra http://localhost:8080 |
+| Página en blanco o muy lenta | Active la aceleración por hardware en la configuración del navegador; baje la «Calidad» en la parte inferior de la página |
+| Otras personas no pueden conectarse a mi ordenador | `srv.py` solo acepta conexiones desde este ordenador; para compartir el sitio, publíquelo en Vercel o Netlify |
+| Actualizar a la última versión | Con Git, ejecute `git pull`; si descargó el ZIP, descárguelo de nuevo |
+
+> Red: el motor 3D Three.js se carga desde una CDN, así que abrir el sitio requiere conexión a internet. Las calles en vivo, las rutas, el tiempo y las imágenes de satélite también necesitan internet; si no se puede llegar al servidor de mapas, las ciudades con datos sin conexión se pueden seguir viendo.
+
 ---
 
 ## 3. Funciones

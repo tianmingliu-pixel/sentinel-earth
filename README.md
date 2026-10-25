@@ -4,6 +4,8 @@ CSE635 security-education globe · 安全教育三维地球 · 보안 교육용 
 
 **文档 · Docs:** [中文](README.zh.md) · [English](README.en.md) · [中英对照](README.zh-en.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [日本語](README.ja.md) · [Русский](README.ru.md) · [Español](README.es.md)
 
+**在自己电脑上部署 · Run it on your own computer:** 各语言文档第 2 节有详细步骤（下载、安装 Python、启动、常见问题） · see section 2 of each language doc for step-by-step instructions.
+
 ```
  Globe (static overview)  ──click a city──▶  Street level (dynamic)
  ├─ 7,342 places, clusters                 ├─ live OpenStreetMap tiles, 3×3 streamed while you move

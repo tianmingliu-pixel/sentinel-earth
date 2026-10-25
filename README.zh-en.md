@@ -29,6 +29,42 @@ flowchart LR
 
 > 本地服务器 `srv.py` 会关掉浏览器缓存，更新代码后刷新就能看到新版本。<br>The local server `srv.py` turns off browser caching, so a refresh always shows the latest code.
 
+### 在自己的电脑上运行（详细步骤） · Run it on your own computer (step by step)
+
+**第 1 步 · 准备环境**
+
+**Step 1 · Prepare**
+- 浏览器：新版 Chrome、Edge、Firefox 或 Safari，需要支持 WebGL2，并打开「硬件加速」。<br>Browser: a recent Chrome, Edge, Firefox or Safari with WebGL2 support and hardware acceleration turned on.
+- Python 3.8 或更高版本：Windows 从 python.org 下载安装，安装时勾选「Add python.exe to PATH」；macOS 和 Linux 一般自带 `python3`。<br>Python 3.8 or later: on Windows, install it from python.org and tick "Add python.exe to PATH"; macOS and Linux usually ship `python3`.
+- 磁盘空间约 1 GB（项目本身约 420 MB，含离线城市包）。有独立显卡会更流畅。<br>About 1 GB of disk space (the project itself is about 420 MB including the offline city bundles). A dedicated graphics card makes it smoother.
+
+**第 2 步 · 下载代码**（任选一种）
+
+**Step 2 · Get the code** (either way)
+- 网页下载：打开 https://github.com/tianmingliu-pixel/sentinel-earth ，点绿色的「Code」→「Download ZIP」，解压到任意文件夹。<br>Download in the browser: open https://github.com/tianmingliu-pixel/sentinel-earth , click the green "Code" button → "Download ZIP", and unzip it into any folder.
+- 用 Git：`git clone --depth 1 https://github.com/tianmingliu-pixel/sentinel-earth.git`<br>With Git: `git clone --depth 1 https://github.com/tianmingliu-pixel/sentinel-earth.git`
+
+**第 3 步 · 启动**
+
+**Step 3 · Start**
+- Windows：进入解压后的文件夹，双击 `start-sentinel-earth.bat`。会弹出一个黑色窗口，并自动打开浏览器。<br>Windows: open the unzipped folder and double-click `start-sentinel-earth.bat`. A black window appears and the browser opens by itself.
+- macOS / Linux：打开终端，运行 `cd sentinel-earth` 和 `python3 srv.py 8000`，再在浏览器打开 http://localhost:8000 。<br>macOS / Linux: in a terminal run `cd sentinel-earth` and `python3 srv.py 8000`, then open http://localhost:8000 in the browser.
+- 使用期间不要关掉那个服务器窗口；关掉窗口或按 Ctrl+C 就会停止。<br>Keep that server window open while you use the site; closing it or pressing Ctrl+C stops the server.
+
+**常见问题**
+
+**Troubleshooting**
+
+| 问题<br>Problem | 解决办法<br>Fix |
+|---|---|
+| 直接双击 `index.html` 打不开<br>Double-clicking `index.html` does not work | 浏览器禁止网页直接读取本地数据文件，必须按第 3 步用本地服务器打开<br>Browsers block pages from reading local data files directly; open it through the local server as in step 3 |
+| 提示端口 8000 被占用<br>Port 8000 is already in use | 换一个端口，例如 `python srv.py 8080`，再打开 http://localhost:8080<br>Use another port, e.g. `python srv.py 8080`, then open http://localhost:8080 |
+| 页面空白或很卡<br>Blank page or very slow | 在浏览器设置里打开硬件加速；在页面底部把「画质」调低<br>Turn on hardware acceleration in the browser settings; lower "Quality" at the bottom of the page |
+| 别人连不上我的电脑<br>Others cannot reach my computer | `srv.py` 只允许本机访问；要分享给别人，请部署到 Vercel 或 Netlify<br>`srv.py` only accepts connections from this computer; to share the site, deploy it to Vercel or Netlify |
+| 更新到最新版<br>Update to the latest version | 用 Git 的运行 `git pull`；下载 ZIP 的重新下载一次<br>With Git run `git pull`; with the ZIP, download it again |
+
+> 网络说明：三维引擎 Three.js 从 CDN 加载，所以打开网站需要联网。实时街区、路线、天气和卫星影像也需要联网；连不上地图服务器时，有离线城市包的城市仍然可以浏览。<br>Network: the 3D engine Three.js loads from a CDN, so opening the site needs an internet connection. Live streets, routes, weather and satellite imagery also need the internet; if the map server cannot be reached, cities with an offline bundle can still be browsed.
+
 ---
 
 ## 三、功能 · Features

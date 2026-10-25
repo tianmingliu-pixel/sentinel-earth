@@ -27,6 +27,34 @@ flowchart LR
 
 > 本地服务器 `srv.py` 会关掉浏览器缓存，更新代码后刷新就能看到新版本。
 
+### 在自己的电脑上运行（详细步骤）
+
+**第 1 步 · 准备环境**
+- 浏览器：新版 Chrome、Edge、Firefox 或 Safari，需要支持 WebGL2，并打开「硬件加速」。
+- Python 3.8 或更高版本：Windows 从 python.org 下载安装，安装时勾选「Add python.exe to PATH」；macOS 和 Linux 一般自带 `python3`。
+- 磁盘空间约 1 GB（项目本身约 420 MB，含离线城市包）。有独立显卡会更流畅。
+
+**第 2 步 · 下载代码**（任选一种）
+- 网页下载：打开 https://github.com/tianmingliu-pixel/sentinel-earth ，点绿色的「Code」→「Download ZIP」，解压到任意文件夹。
+- 用 Git：`git clone --depth 1 https://github.com/tianmingliu-pixel/sentinel-earth.git`
+
+**第 3 步 · 启动**
+- Windows：进入解压后的文件夹，双击 `start-sentinel-earth.bat`。会弹出一个黑色窗口，并自动打开浏览器。
+- macOS / Linux：打开终端，运行 `cd sentinel-earth` 和 `python3 srv.py 8000`，再在浏览器打开 http://localhost:8000 。
+- 使用期间不要关掉那个服务器窗口；关掉窗口或按 Ctrl+C 就会停止。
+
+**常见问题**
+
+| 问题 | 解决办法 |
+|---|---|
+| 直接双击 `index.html` 打不开 | 浏览器禁止网页直接读取本地数据文件，必须按第 3 步用本地服务器打开 |
+| 提示端口 8000 被占用 | 换一个端口，例如 `python srv.py 8080`，再打开 http://localhost:8080 |
+| 页面空白或很卡 | 在浏览器设置里打开硬件加速；在页面底部把「画质」调低 |
+| 别人连不上我的电脑 | `srv.py` 只允许本机访问；要分享给别人，请部署到 Vercel 或 Netlify |
+| 更新到最新版 | 用 Git 的运行 `git pull`；下载 ZIP 的重新下载一次 |
+
+> 网络说明：三维引擎 Three.js 从 CDN 加载，所以打开网站需要联网。实时街区、路线、天气和卫星影像也需要联网；连不上地图服务器时，有离线城市包的城市仍然可以浏览。
+
 ---
 
 ## 三、功能

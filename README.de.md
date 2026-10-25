@@ -27,6 +27,34 @@ flowchart LR
 
 > Der lokale Server `srv.py` schaltet den Browser-Cache ab, ein Neuladen zeigt also immer den neuesten Code.
 
+### Auf dem eigenen Computer starten (Schritt für Schritt)
+
+**Schritt 1 · Vorbereiten**
+- Browser: ein aktueller Chrome, Edge, Firefox oder Safari mit WebGL2-Unterstützung und eingeschalteter Hardwarebeschleunigung.
+- Python 3.8 oder neuer: unter Windows von python.org installieren und „Add python.exe to PATH“ anhaken; macOS und Linux bringen meist `python3` mit.
+- Etwa 1 GB freier Speicher (das Projekt selbst ist mit den Offline-Stadtpaketen etwa 420 MB groß). Mit eigener Grafikkarte läuft es flüssiger.
+
+**Schritt 2 · Code holen** (eine der beiden Arten)
+- Im Browser herunterladen: https://github.com/tianmingliu-pixel/sentinel-earth öffnen, auf die grüne Schaltfläche „Code“ → „Download ZIP“ klicken und in einen beliebigen Ordner entpacken.
+- Mit Git: `git clone --depth 1 https://github.com/tianmingliu-pixel/sentinel-earth.git`
+
+**Schritt 3 · Starten**
+- Windows: den entpackten Ordner öffnen und `start-sentinel-earth.bat` doppelklicken. Ein schwarzes Fenster erscheint, und der Browser öffnet sich von selbst.
+- macOS / Linux: im Terminal `cd sentinel-earth` und `python3 srv.py 8000` ausführen, dann http://localhost:8000 im Browser öffnen.
+- Das Serverfenster während der Nutzung offen lassen; Schließen oder Strg+C beendet den Server.
+
+**Fehlerbehebung**
+
+| Problem | Lösung |
+|---|---|
+| Doppelklick auf `index.html` funktioniert nicht | Browser verbieten Seiten, lokale Datendateien direkt zu lesen; die Seite wie in Schritt 3 über den lokalen Server öffnen |
+| Port 8000 ist belegt | Einen anderen Port nehmen, z. B. `python srv.py 8080`, dann http://localhost:8080 öffnen |
+| Leere Seite oder sehr langsam | Hardwarebeschleunigung in den Browsereinstellungen einschalten; unten auf der Seite die „Qualität“ senken |
+| Andere erreichen meinen Computer nicht | `srv.py` nimmt nur Verbindungen von diesem Computer an; zum Teilen die Website auf Vercel oder Netlify bereitstellen |
+| Auf die neueste Version aktualisieren | Mit Git `git pull` ausführen; beim ZIP erneut herunterladen |
+
+> Netzwerk: Die 3D-Engine Three.js wird von einem CDN geladen, zum Öffnen der Seite ist also eine Internetverbindung nötig. Live-Straßen, Routen, Wetter und Satellitenbilder brauchen ebenfalls Internet; ist der Kartenserver nicht erreichbar, lassen sich Städte mit Offline-Paket weiter ansehen.
+
 ---
 
 ## 3. Funktionen
