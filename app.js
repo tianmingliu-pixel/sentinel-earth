@@ -25,7 +25,7 @@ function lvColor(i){return cv(D.LEVELS[i].c);}
 var loadTxt=document.getElementById('loadTxt'),loadBar=document.getElementById('loadBar');
 function prog(p,t){loadBar.style.width=Math.round(p*100)+'%';if(t)loadTxt.textContent=t;}
 function loadImg(u){return new Promise(function(res,rej){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){res(i);};i.onerror=rej;i.src=u;});}
-var SEV='20261025a';function loadJSON(u){return fetch(u+(u.indexOf('?')<0&&!/bundles/.test(u)?'?v='+SEV:'')).then(function(r){return r.json();});}
+var SEV='20261025b';function loadJSON(u){return fetch(u+(u.indexOf('?')<0&&!/bundles/.test(u)?'?v='+SEV:'')).then(function(r){return r.json();});}
 
 if(!T3){loadTxt.textContent='WebGL / three.js unavailable';return;}
 
@@ -528,15 +528,23 @@ function resetToIntro(){
   +'<div class="sec"><h3>'+T('how')+'</h3><ul class="notes">'+T('howList').map(function(s){return '<li class="ctrl">'+s+'</li>';}).join('')+'</ul></div>'
   +'<div class="sec"><h3>'+T('ladder')+'</h3>'+lv+'</div>'
   +'<div class="sec"><h3>'+T('cats')+'</h3>'+cats+'</div>'
-  +'<div class="sec"><h3>'+T('fly')+' · '+CITIES.length+'</h3><input id="cSearch" type="search" placeholder="'+(I18T('search_a_country_or'))+'" style="width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--glass-2);color:var(--ink);font:inherit;font-size:13px"><div class="flychips" id="cList">'+flyList('')+'</div></div>';
+  +'<div class="sec"><h3>'+esc(I18P('各国首都','Capitals'))+' · '+CITIES.filter(function(c){return c.cap;}).length+'</h3><input id="cSearch" type="search" placeholder="'+(I18T('search_a_country_or'))+'" style="width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--glass-2);color:var(--ink);font:inherit;font-size:13px"><div class="flychips" id="cList">'+flyList('')+'</div></div>';
  wire();pBody.scrollTop=0;
  var si=document.getElementById('cSearch');if(si)si.addEventListener('input',function(){document.getElementById('cList').innerHTML=flyList(si.value);wire();});
 }
 function cityName(c){return I18P(c.zh||c.en,c.en||c.zh);}
+// fly-to list: with no search, one capital per country/region, grouped by continent; a search looks through every place
+var CONT_NAME={'Asia':['亚洲','Asia'],'Europe':['欧洲','Europe'],'Africa':['非洲','Africa'],'North America':['北美洲','North America'],'South America':['南美洲','South America'],'Oceania':['大洋洲','Oceania'],'Other':['其他','Other']},
+ CONT_ORDER=['Asia','Europe','Africa','North America','South America','Oceania','Other'],CONT_FIX={GF:'South America',GI:'Europe',GP:'North America',MQ:'North America',RE:'Africa',SJ:'Europe',YT:'Africa'};
+function isoCont(iso){if(!isoCont.m){isoCont.m={};((V&&V.countries)||[]).forEach(function(c){isoCont.m[c[2]]=c[7];});}var c=CONT_FIX[iso]||isoCont.m[iso];return CONT_NAME[c]?c:'Other';}
+function flyChip(c,cap){return '<button data-city="'+c.id+'"><i style="background:'+(cap?'#f2c14e':c.f?'#58e0c8':'#9fe8ff')+'"></i>'+esc(cityName(c))+' <span style="color:var(--faint)">'+esc(cap?I18P(c.czh||c.country||c.iso,c.country||c.czh||c.iso):(c.iso||''))+'</span></button>';}
 function flyList(q){q=(q||'').trim().toLowerCase();
- var list=CITIES.filter(function(c){if(!q)return c.f;return (c.en+' '+(c.zh||'')+' '+(c.country||'')+' '+(c.czh||'')+' '+(c.iso||'')).toLowerCase().indexOf(q)>=0;}).slice(0,60);
+ if(!q){var caps=CITIES.filter(function(c){return c.cap;}),G={};caps.forEach(function(c){var k=isoCont(c.iso);(G[k]||(G[k]=[])).push(c);});
+  var loc=LZ()?'zh':'en';return CONT_ORDER.filter(function(k){return G[k];}).map(function(k){var L=G[k].sort(function(a,b){return String(LZ()?a.czh||a.country:a.country||a.czh).localeCompare(String(LZ()?b.czh||b.country:b.country||b.czh),loc);});
+   return '<div class="flyGrp" style="width:100%;margin:8px 0 2px;font-size:11px;letter-spacing:.06em;color:var(--faint)">'+esc(I18P(CONT_NAME[k][0],CONT_NAME[k][1]))+' · '+L.length+'</div>'+L.map(function(c){return flyChip(c,true);}).join('');}).join('');}
+ var list=CITIES.filter(function(c){return (c.en+' '+(c.zh||'')+' '+(c.country||'')+' '+(c.czh||'')+' '+(c.iso||'')).toLowerCase().indexOf(q)>=0;}).sort(function(a,b){return (b.cap?1:0)-(a.cap?1:0);}).slice(0,60);
  if(!list.length)return '<span class="ctrl">'+(I18T('no_match'))+'</span>';
- return list.map(function(c){return '<button data-city="'+c.id+'"><i style="background:'+(c.f?'#58e0c8':'#9fe8ff')+'"></i>'+esc(cityName(c))+(c.f?'':' <span style="color:var(--faint)">'+esc(c.iso||'')+'</span>')+'</button>';}).join('');}
+ return list.map(function(c){return flyChip(c,!!c.cap);}).join('');}
 function regForPoint(lat,lon){var land=countryAt(lat,lon);if(!land)return {ocean:true,sl:D.OCEANREG.sl,reg:D.OCEANREG};
  var iso=land[2];var r=D.CTRYREG[iso];if(r)return {ocean:false,c:land,sl:r.sl,r:r};
  var cont=land[7];var cr=D.CONTREG[cont]||D.CONTREG['Asia'];return {ocean:false,c:land,sl:cr.sl,r:cr,generic:true};}
