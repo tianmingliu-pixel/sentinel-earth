@@ -53,7 +53,7 @@ flowchart LR
 | Andere erreichen meinen Computer nicht | `srv.py` nimmt nur Verbindungen von diesem Computer an; zum Teilen die Website auf Vercel oder Netlify bereitstellen |
 | Auf die neueste Version aktualisieren | Mit Git `git pull` ausführen; beim ZIP erneut herunterladen |
 
-> Netzwerk: Die 3D-Engine Three.js wird von einem CDN geladen, zum Öffnen der Seite ist also eine Internetverbindung nötig. Live-Straßen, Routen, Wetter und Satellitenbilder brauchen ebenfalls Internet; ist der Kartenserver nicht erreichbar, lassen sich Städte mit Offline-Paket weiter ansehen.
+> Netzwerk: Die 3D-Engine liegt im Ordner `lib/` des Projekts, die Seite öffnet sich also auch ohne Internet; der Globus und Städte mit Offline-Paket funktionieren normal. Live-Straßen, Routen, Wetter und Satellitenbilder brauchen Internet.
 
 ---
 
@@ -147,6 +147,8 @@ sentinel-earth/
 │  ├─ earth/               Erdtexturen und Ländervektoren
 │  ├─ streets/             Straßenkerne der Städte
 │  └─ bundles/             Offline-Stadtpakete (144 Dateien, etwa 416 MB)
+├─ lib/three.min.js       3D-Engine Three.js r160 (lokale Kopie)
+├─ LICENSE                 MIT-Lizenz und Hinweise zu Daten Dritter
 ├─ srv.py                  lokaler Server (ohne Cache)
 ├─ start-sentinel-earth.bat  Start mit einem Klick unter Windows
 ├─ vercel.json             Deployment-Konfiguration
@@ -176,3 +178,4 @@ Jeder Eintrag ist Schlüssel → [Chinesisch, Englisch]. Einen Text hinzufügen:
 
 - Die umweltbezogene Sicherheitslage und die Netzwerkketten der Gebäude sind Lehrreferenzen, keine Bewertung bestimmter Gebäude oder Organisationen.
 - Wo eine Hauptstadt umstritten ist (etwa Israel, Palästina), zeigt die Liste die Stadt, in der die Regierungsinstitutionen tatsächlich sitzen.
+- Lizenz: Der Code steht unter der MIT-Lizenz (siehe `LICENSE`). Straßen- und Ortsdaten aus OpenStreetMap stehen unter der ODbL 1.0; bei Weiterverwendung muss die Namensnennung erhalten bleiben.

@@ -63,7 +63,7 @@ flowchart LR
 | 别人连不上我的电脑<br>Others cannot reach my computer | `srv.py` 只允许本机访问；要分享给别人，请部署到 Vercel 或 Netlify<br>`srv.py` only accepts connections from this computer; to share the site, deploy it to Vercel or Netlify |
 | 更新到最新版<br>Update to the latest version | 用 Git 的运行 `git pull`；下载 ZIP 的重新下载一次<br>With Git run `git pull`; with the ZIP, download it again |
 
-> 网络说明：三维引擎 Three.js 从 CDN 加载，所以打开网站需要联网。实时街区、路线、天气和卫星影像也需要联网；连不上地图服务器时，有离线城市包的城市仍然可以浏览。<br>Network: the 3D engine Three.js loads from a CDN, so opening the site needs an internet connection. Live streets, routes, weather and satellite imagery also need the internet; if the map server cannot be reached, cities with an offline bundle can still be browsed.
+> 网络说明：三维引擎已经放在项目的 `lib/` 文件夹里，断网也能打开网站，地球层和有离线城市包的城市都能正常浏览。实时街区、路线、天气和卫星影像需要联网。<br>Network: the 3D engine ships in the project's `lib/` folder, so the site opens without an internet connection; the globe and cities with an offline bundle work normally. Live streets, routes, weather and satellite imagery need the internet.
 
 ---
 
@@ -157,6 +157,8 @@ sentinel-earth/
 │  ├─ earth/               地球贴图与国界矢量 / Earth textures and country vectors
 │  ├─ streets/             各城市街道核心区 / street cores of each city
 │  └─ bundles/             离线城市包（144 个文件，约 416 MB） / offline city bundles (144 files, about 416 MB)
+├─ lib/three.min.js       三维引擎 Three.js r160（本地副本） / 3D engine Three.js r160 (local copy)
+├─ LICENSE                 MIT 许可证与第三方数据说明 / MIT License and third-party data notes
 ├─ srv.py                  本地服务器（关闭缓存） / local server (no cache)
 ├─ start-sentinel-earth.bat  Windows 一键启动 / one-click start on Windows
 ├─ vercel.json             部署配置 / deployment config
@@ -190,3 +192,4 @@ Each entry is key → [Chinese, English]. To add a string:
 
 - 环境安全态势、建筑网络链路都是教学参考，不评估任何具体建筑或机构。<br>The environmental security posture and building network chains are teaching references, not assessments of any specific building or organisation.
 - 首都归属有争议的地方（如以色列、巴勒斯坦），列表里标的是政府机构实际所在的城市。<br>Where a capital is disputed (for example Israel, Palestine), the list shows the city where the government institutions actually sit.
+- 许可证：代码采用 MIT 许可证（见 `LICENSE`）。来自 OpenStreetMap 的街道和地点数据遵循 ODbL 1.0，转用时要保留署名。<br>License: the code is under the MIT License (see `LICENSE`). Street and place data from OpenStreetMap is under ODbL 1.0; keep the attribution when reusing it.

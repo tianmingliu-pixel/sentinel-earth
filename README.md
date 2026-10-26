@@ -6,6 +6,8 @@ CSE635 security-education globe · 安全教育三维地球 · 보안 교육용 
 
 **在自己电脑上部署 · Run it on your own computer:** 各语言文档第 2 节有详细步骤（下载、安装 Python、启动、常见问题） · see section 2 of each language doc for step-by-step instructions.
 
+**许可证 · License:** 代码 MIT（见 [LICENSE](LICENSE)）；OpenStreetMap 数据 ODbL 1.0 · code MIT (see [LICENSE](LICENSE)); OpenStreetMap data ODbL 1.0.
+
 ```
  Globe (static overview)  ──click a city──▶  Street level (dynamic)
  ├─ 7,342 places, clusters                 ├─ live OpenStreetMap tiles, 3×3 streamed while you move

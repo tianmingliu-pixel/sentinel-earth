@@ -25,7 +25,7 @@ function lvColor(i){return cv(D.LEVELS[i].c);}
 var loadTxt=document.getElementById('loadTxt'),loadBar=document.getElementById('loadBar');
 function prog(p,t){loadBar.style.width=Math.round(p*100)+'%';if(t)loadTxt.textContent=t;}
 function loadImg(u){return new Promise(function(res,rej){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){res(i);};i.onerror=rej;i.src=u;});}
-var SEV='20261025b';function loadJSON(u){return fetch(u+(u.indexOf('?')<0&&!/bundles/.test(u)?'?v='+SEV:'')).then(function(r){return r.json();});}
+var SEV='20261025c';function loadJSON(u){return fetch(u+(u.indexOf('?')<0&&!/bundles/.test(u)?'?v='+SEV:'')).then(function(r){return r.json();});}
 
 if(!T3){loadTxt.textContent='WebGL / three.js unavailable';return;}
 

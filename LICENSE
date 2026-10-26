@@ -1,0 +1,37 @@
+MIT License
+
+Copyright (c) 2026 tianmingliu-pixel
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+Third-party components and data (not covered by the MIT license above)
+第三方组件与数据（不受上面的 MIT 许可约束）
+
+- lib/three.min.js — Three.js r160, © 2010-2023 Three.js Authors, MIT License.
+- Street and place data in data/streets, data/bundles and data/cities.json is
+  derived from OpenStreetMap, © OpenStreetMap contributors, available under the
+  Open Database License (ODbL) 1.0: https://www.openstreetmap.org/copyright
+  Reuse of these data files must keep this attribution and follow the ODbL.
+- Building fill comes from Overture Maps Foundation data (ODbL / CDLA where
+  applicable): https://overturemaps.org
+- Earth imagery in data/earth: NASA (public domain).
+- Live services used at run time keep their own terms: OpenFreeMap, OSRM,
+  Overpass API, Open-Meteo (CC BY 4.0), NWS, Esri, EOX Sentinel-2 cloudless,
+  NASA GIBS / EONET, USGS, CelesTrak, RainViewer.

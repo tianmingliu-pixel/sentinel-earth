@@ -53,7 +53,7 @@ flowchart LR
 | Otras personas no pueden conectarse a mi ordenador | `srv.py` solo acepta conexiones desde este ordenador; para compartir el sitio, publíquelo en Vercel o Netlify |
 | Actualizar a la última versión | Con Git, ejecute `git pull`; si descargó el ZIP, descárguelo de nuevo |
 
-> Red: el motor 3D Three.js se carga desde una CDN, así que abrir el sitio requiere conexión a internet. Las calles en vivo, las rutas, el tiempo y las imágenes de satélite también necesitan internet; si no se puede llegar al servidor de mapas, las ciudades con datos sin conexión se pueden seguir viendo.
+> Red: el motor 3D viene incluido en la carpeta `lib/` del proyecto, así que el sitio se abre sin conexión a internet; el globo y las ciudades con datos sin conexión funcionan con normalidad. Las calles en vivo, las rutas, el tiempo y las imágenes de satélite necesitan internet.
 
 ---
 
@@ -147,6 +147,8 @@ sentinel-earth/
 │  ├─ earth/               texturas de la Tierra y vectores de fronteras
 │  ├─ streets/             núcleos de calles de cada ciudad
 │  └─ bundles/             datos de ciudades sin conexión (144 archivos, unos 416 MB)
+├─ lib/three.min.js       motor 3D Three.js r160 (copia local)
+├─ LICENSE                 licencia MIT y notas sobre datos de terceros
 ├─ srv.py                  servidor local (sin caché)
 ├─ start-sentinel-earth.bat  arranque con un clic en Windows
 ├─ vercel.json             configuración de publicación
@@ -176,3 +178,4 @@ Cada entrada es clave → [chino, inglés]. Para añadir un texto:
 
 - La situación de seguridad según el entorno y las cadenas de red de los edificios son material didáctico de referencia, no una evaluación de ningún edificio u organización concretos.
 - Donde la capital está en disputa (por ejemplo, Israel, Palestina), la lista muestra la ciudad donde se encuentran realmente las instituciones del gobierno.
+- Licencia: el código está bajo la licencia MIT (véase `LICENSE`). Los datos de calles y lugares de OpenStreetMap están bajo la ODbL 1.0; al reutilizarlos hay que mantener la atribución.

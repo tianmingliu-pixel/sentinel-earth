@@ -708,8 +708,9 @@ body.winDrag,body.winDrag *{user-select:none!important;cursor:grabbing!important
 <div class="dvRow"><span class="zh-only">时间倍率</span><span class="en-only">Time ×</span><button type="button" data-dx="1">1×</button><button type="button" data-dx="2">2×</button><button type="button" data-dx="4">4×</button><button type="button" data-dx="8">8×</button></div>
 <div class="dvLidBox"><div class="dvLidH"><span class="zh-only">📡 车顶激光雷达</span><span class="en-only">📡 Roof LiDAR</span></div><div id="dvLid"></div><div class="lidS" id="dvLidS"></div></div><div id="dvState"></div><div id="dvAlong"></div><div class="dvNote"><span class="zh-only">道路等级 / 单行道：OSM 实时街区 · 信号灯 / 停车 / 让行：OSM 实测（可连通时）否则按路口等级推断 · 信号配时为模拟 · 限速为本国道路等级默认值</span><span class="en-only">Road class / one-way: live OSM tiles · signals / stop / yield: real OSM nodes when reachable, else inferred from junction class · signal timing simulated · limits are national defaults per road class</span></div></div>
 <div id="drvHud" hidden></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script src="lib/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"><\/script>')</script>
 <script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
-<script charset="utf-8" src="i18n.js?v=20261025b"></script>
-<script charset="utf-8" src="data.js?v=20261025b"></script>
-<script charset="utf-8" src="app.js?v=20261025b"></script>
+<script charset="utf-8" src="i18n.js?v=20261025c"></script>
+<script charset="utf-8" src="data.js?v=20261025c"></script>
+<script charset="utf-8" src="app.js?v=20261025c"></script>
