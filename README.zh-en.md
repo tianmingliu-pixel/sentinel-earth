@@ -11,7 +11,7 @@ A CSE635 Software Security Engineering project: a deployable 3D globe website. Z
 ## 一、一张图看懂缩放层级 · Zoom levels at a glance
 
 ```mermaid
-flowchart LR
+flowchart TB
   SS["太阳系<br/>八大行星今日位置<br/>Solar system<br/>8 planets at today's positions"] -- 放大地球 · zoom in on Earth --> EM["地月系统<br/>月球真实距离与月相<br/>Earth–Moon<br/>true distance and phase"]
   EM -- 放大 · zoom in --> GL["地球<br/>真实昼夜 · 各国监管与安全级别<br/>Globe<br/>real day/night · regulations and security levels"]
   GL -- 点城市 / 一直放大 · click a city / keep zooming --> ST["街道层<br/>真实三维街区 · 交通 · 行人<br/>Street level<br/>real 3D streets · traffic · pedestrians"]

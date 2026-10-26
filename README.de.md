@@ -9,7 +9,7 @@ Ein Projekt für den Kurs CSE635 Software Security Engineering: eine direkt depl
 ## 1. Die Zoomstufen im Überblick
 
 ```mermaid
-flowchart LR
+flowchart TB
   SS["Sonnensystem<br/>8 Planeten an ihrer heutigen Position"] -- auf die Erde zoomen --> EM["Erde–Mond<br/>echte Entfernung und Phase"]
   EM -- hineinzoomen --> GL["Globus<br/>echter Tag und Nacht · Regulierung und Sicherheitsstufen"]
   GL -- Stadt anklicken / weiter zoomen --> ST["Straßenebene<br/>echte 3D-Straßen · Verkehr · Fußgänger"]

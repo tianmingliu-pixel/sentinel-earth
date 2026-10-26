@@ -50,7 +50,7 @@ flowchart TB
 ```
 
 ```mermaid
-flowchart LR
+flowchart TB
   ST["Street · 街道层<br/>real 3D streets"] -- zoom out · 缩小 --> GL["Globe · 地球<br/>real Sun direction · 真实昼夜"]
   GL -- zoom out · 缩小 --> EM["Earth–Moon · 地月<br/>Moon at true distance & phase<br/>月球真实距离与月相"]
   EM -- zoom out · 缩小 --> SS["Solar system · 太阳系<br/>8 planets at today's positions<br/>八大行星今日位置"]

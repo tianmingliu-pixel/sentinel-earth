@@ -9,7 +9,7 @@ Proyecto del curso CSE635 de Ingeniería de Seguridad del Software: un sitio web
 ## 1. Los niveles de zoom de un vistazo
 
 ```mermaid
-flowchart LR
+flowchart TB
   SS["Sistema solar<br/>8 planetas en su posición de hoy"] -- acercar a la Tierra --> EM["Tierra–Luna<br/>distancia y fase reales"]
   EM -- acercar --> GL["Globo<br/>día y noche reales · normativa y niveles de seguridad"]
   GL -- clic en una ciudad / seguir acercando --> ST["Nivel de calle<br/>calles reales en 3D · tráfico · peatones"]

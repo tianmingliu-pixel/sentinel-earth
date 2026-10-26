@@ -9,7 +9,7 @@ A CSE635 Software Security Engineering project: a deployable 3D globe website. Z
 ## 1. Zoom levels at a glance
 
 ```mermaid
-flowchart LR
+flowchart TB
   SS["Solar system<br/>8 planets at today's positions"] -- zoom in on Earth --> EM["Earth–Moon<br/>true distance and phase"]
   EM -- zoom in --> GL["Globe<br/>real day/night · regulations and security levels"]
   GL -- click a city / keep zooming --> ST["Street level<br/>real 3D streets · traffic · pedestrians"]
