@@ -71,6 +71,7 @@ flowchart LR
 - **环境安全态势**：根据照度、能见度、风、降水、雷电、温度和时段七项条件，给出监控成像、无人机巡检、防水防雷、值守等方面的通用参考。这只是针对环境条件的教学参考，不评估任何具体建筑。
 
 **城市互联与导航**
+- 「快速飞往」默认列出每个国家或地区的首都（225 个），按大洲分组；搜索框可以搜全部 2353 个地点。
 - 街道层左上是小地球（方位指针），右上是 XYZ 空间坐标，右下「前方临近」列出朝向前方 400 km 内的城镇和最近的邻国。
 - 点列表里的城市名，镜头会沿地面一路飞过去，沿途街区块实时加载，相邻城市连成一张图。速度可选慢、中、快，按 WASD 或 Esc 随时停下。
 - 连不上地图服务器时，后台会自动重试；加载失败的街区块也会自动重试。视野可以在 3×3 和 5×5 街区块之间切换。
@@ -118,7 +119,7 @@ flowchart LR
 - 右上角三个按钮切换：中文、English、双语（中英并排，例如「限速 / LIMIT」）。选择会记在浏览器里。
 - 所有界面文字集中在语言包 `i18n.js`：`ui` 是界面标签，`s` 是其余全部屏幕文字（抬头显示、面板、提示、驾驶、天眼、街道生活），每条都是「键 → [中文, English]」。`pick()` 是三种模式共用的取词规则。新增文字时在语言包里加一个键，代码里用 `I18T('键')` 调用。
 
-**本地运行**：双击 `start-sentinel-earth.bat`（Windows），或运行 `python srv.py 8000`，再打开 http://localhost:8000 。`data/bundles` 里是离线城市包，没有网络时也能看这些城市。
+**本地运行**：双击 `start-sentinel-earth.bat`（Windows），或运行 `python srv.py 8000`，再打开 http://localhost:8000 。`data/bundles` 里是离线城市包，没有网络时也能看这些城市。 三维引擎放在 `lib/` 里，断网也能打开；详细的部署步骤见 [README.zh.md](README.zh.md)。
 
 **部署**：这个文件夹就是网站本身，不需要构建步骤。
 - Vercel：在文件夹里运行 `vercel deploy`，或者把它推到 GitHub 再在 Vercel 导入。
@@ -138,6 +139,7 @@ flowchart LR
 - **Environmental security posture**: seven conditions (illumination, visibility, wind, precipitation, lightning, temperature, time window) give generic guidance on CCTV imaging, drone patrol, flood and surge protection, and staffing. It is a teaching reference about conditions, not an assessment of any specific building.
 
 **Connected cities and navigation**
+- "Fly to" lists one capital per country or region by default (225), grouped by continent; the search box covers all 2,353 places.
 - At street level, a mini globe with a heading pointer sits top left and an XYZ gizmo top right. The "Next up" radar at bottom right lists places within 400 km ahead and the nearest neighbouring country.
 - Click a place to glide there over the ground while tiles stream in, so neighbouring cities join into one map. Speed is slow, medium or fast; WASD or Esc stops.
 - If the map server is unreachable, the page retries in the background, and failed tiles retry on their own. The view can be 3×3 or 5×5 tiles.
@@ -185,7 +187,7 @@ flowchart LR
 - Three buttons at the top right: Chinese, English and bilingual (both side by side, e.g. "限速 / LIMIT"). The choice is remembered in the browser.
 - Every interface string lives in the language pack `i18n.js`: `ui` holds interface labels, `s` holds every other on-screen string (HUDs, panels, toasts, driving, sky eye, street life), each as key → [Chinese, English]. `pick()` is the one rule all three modes use. To add a string, add a key to the pack and call `I18T('key')` in the code.
 
-**Run locally**: double-click `start-sentinel-earth.bat` (Windows) or run `python srv.py 8000`, then open http://localhost:8000. `data/bundles` holds offline city bundles that work without a network.
+**Run locally**: double-click `start-sentinel-earth.bat` (Windows) or run `python srv.py 8000`, then open http://localhost:8000. `data/bundles` holds offline city bundles that work without a network. The 3D engine ships in `lib/`, so the site opens offline; step-by-step setup is in [README.en.md](README.en.md).
 
 **Deploy**: this folder is the site itself; there is no build step.
 - Vercel: run `vercel deploy` in the folder, or push it to GitHub and import it in Vercel.
@@ -205,6 +207,7 @@ flowchart LR
 - **환경 보안 태세**: 조도, 가시거리, 바람, 강수, 낙뢰, 기온, 시간대의 일곱 가지 조건으로 CCTV 영상, 드론 순찰, 침수·서지 보호, 근무 인원에 대한 일반적인 참고 정보를 보여 줍니다. 환경 조건에 대한 교육용 참고 자료이며, 특정 건물을 평가하지 않습니다.
 
 **도시 연결과 내비게이션**
+- "바로 가기" 목록은 기본으로 국가·지역마다 수도 하나(225곳)를 대륙별로 보여 주고, 검색창은 전체 2,353곳을 찾습니다.
 - 거리 레벨 왼쪽 위에는 방위 포인터가 있는 미니 지구본, 오른쪽 위에는 XYZ 좌표축이 있습니다. 오른쪽 아래 "전방 근접" 레이더는 진행 방향 400 km 안의 도시와 가장 가까운 이웃 나라를 보여 줍니다.
 - 목록의 도시를 클릭하면 지면을 따라 날아가며 타일을 실시간으로 불러오므로, 이웃 도시가 하나의 지도로 이어집니다. 속도는 느림·보통·빠름이며 WASD나 Esc로 멈춥니다.
 - 지도 서버에 연결되지 않으면 백그라운드에서 다시 시도하고, 실패한 타일도 자동으로 다시 불러옵니다. 시야는 3×3 또는 5×5 타일입니다.
@@ -252,7 +255,7 @@ flowchart LR
 - 오른쪽 위 세 버튼으로 중국어, 영어, 이중 언어(두 언어를 나란히, 예: "限速 / LIMIT")를 고릅니다. 선택은 브라우저에 저장됩니다.
 - 모든 화면 문구는 언어 팩 `i18n.js`에 모여 있습니다. `ui`는 인터페이스 라벨, `s`는 그 밖의 모든 화면 문구(HUD, 패널, 알림, 주행, 천안, 거리 생활)이며 각 항목은 키 → [중국어, 영어]입니다. `pick()`은 세 모드가 함께 쓰는 선택 규칙입니다. 문구를 추가하려면 언어 팩에 키를 넣고 코드에서 `I18T('키')`로 부릅니다.
 
-**로컬 실행**: Windows에서 `start-sentinel-earth.bat`를 더블클릭하거나 `python srv.py 8000`을 실행한 뒤 http://localhost:8000 을 엽니다. `data/bundles`에는 네트워크 없이도 볼 수 있는 오프라인 도시 데이터가 있습니다.
+**로컬 실행**: Windows에서 `start-sentinel-earth.bat`를 더블클릭하거나 `python srv.py 8000`을 실행한 뒤 http://localhost:8000 을 엽니다. `data/bundles`에는 네트워크 없이도 볼 수 있는 오프라인 도시 데이터가 있습니다. 3D 엔진이 `lib/`에 들어 있어 오프라인에서도 열리며, 자세한 설치 단계는 [README.ko.md](README.ko.md)에 있습니다.
 
 **배포**: 이 폴더가 곧 사이트이며, 빌드 단계는 없습니다.
 - Vercel: 폴더에서 `vercel deploy`를 실행하거나, GitHub에 올린 뒤 Vercel에서 가져옵니다.
@@ -272,6 +275,7 @@ flowchart LR
 - **Umweltbezogene Sicherheitslage**: Sieben Bedingungen (Beleuchtungsstärke, Sicht, Wind, Niederschlag, Blitz, Temperatur, Zeitfenster) liefern allgemeine Hinweise zu Videobild, Drohnenstreife, Wasser- und Überspannungsschutz sowie Personalstärke. Das ist eine Lehrreferenz zu Bedingungen, keine Bewertung bestimmter Gebäude.
 
 **Verbundene Städte und Navigation**
+- „Hinfliegen“ listet standardmäßig je Land oder Region eine Hauptstadt (225), nach Kontinenten gruppiert; das Suchfeld durchsucht alle 2.353 Orte.
 - Auf Straßenebene zeigt oben links ein Mini-Globus mit Richtungszeiger und oben rechts ein XYZ-Achsenkreuz. Das Radar "Voraus" unten rechts listet Orte bis 400 km in Blickrichtung und das nächste Nachbarland.
 - Ein Klick auf einen Ort lässt die Kamera über den Boden dorthin gleiten, während Kacheln nachladen; so verbinden sich Nachbarstädte zu einer Karte. Tempo langsam, mittel oder schnell; WASD oder Esc stoppt.
 - Ist der Kartenserver nicht erreichbar, versucht die Seite es im Hintergrund erneut, und fehlgeschlagene Kacheln laden automatisch nach. Sichtbereich 3×3 oder 5×5 Kacheln.
@@ -319,7 +323,7 @@ flowchart LR
 - Drei Schaltflächen oben rechts: Chinesisch, Englisch und zweisprachig (beides nebeneinander, z. B. „限速 / LIMIT“). Die Wahl bleibt im Browser gespeichert.
 - Alle Oberflächentexte liegen im Sprachpaket `i18n.js`: `ui` enthält die Oberflächenbeschriftungen, `s` alle übrigen Bildschirmtexte (HUDs, Panels, Hinweise, Fahren, Himmelsauge, Straßenleben), jeweils Schlüssel → [Chinesisch, Englisch]. `pick()` ist die gemeinsame Auswahlregel aller drei Modi. Für einen neuen Text einen Schlüssel ins Paket aufnehmen und im Code `I18T('Schlüssel')` aufrufen.
 
-**Lokal starten**: unter Windows `start-sentinel-earth.bat` doppelklicken oder `python srv.py 8000` ausführen und http://localhost:8000 öffnen. `data/bundles` enthält Offline-Stadtpakete, die ohne Netz funktionieren.
+**Lokal starten**: unter Windows `start-sentinel-earth.bat` doppelklicken oder `python srv.py 8000` ausführen und http://localhost:8000 öffnen. `data/bundles` enthält Offline-Stadtpakete, die ohne Netz funktionieren. Die 3D-Engine liegt in `lib/`, die Seite öffnet sich also auch offline; eine Schritt-für-Schritt-Anleitung steht in [README.de.md](README.de.md).
 
 **Deployment**: Dieser Ordner ist die Website selbst; es gibt keinen Build-Schritt.
 - Vercel: `vercel deploy` im Ordner ausführen, oder den Ordner auf GitHub pushen und in Vercel importieren.
