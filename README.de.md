@@ -100,6 +100,25 @@ flowchart TB
 - Drei Schaltflächen oben rechts; der zweisprachige Modus zeigt beides nebeneinander, z. B. „限速 / LIMIT“. Die Wahl bleibt im Browser gespeichert.
 - Alle Oberflächentexte liegen im Sprachpaket `i18n.js` (siehe Abschnitt 5).
 
+### 3.6 Cyber-Sicherheitsdossier
+
+```mermaid
+flowchart TB
+  B["Gebäude anklicken"] --> C["Gebäudeklasse<br/>9 Klassen · Unterklasse"]
+  C --> D["Cyber-Sicherheitsdossier"]
+  D --> T1["Lagebild · Schichten · Ende-zu-Ende"]
+  D --> T2["Identität · Krypto · Netz · Cloud"]
+  D --> T3["Lieferkette · Beteiligte · Angreifer"]
+  D --> T4["KI-Agenten · Trends · CSE635-Kurs"]
+```
+
+- Auf Straßenebene ein Gebäude anklicken und im Panel „🛰 Cyber-Sicherheitsdossier“ wählen (auch im Panel jeder Gebäudeklasse). Es öffnet sich ein Vollbild-Dossier für die Klasse dieses Gebäudes.
+- 13 Reiter: Lagebild · Schichten · Ende-zu-Ende · Identität & Token · Kryptografie & Algorithmen · Netz, Routing & Leitungen · Cloud & Daten · Lieferkette & Patches · Beteiligte (Unternehmen / Staat / Bewohner / Lieferanten / Netzbetreiber) · Angreifer & Reaktion · KI & Agenten · Trends & Regulierung · CSE635-Kursbezug.
+- Jeder Punkt folgt Bedrohung → Maßnahme → Abwägung; ◆ markiert CSE635-Formulierungen oder Kursfälle (STRIDE, BOLA/BFLA, JWT-Prüfung, DevSecOps-Gates, „das Modell schlägt vor, die Policy-Schicht entscheidet“, Agenten-Risikostufen, Assurance-Paket aus Woche 7).
+- Diagramme: Schutzziel- und STRIDE-Radar, klickbarer 8-Schichten-Stapel, 14-stufiger Ende-zu-Ende-Pfad, OAuth + PKCE-Sequenz, Zero-Trust-PDP/PEP, Matrix der geteilten Verantwortung, Pipeline-Gates, Patch-Prioritätstrichter, Verantwortungs-Heatmap, ATT&CK-Taktiken und Incident-Response-Zyklus.
+- Jede der 9 Klassen (Wohnen, Gewerbe, Öffentlich, Bildung, Gesundheit, Industrie, Kultur, Verkehr, Religion) hat eigene Expositionsstufe, Kronjuwelen, Top-5-Risiken, Compliance-Rahmen und Planspiel; Haken in der Checkliste des Woche-7-Pakets bleiben in diesem Browser gespeichert.
+- Es ist Lehrmaterial auf Klassenebene: Es bewertet nicht das reale Gebäude und enthält keine echten Schwachstellen- oder Konfigurationsdaten.
+
 ---
 
 ## 4. Architektur
@@ -139,6 +158,7 @@ sentinel-earth/
 ├─ index.html              Seitenstruktur und Stile
 ├─ app.js                  gesamte Anwendungslogik (Globus, Straßen, Fahren, Straßenleben, Sonnensystem …)
 ├─ i18n.js                 Sprachpaket: Chinesisch / Englisch / zweisprachig
+├─ dossier.js              Cyber-Sicherheitsdossier: Wissensbasis + Ansicht
 ├─ data.js                 Lehrdaten: Sicherheitsstufen, Gebäudetypen, Regulierung
 ├─ data/
 │  ├─ cities.json          2.353 Orte (225 Hauptstädte)

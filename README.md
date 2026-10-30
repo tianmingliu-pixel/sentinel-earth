@@ -115,6 +115,10 @@ flowchart TB
 - 一直缩小，先看到地月系统，再进入「太阳系视角」：八大行星按今天的真实位置排在各自轨道上，可以点任意行星看半径、离太阳和离地球的距离、光行时间、公转和自转周期。土星环和天王星的自转轴按真实朝向画出。
 - 底部时间条：实时、暂停、1 天/秒、1 周/秒、1 月/秒、1 年/秒。位置用 Schlyter 低精度星历计算（约 1–2 角分）；太阳系视角里的距离和大小经过压缩，不是真实比例。
 
+**网络安全情报档案**
+- 街道层点建筑 →「🛰 网络安全情报档案」：按建筑类别生成的全屏档案，13 个维度（分层架构、端到端链路、认证与令牌、密码与算法、网络路由线路、云与数据、供应链与补丁、企业/政府/居民/供应商、对手与检测响应、AI Agent、前沿与法规、CSE635 课程映射），配雷达图、8 层架构、端到端路径、OAuth 时序等图示。
+- 每条按「威胁 → 控制 → 利弊」写，融合 CSE635 课程内容；只做类别层面的教学参考，不评估任何真实建筑。
+
 **语言：中文 / EN / 双语**
 - 右上角三个按钮切换：中文、English、双语（中英并排，例如「限速 / LIMIT」）。选择会记在浏览器里。
 - 所有界面文字集中在语言包 `i18n.js`：`ui` 是界面标签，`s` 是其余全部屏幕文字（抬头显示、面板、提示、驾驶、天眼、街道生活），每条都是「键 → [中文, English]」。`pick()` 是三种模式共用的取词规则。新增文字时在语言包里加一个键，代码里用 `I18T('键')` 调用。
@@ -182,6 +186,10 @@ flowchart TB
 - Turn on "Solar system" on the globe: the Sun sits in its true direction (Earth's day/night line matches this moment), the Moon at its true distance and phase, and Mercury to Neptune in their true directions in the sky.
 - Keep zooming out to see the Earth–Moon system, then the solar-system view: the eight planets at today's real positions on their orbits. Click any planet for its radius, distance from the Sun and from Earth, light time, and orbital and rotation periods. Saturn's rings and Uranus's axis are drawn in their real orientation.
 - Time bar at the bottom: live, pause, 1 day/s, 1 week/s, 1 month/s, 1 year/s. Positions come from Schlyter's low-precision ephemeris (about 1–2′); distances and sizes in the solar-system view are compressed, not to scale.
+
+**Cyber security dossier**
+- Click a building at street level → "🛰 Cyber security dossier": a full-screen dossier for the building's class with 13 tabs (layers, end-to-end path, identity & tokens, crypto, network/routing/lines, cloud & data, supply chain & patching, stakeholders, adversaries & response, AI agents, frontier & regulation, CSE635 course map) and diagrams such as radars, an 8-layer stack, an end-to-end path and an OAuth sequence.
+- Every item runs threat → control → trade-off and draws on the CSE635 course; it is class-level teaching material and assesses no real building.
 
 **Language: 中文 / EN / 双语 (bilingual)**
 - Three buttons at the top right: Chinese, English and bilingual (both side by side, e.g. "限速 / LIMIT"). The choice is remembered in the browser.
@@ -251,6 +259,10 @@ flowchart TB
 - 계속 축소하면 지구–달 시스템을 거쳐 "태양계 시점"으로 들어가, 여덟 행성이 오늘의 실제 위치로 궤도 위에 놓입니다. 행성을 클릭하면 반지름, 태양·지구까지의 거리, 빛의 도달 시간, 공전·자전 주기를 볼 수 있습니다. 토성 고리와 천왕성 자전축은 실제 방향으로 그립니다.
 - 아래 시간 막대: 실시간, 일시정지, 1일/초, 1주/초, 1개월/초, 1년/초. 위치는 Schlyter 저정밀 천체력(약 1–2′)으로 계산하며, 태양계 시점의 거리와 크기는 압축되어 실제 비율이 아닙니다.
 
+**사이버 보안 정보 파일**
+- 거리 레벨에서 건물 클릭 →「🛰 사이버 보안 정보 파일」: 건물 분류별 전체 화면 파일, 13개 탭(계층 구조, 종단 간 경로, 인증과 토큰, 암호, 네트워크·라우팅·회선, 클라우드와 데이터, 공급망과 패치, 이해관계자, 공격자와 대응, AI 에이전트, 최신 기술과 규제, CSE635 과목 매핑)과 레이더, 8계층 구조, 종단 간 경로, OAuth 시퀀스 등의 도식.
+- 모든 항목은 위협 → 통제 → 장단점 순서이며 CSE635 수업 내용을 반영합니다. 분류 단위의 교육 자료로, 실제 건물을 평가하지 않습니다.
+
 **언어: 中文 / EN / 双语(이중 언어)**
 - 오른쪽 위 세 버튼으로 중국어, 영어, 이중 언어(두 언어를 나란히, 예: "限速 / LIMIT")를 고릅니다. 선택은 브라우저에 저장됩니다.
 - 모든 화면 문구는 언어 팩 `i18n.js`에 모여 있습니다. `ui`는 인터페이스 라벨, `s`는 그 밖의 모든 화면 문구(HUD, 패널, 알림, 주행, 천안, 거리 생활)이며 각 항목은 키 → [중국어, 영어]입니다. `pick()`은 세 모드가 함께 쓰는 선택 규칙입니다. 문구를 추가하려면 언어 팩에 키를 넣고 코드에서 `I18T('키')`로 부릅니다.
@@ -318,6 +330,10 @@ flowchart TB
 - „Sonnensystem“ auf dem Globus einschalten: Die Sonne steht in ihrer echten Richtung (die Tag-Nacht-Grenze der Erde entspricht diesem Moment), der Mond in echter Entfernung und Phase, Merkur bis Neptun in ihrer echten Richtung am Himmel.
 - Weiter herauszoomen zeigt erst das Erde-Mond-System, dann die Sonnensystem-Ansicht: die acht Planeten an ihrer heutigen echten Position auf ihren Bahnen. Ein Klick auf einen Planeten zeigt Radius, Abstand zur Sonne und zur Erde, Lichtlaufzeit sowie Umlauf- und Rotationsdauer. Saturnringe und Uranusachse sind in ihrer echten Ausrichtung gezeichnet.
 - Zeitleiste unten: live, Pause, 1 Tag/s, 1 Woche/s, 1 Monat/s, 1 Jahr/s. Die Positionen stammen aus Schlyters Ephemeride niedriger Genauigkeit (etwa 1–2′); Abstände und Größen in der Sonnensystem-Ansicht sind gestaucht, nicht maßstäblich.
+
+**Cyber-Sicherheitsdossier**
+- Gebäude auf Straßenebene anklicken → „🛰 Cyber-Sicherheitsdossier“: Vollbild-Dossier zur Gebäudeklasse mit 13 Reitern (Schichten, Ende-zu-Ende-Pfad, Identität & Token, Kryptografie, Netz/Routing/Leitungen, Cloud & Daten, Lieferkette & Patches, Beteiligte, Angreifer & Reaktion, KI-Agenten, Trends & Regulierung, CSE635-Kursbezug) und Diagrammen wie Radar, 8-Schichten-Stapel, Ende-zu-Ende-Pfad und OAuth-Sequenz.
+- Jeder Punkt folgt Bedrohung → Maßnahme → Abwägung und greift auf den CSE635-Kurs zurück; es ist Lehrmaterial auf Klassenebene und bewertet kein reales Gebäude.
 
 **Sprache: 中文 / EN / 双语 (zweisprachig)**
 - Drei Schaltflächen oben rechts: Chinesisch, Englisch und zweisprachig (beides nebeneinander, z. B. „限速 / LIMIT“). Die Wahl bleibt im Browser gespeichert.

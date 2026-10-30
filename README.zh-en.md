@@ -110,6 +110,25 @@ flowchart TB
 - 右上角三个按钮切换，双语模式中英并排，例如「限速 / LIMIT」。选择会记在浏览器里。<br>Three buttons at the top right; bilingual mode shows both side by side, e.g. "限速 / LIMIT". The choice is remembered in the browser.
 - 所有界面文字集中在语言包 `i18n.js`，详见第五节。<br>All interface text lives in the language pack `i18n.js` (see section 5).
 
+### 6. 网络安全情报档案 · Cyber security dossier
+
+```mermaid
+flowchart TB
+  B["点击建筑<br/>Click a building"] --> C["建筑类别<br/>9 大类 · 子类<br/>Building class<br/>9 classes · sub-class"]
+  C --> D["网络安全情报档案<br/>Cyber security dossier"]
+  D --> T1["总览 · 分层 · 端到端<br/>Brief · layers · end-to-end"]
+  D --> T2["认证 · 密码 · 网络 · 云<br/>Identity · crypto · network · cloud"]
+  D --> T3["供应链 · 各方责任 · 对手<br/>Supply chain · stakeholders · adversaries"]
+  D --> T4["AI Agent · 前沿 · CSE635 课程<br/>AI agents · frontier · CSE635 course"]
+```
+
+- 街道层点任意建筑，在面板里点「🛰 网络安全情报档案」（建筑类别面板里也有），会打开一份按该建筑类别生成的全屏档案。<br>At street level, click any building and press "🛰 Cyber security dossier" in its panel (it is also in each building-class panel). A full-screen dossier opens for that building's class.
+- 13 个维度：态势总览 · 分层架构 · 端到端链路 · 认证与令牌 · 密码与算法 · 网络·路由·线路 · 云与数据存储 · 供应链与补丁 · 企业/政府/居民/供应商/运营商 · 对手与检测响应 · AI·Agent 安全 · 前沿与法规 · CSE635 课程映射。<br>13 tabs: brief · layers · end-to-end · identity & tokens · crypto & algorithms · network, routing & lines · cloud & data · supply chain & patching · stakeholders (enterprise / government / residents / suppliers / carriers) · adversaries & response · AI & agents · frontier & regulation · CSE635 course map.
+- 每一条都按「威胁 → 控制 → 利弊」写；带 ◆ 的是 CSE635 课程原话或课程案例（STRIDE、BOLA/BFLA、JWT 审查、DevSecOps 门禁、模型提议 / 策略层决定、Agent 风险分级、Week 7 保障包）。<br>Every item runs threat → control → trade-off; ◆ marks CSE635 wording or course cases (STRIDE, BOLA/BFLA, JWT review, DevSecOps gates, model proposes / policy disposes, agent risk tiers, the Week 7 assurance package).
+- 图示：安全目标与 STRIDE 雷达图、可点击的 8 层架构、14 跳端到端路径、OAuth + PKCE 时序图、零信任 PDP/PEP、共享责任矩阵、流水线门禁、补丁优先级漏斗、责任热力图、ATT&CK 战术与事件响应循环。<br>Diagrams: objective and STRIDE radars, a clickable 8-layer stack, a 14-hop end-to-end path, an OAuth + PKCE sequence, zero-trust PDP/PEP, a shared-responsibility matrix, pipeline gates, a patch-priority funnel, a responsibility heat map, ATT&CK tactics and the incident-response loop.
+- 9 类建筑（住宅、商业、公共行政、教育、医疗、工业、文体、交通基建、宗教）各有自己的暴露等级、核心资产、五大风险、合规框架和桌面推演；Week 7 保障包清单的勾选会记在本浏览器。<br>Each of the 9 classes (residential, commercial, public, education, health, industrial, culture, transit, religious) has its own exposure tier, crown jewels, top five risks, compliance frame and tabletop exercise; ticks on the Week 7 package checklist are kept in this browser.
+- 这是按类别给出的教学参考，不评估这栋真实建筑，也不含任何真实漏洞或配置信息。<br>It is class-level teaching material: it does not assess the real building and holds no real vulnerability or configuration data.
+
 ---
 
 ## 四、整体架构 · Architecture
@@ -149,6 +168,7 @@ sentinel-earth/
 ├─ index.html              页面结构与样式 / page structure and styles
 ├─ app.js                  全部应用逻辑（地球、街道、驾驶、街道生活、太阳系……） / all application logic (globe, streets, driving, street life, solar system…)
 ├─ i18n.js                 语言包：中文 / English / 双语 / language pack: Chinese / English / bilingual
+├─ dossier.js              网络安全情报档案：知识库 + 查看器 / cyber security dossier: knowledge base + viewer
 ├─ data.js                 安全级别、建筑类型、监管框架等教学数据 / teaching data: security levels, building types, regulations
 ├─ data/
 │  ├─ cities.json          2353 个地点（含 225 个首都） / 2,353 places (225 capitals)

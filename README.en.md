@@ -100,6 +100,25 @@ flowchart TB
 - Three buttons at the top right; bilingual mode shows both side by side, e.g. "限速 / LIMIT". The choice is remembered in the browser.
 - All interface text lives in the language pack `i18n.js` (see section 5).
 
+### 3.6 Cyber security dossier
+
+```mermaid
+flowchart TB
+  B["Click a building"] --> C["Building class<br/>9 classes · sub-class"]
+  C --> D["Cyber security dossier"]
+  D --> T1["Brief · layers · end-to-end"]
+  D --> T2["Identity · crypto · network · cloud"]
+  D --> T3["Supply chain · stakeholders · adversaries"]
+  D --> T4["AI agents · frontier · CSE635 course"]
+```
+
+- At street level, click any building and press "🛰 Cyber security dossier" in its panel (it is also in each building-class panel). A full-screen dossier opens for that building's class.
+- 13 tabs: brief · layers · end-to-end · identity & tokens · crypto & algorithms · network, routing & lines · cloud & data · supply chain & patching · stakeholders (enterprise / government / residents / suppliers / carriers) · adversaries & response · AI & agents · frontier & regulation · CSE635 course map.
+- Every item runs threat → control → trade-off; ◆ marks CSE635 wording or course cases (STRIDE, BOLA/BFLA, JWT review, DevSecOps gates, model proposes / policy disposes, agent risk tiers, the Week 7 assurance package).
+- Diagrams: objective and STRIDE radars, a clickable 8-layer stack, a 14-hop end-to-end path, an OAuth + PKCE sequence, zero-trust PDP/PEP, a shared-responsibility matrix, pipeline gates, a patch-priority funnel, a responsibility heat map, ATT&CK tactics and the incident-response loop.
+- Each of the 9 classes (residential, commercial, public, education, health, industrial, culture, transit, religious) has its own exposure tier, crown jewels, top five risks, compliance frame and tabletop exercise; ticks on the Week 7 package checklist are kept in this browser.
+- It is class-level teaching material: it does not assess the real building and holds no real vulnerability or configuration data.
+
 ---
 
 ## 4. Architecture
@@ -139,6 +158,7 @@ sentinel-earth/
 ├─ index.html              page structure and styles
 ├─ app.js                  all application logic (globe, streets, driving, street life, solar system…)
 ├─ i18n.js                 language pack: Chinese / English / bilingual
+├─ dossier.js              cyber security dossier: knowledge base + viewer
 ├─ data.js                 teaching data: security levels, building types, regulations
 ├─ data/
 │  ├─ cities.json          2,353 places (225 capitals)

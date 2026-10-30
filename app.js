@@ -25,7 +25,7 @@ function lvColor(i){return cv(D.LEVELS[i].c);}
 var loadTxt=document.getElementById('loadTxt'),loadBar=document.getElementById('loadBar');
 function prog(p,t){loadBar.style.width=Math.round(p*100)+'%';if(t)loadTxt.textContent=t;}
 function loadImg(u){return new Promise(function(res,rej){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){res(i);};i.onerror=rej;i.src=u;});}
-var SEV='20261025c';function loadJSON(u){return fetch(u+(u.indexOf('?')<0&&!/bundles/.test(u)?'?v='+SEV:'')).then(function(r){return r.json();});}
+var SEV='20261029a';function loadJSON(u){return fetch(u+(u.indexOf('?')<0&&!/bundles/.test(u)?'?v='+SEV:'')).then(function(r){return r.json();});}
 
 if(!T3){loadTxt.textContent='WebGL / three.js unavailable';return;}
 
@@ -578,6 +578,8 @@ function renderCityIntro(c,data){
   +'<div class="btns"><button class="btn" data-back="globe">← '+T('back')+'</button></div>';
  wire();pBody.scrollTop=0;state={type:'cityIntro'};ENV.secHTML='';envUI(true);
 }
+function dosBtnHTML(){return window.SE_DOS?'<button class="dosBtn" data-dos="1"><b>'+SE_DOS.label()+' →</b><small>'+SE_DOS.blurb()+'</small></button>':'';}
+function dosWire(o){var bs=pBody.querySelectorAll('[data-dos]');for(var i=0;i<bs.length;i++)bs[i].onclick=function(){if(window.SE_DOS)SE_DOS.open(o);};}
 function renderCategory(catId,b){
  var cat=D.CATS[catId],ape=LX(D.CATAPE[catId]),tx=b?txOf(b):null,TM=tx?TAX[tx.m]:null;
  pHead.innerHTML=headHTML(T('bEye'),TM?txSub(tx):LX(cat).n,'<span class="badge" style="background:'+lvColor(cat.sl)+'">SL'+(cat.sl+1)+'</span>'+(TM?'<span class="chip" style="color:'+TM.col+'">■ '+(tx.m+1)+' · '+esc(I18P(TM.zh,TM.en))+' → '+esc(txSub(tx))+'</span>':'<span class="chip" style="color:'+cv(cat.cvar)+'">'+esc(LX(cat).n)+'</span>'),true);
@@ -590,6 +592,7 @@ function renderCategory(catId,b){
   function tile(k,v,u){return '<div><em>'+k+'</em><b>'+v+'</b>'+(u?'<small>'+u+'</small>':'')+'</div>';}
   var nav=[['ov',I18T('overview')],['loc',I18T('location')],['cls',I18T('class')],['lzr',I18T('survey')],['ph',I18T('photos')],['mno',I18T('networks')],['sec',I18T('security')]];
   info='<nav class="bxnav">'+nav.map(function(n){return '<button data-go="'+n[0]+'">'+n[1]+'</button>';}).join('')+'</nav>'
+   +dosBtnHTML()
    +'<div class="sec bxs" data-sec="ov"><h3>'+(I18T('overview'))+'</h3><div class="bxk">'
    +tile(I18T('height'),h.toFixed(h<20?1:0),'m'+(est?(I18T('default')):''))+tile(I18T('est_floors'),'≈ '+fl,'')+tile(I18T('footprint'),Math.round(foot).toLocaleString(),'m²')
    +tile(I18T('perimeter'),Math.round(bf.per).toLocaleString(),'m')+tile(I18T('est_volume'),'≈ '+Math.round(foot*h).toLocaleString(),'m³')+tile(I18T('coords'),'<span class="ll">'+bf.ll.lat.toFixed(5)+'°<br>'+bf.ll.lon.toFixed(5)+'°</span>','<a href="https://www.openstreetmap.org/#map=19/'+bf.ll.lat.toFixed(5)+'/'+bf.ll.lon.toFixed(5)+'" target="_blank" rel="noopener">OSM ↗</a>')+'</div></div>'
@@ -603,6 +606,7 @@ function renderCategory(catId,b){
   +'<div class="btns"><button class="btn" data-back="city">← '+esc(cityName(L2.city))+'</button><button class="btn" data-back="globe">'+T('back')+'</button></div>';
  pBody.classList.toggle('bxmode',!!b);pBody.querySelectorAll('[data-go]').forEach(function(btn){btn.onclick=function(){var t=pBody.querySelector('[data-sec="'+btn.getAttribute('data-go')+'"]');if(t)pBody.scrollTo({top:t.offsetTop-44,behavior:'smooth'});};});
  wire();pBody.scrollTop=0;state={type:'cat',cat:catId,b:b};
+ if(b){var _nm=(function(){var f=buildingFacts(b);return f.places.length?(LZ()&&f.places[0].zh?f.places[0].zh:f.places[0].n):'';})();dosWire({k:TM?TM.k:'com',sk:tx?tx.s:'',name:_nm,cls:TM?[TM.zh,TM.en]:[LX(cat).n,LX(cat).n],sub:tx&&TM&&TM.s[tx.s]?[TM.s[tx.s][0],TM.s[tx.s][1]]:null,col:TM?TM.col:null,lat:buildingFacts(b).ll.lat,lon:buildingFacts(b).ll.lon});}
  if(b){bxFill(b);var bf2=buildingFacts(b);if(bf2.live)fillFullAddr(bf2.ll.lat,bf2.ll.lon);}
 }
 function renderDistrict(idx){
@@ -654,7 +658,7 @@ function zoom(f){if(solZoom(f))return;if(mode==='globe'&&CINE){want.d=Math.max(R
 function pickBuilding(){ray.setFromCamera(ndc,camera);var hit=L2.group?ray.intersectObject(L2.group,true):[];var bx,bz;
  if(hit.length){bx=hit[0].point.x;bz=hit[0].point.z;}else{var gp=rayGround();if(!gp)return null;bx=gp.x;bz=gp.z;}
  var found=null,fh=-1;for(var k=0;k<L2.picks.length;k++){var pl=L2.picks[k];if(pl._bb&&(bx<pl._bb[0]||bx>pl._bb[2]||bz<pl._bb[1]||bz>pl._bb[3]))continue;if(pip(bx,bz,pl,2)&&pl[0]>fh){fh=pl[0];found=pl;}}return found;}
-window.addEventListener('keydown',function(e){invalidate(800);if(e.key==='Escape'){if(mode==='street')exitCity();else resetGlobe();}});
+window.addEventListener('keydown',function(e){invalidate(800);if(window.SE_DOS&&SE_DOS.isOpen()){if(e.key==='Escape')SE_DOS.close();return;}if(e.key==='Escape'){if(mode==='street')exitCity();else resetGlobe();}});
 
 var WORLD={out:0,busy:0},EXIT_D=0;
 // enter the street level anywhere on land (not only at listed cities)
@@ -2981,11 +2985,11 @@ function renderTax(m){var M=TAX[m],zh=LZ();if(!M)return;var C=txCounts();
  pHead.innerHTML=headHTML(I18T('building_class_2'),(m+1)+' · '+(I18P(M.zh,M.en)),'<span class="chip" style="color:'+M.col+'">■ '+(I18P(M.en,M.zh))+'</span><span class="chip">'+(C.n[m]||0)+' '+T('buildings')+'</span>',true);
  var subs=Object.keys(M.s).map(function(k){var c=C.s[m+':'+k]||0;return '<div class="txs'+(c?'':' z')+'"><i style="background:'+M.col+'"></i><span>'+esc(I18P(M.s[k][0],M.s[k][1]))+'</span><em>'+c+'</em></div>';}).join('');
  var p=M.p,ape=LX(D.CATAPE[p]);
- pBody.innerHTML='<p class="ctrl" style="margin:0">'+esc(LX(M.d))+'</p><div class="sec"><h3>'+(I18T('sub_classes_loaded_streets'))+'</h3><div class="txsubs">'+subs+'</div></div>'
+ pBody.innerHTML='<p class="ctrl" style="margin:0">'+esc(LX(M.d))+'</p>'+dosBtnHTML()+'<div class="sec"><h3>'+(I18T('sub_classes_loaded_streets'))+'</h3><div class="txsubs">'+subs+'</div></div>'
   +'<div class="sec">'+txSecHTML(m)+'</div>'
   +'<div class="sec"><h3>'+T('net')+' · '+esc(LX(D.CATS[p]).n)+'</h3><div class="blk"><p>'+esc(LX(D.CATS[p]).net)+'</p></div></div><div class="sec">'+triHTML(ape.a,ape.p,ape.e)+'</div>'
   +'<div class="btns"><button class="btn" data-back="city">← '+esc(cityName(L2.city))+'</button></div>';
- wire();pBody.scrollTop=0;state={type:'tax',m:m};}
+ wire();pBody.scrollTop=0;state={type:'tax',m:m};dosWire({k:M.k,cls:[M.zh,M.en],col:M.col});}
 function txLegendHTML(counts,btn){var zh=LZ();return TAX.map(function(M,i){var on=U.uFocus.value===i;return '<button class="lgb" data-tx="'+i+'" aria-pressed="'+on+'" title="'+esc(LX(M.d))+'"><i style="background:'+M.col+'"></i>'+(i+1)+' '+esc(I18P(M.zh.replace('建筑',''),M.en))+'<em>'+(counts[i]||0)+'</em></button>';}).join('');}
 
 

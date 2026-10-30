@@ -100,6 +100,25 @@ flowchart TB
 - Tres botones arriba a la derecha; el modo bilingüe muestra ambos idiomas uno junto al otro, por ejemplo «限速 / LIMIT». La elección queda guardada en el navegador.
 - Todos los textos de la interfaz están en el paquete de idioma `i18n.js` (véase la sección 5).
 
+### 3.6 Expediente de ciberseguridad
+
+```mermaid
+flowchart TB
+  B["Clic en un edificio"] --> C["Clase de edificio<br/>9 clases · subclase"]
+  C --> D["Expediente de ciberseguridad"]
+  D --> T1["Resumen · capas · extremo a extremo"]
+  D --> T2["Identidad · cripto · red · nube"]
+  D --> T3["Cadena de suministro · actores · adversarios"]
+  D --> T4["Agentes de IA · novedades · curso CSE635"]
+```
+
+- En el nivel de calle, haga clic en cualquier edificio y pulse «🛰 Expediente de ciberseguridad» en su panel (también está en el panel de cada clase de edificio). Se abre un expediente a pantalla completa para la clase de ese edificio.
+- 13 pestañas: resumen · capas · extremo a extremo · identidad y tokens · criptografía y algoritmos · red, enrutamiento y líneas · nube y datos · cadena de suministro y parches · actores (empresas / gobierno / residentes / proveedores / operadores) · adversarios y respuesta · IA y agentes · novedades y regulación · relación con el curso CSE635.
+- Cada punto sigue amenaza → control → contrapartida; ◆ marca frases o casos del curso CSE635 (STRIDE, BOLA/BFLA, revisión de JWT, puertas DevSecOps, «el modelo propone, la capa de políticas decide», niveles de riesgo de agentes, el paquete de garantía de la semana 7).
+- Diagramas: radares de objetivos de seguridad y STRIDE, una pila de 8 capas que se puede pulsar, un recorrido de 14 saltos de extremo a extremo, una secuencia OAuth + PKCE, PDP/PEP de confianza cero, una matriz de responsabilidad compartida, puertas del pipeline, un embudo de prioridad de parches, un mapa de calor de responsabilidades, tácticas de ATT&CK y el ciclo de respuesta a incidentes.
+- Cada una de las 9 clases (residencial, comercial, pública, educación, salud, industrial, cultura, transporte, religiosa) tiene su nivel de exposición, activos críticos, cinco riesgos principales, marco normativo y ejercicio de mesa; las marcas de la lista del paquete de la semana 7 se guardan en este navegador.
+- Es material didáctico por clase: no evalúa el edificio real ni contiene datos reales de vulnerabilidades o configuración.
+
 ---
 
 ## 4. Arquitectura
@@ -139,6 +158,7 @@ sentinel-earth/
 ├─ index.html              estructura y estilos de la página
 ├─ app.js                  toda la lógica de la aplicación (globo, calles, conducción, vida en la calle, sistema solar…)
 ├─ i18n.js                 paquete de idioma: chino / inglés / bilingüe
+├─ dossier.js              expediente de ciberseguridad: base de conocimiento + visor
 ├─ data.js                 datos didácticos: niveles de seguridad, tipos de edificio, normativa
 ├─ data/
 │  ├─ cities.json          2353 lugares (225 capitales)
